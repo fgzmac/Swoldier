@@ -1,0 +1,34 @@
+# Dependencies and generated development files
+node_modules/
+.expo/
+
+# Generated builds and test output; keep application source trackable
+dist/
+build/
+coverage/
+DerivedData/
+android/.gradle/
+ios/Pods/
+xcuserdata/
+*.xcuserstate
+
+# Local logs and operating-system files
+*.log
+.DS_Store
+Thumbs.db
+
+# Local secrets and signing credentials
+.env
+.env.*
+!.env.example
+*.p8
+*.p12
+*.mobileprovision
+*.jks
+*.keystore
+
+# Personal scans, workout exports, and other private files
+/private_data/
+
+# Commit the selected package manager's lockfile.
+# Ignore rules are not encryption and do not untrack existing commits.
