@@ -1,21 +1,21 @@
 # Current project handoff
 
-## Verified foundation status — 2026-11-09
+Updated: 2026-11-10. The adopted discovery scope, planned checks, later features, and open questions are recorded in [PROJECT.md](PROJECT.md). The next task is feasibility research and proof design.
 
-- Working folder: D:\SwoldierApp. Source preserved at C:\Users\bbdaw\OneDrive\Desktop\WorkoutApp\workout-app-starter.
-- All 8 relative filenames and SHA-256 hashes matched immediately after copying and before editing. README and AGENTS are at the root; no nested starter folder.
-- Earlier local inspection verified Windows 11 Home, native PowerShell, and 32 GB installed RAM.
-- This task reran versions: Git 2.55.0.windows.4; Node.js v24.19.0; npm 11.17.0; VS Code 1.145.2 x64; Codex CLI 0.167.0-alpha.3.2.
-- This task rechecked D: as exFAT, Healthy / OK. The user supplied diagnostic results reporting no problems and exit 0. Separately, the earlier assistant-run /markclean check returned 0 and cleared the dirty flag. The original cause remains unknown. No repair was repeated during migration.
-- git ls-remote against https://github.com/fgzmac/Swoldier.git succeeded, exit 0, with no refs. This was an empty result, not a network/authentication error.
-- Git is initialized at D:\SwoldierApp on main; origin is https://github.com/fgzmac/Swoldier.git. The eight reviewed foundation files form the initial local commit, Initialize workout app project foundation. Author identity is configured locally from the user's supplied name/email. No push is authorized or performed.
-- Framework remains undecided. App planning/design is the next phase; no app, persistence, iPhone, or widget test has run.
-- Local files, GitHub, and ChatGPT uploads do not synchronize automatically.
+- Working folder: D:\SwoldierApp. Origin: https://github.com/fgzmac/Swoldier.git.
+- Historical publication: the documentation foundation was pushed at commit 75a4c62aefeb27dfdfbb7c3b5e87ad307115cbd4.
+- Fresh verification on 2026-11-10: local HEAD and remote main both matched that commit; local main tracked origin/main. The working tree was clean before the checkpoint began; the follow-up inspection found the five expected local documentation edits. The remote query was read-only and succeeded.
+- The discovery session ended with five local Markdown edits. See Git history for the checkpoint commit and publication status.
+- The iPhone 15 Pro / iOS 26.6.1 is user-reported, not device-verified. Framework selection is open. App, persistence, and Lock Screen tests have not run.
 
-## One active task: app planning/design
+## Next small task: research no-unlock Lock Screen interactions
 
-Use [DISCOVERY_SESSION.md](DISCOVERY_SESSION.md) as the preserved agenda. Choose the smallest useful release and clarify workout behavior before choosing a framework. Record adopted decisions and remaining questions in [PROJECT.md](PROJECT.md). Success means an agreed scope and one small design task, not an implemented app.
+Use official Apple documentation to map the required actions to candidate iOS surfaces. The workout starts in the app before the phone locks. While the phone remains locked and the app does not open in the foreground, the user must be able to adjust pounds, reps, and RIR; complete a set; add a set; and finish an exercise and advance.
 
-Preserve the source on C:. Keep user learning reflections user-written. Read [BUILD_LOG.md](BUILD_LOG.md) before later work. Publishing to GitHub is a separate task.
+Define a bounded proof for the reported iPhone 15 Pro / iOS 26.6.1 using fictional data and a tiny workout fixture. Specify setup and build prerequisites, a test per required action, how to verify the device stays locked and the app does not open in the foreground, and how to verify the resulting state afterward. For completion, require exactly one saved record with the edited values and a rest countdown, including a repeat-tap check. Distinguish what official docs establish from what still needs device testing. Report any unsupported or uncertain action for an explicit scope decision.
 
-Git on this exFAT volume requires a command-scoped trust exception: git -c safe.directory=D:/SwoldierApp -C D:/SwoldierApp <command>. Global settings were not changed.
+Success means a cited capability map and a reviewable proof plan. An app-opening shortcut cannot count as meeting the requirement. This is research and proof design only; do not implement the proof or select a framework.
+
+Use [DISCOVERY_SESSION.md](DISCOVERY_SESSION.md) as the historical agenda, [PROJECT.md](PROJECT.md) as the decision record, and [BUILD_LOG.md](BUILD_LOG.md) as the session history.
+
+For Git on this exFAT folder, use the command-scoped exception: `git -c safe.directory=D:/SwoldierApp -C D:/SwoldierApp <command>`. Global Git settings were not changed.

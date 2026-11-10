@@ -1,6 +1,6 @@
 # Workout App — project plan
 
-Last updated: **2026-11-09**
+Last updated: **2026-11-10**
 
 ## Goal and status
 
@@ -8,13 +8,13 @@ Build an iPhone-first workout tracker that makes it easy to log actual sets, ada
 
 | Area | Status |
 | --- | --- |
-| Current phase | Foundation migration verified; local Git foundation established. App planning/design comes next. |
-| Product notes | Prepared in this starter pack. |
-| GitHub repository | [fgzmac/Swoldier](https://github.com/fgzmac/Swoldier), remote refs successfully checked and empty on 2026-11-09. Local main branch and origin configured; no push. |
+| Current phase | Discovery decisions recorded. Lock Screen feasibility research and proof design come next. |
+| Product notes | Adopted scope and planned checks recorded below. |
+| GitHub repository | [fgzmac/Swoldier](https://github.com/fgzmac/Swoldier), foundation published. Remote main independently rechecked on 2026-11-10. |
 | Application code | Not implemented in this starter pack. |
 | Development stack | Proposed options only; not selected. |
 | Local persistence | Planned; not implemented or verified. |
-| Native iPhone widget | Planned; no native proof or device test has run. |
+| Lock Screen experience | Essential to the first version. Technical feasibility is unverified; no device proof has run. |
 | Earlier interactive screen | Illustrative mockup only. |
 
 ## Verified foundation status — 2026-11-09
@@ -22,34 +22,30 @@ Build an iPhone-first workout tracker that makes it easy to log actual sets, ada
 - Working folder: D:\SwoldierApp. Source preserved at C:\Users\bbdaw\OneDrive\Desktop\WorkoutApp\workout-app-starter.
 - All 8 relative filenames and SHA-256 hashes matched immediately after copying and before editing. README and AGENTS are at the root; no nested starter folder.
 - Earlier local inspection verified Windows 11 Home, native PowerShell, and 32 GB installed RAM.
-- This task reran versions: Git 2.55.0.windows.4; Node.js v24.19.0; npm 11.17.0; VS Code 1.145.2 x64; Codex CLI 0.167.0-alpha.3.2.
-- This task rechecked D: as exFAT, Healthy / OK. The user supplied diagnostic results reporting no problems and exit 0. Separately, the earlier assistant-run /markclean check returned 0 and cleared the dirty flag. The original cause remains unknown. No repair was repeated during migration.
-- git ls-remote against https://github.com/fgzmac/Swoldier.git succeeded, exit 0, with no refs. This was an empty result, not a network/authentication error.
-- Git is initialized at D:\SwoldierApp on main; origin is https://github.com/fgzmac/Swoldier.git. The eight reviewed foundation files form the initial local commit, Initialize workout app project foundation. Author identity is configured locally from the user's supplied name/email. No push is authorized or performed.
-- Framework remains undecided. App planning/design is the next phase; no app, persistence, iPhone, or widget test has run.
+- During foundation setup, the tool versions were: Git 2.55.0.windows.4; Node.js v24.19.0; npm 11.17.0; VS Code 1.145.2 x64; Codex CLI 0.167.0-alpha.3.2.
+- During foundation setup, D: was rechecked as exFAT, Healthy / OK. The user supplied diagnostic results reporting no problems and exit 0. Separately, the earlier assistant-run /markclean check returned 0 and cleared the dirty flag. The original cause remains unknown. No repair was repeated during migration.
+- Foundation publication was verified previously. On 2026-11-10, a fresh read-only remote check confirmed that remote main matches local HEAD at 75a4c62aefeb27dfdfbb7c3b5e87ad307115cbd4. Local main tracked origin/main and was clean before this checkpoint.
+- Framework remains undecided. iPhone 15 Pro / iOS 26.6.1 is user-reported and has not been device-verified. App, persistence, and Lock Screen tests have not run.
 - Local files, GitHub, and ChatGPT uploads do not synchronize automatically.
 
-## Confirmed user requirements
+## Confirmed first-version scope
 
-### Workout flow
+The goal is quick preparation in the app and minimal distraction during training. Build for iPhone first, with essential Lock Screen interactions as a release requirement. Technical feasibility and release timing are still open.
 
-- Build for **iPhone first**, starting simply and adding features later.
-- Hold complete workout routines and support the user's weekly Push/Pull/Leg direction. Only the Push exercise list has been supplied so far.
-- Show the current exercise and set with easy entry for **weight in pounds, repetitions, and actual RIR**. RIR means repetitions in reserve: the user's estimate of additional reps they could have performed.
-- Completing a set saves it and starts a rest timer.
-- Allow extra sets and an explicit **Finish exercise** action. Do not automatically finish an exercise just because its planned set count has been reached.
-- Move to the next exercise and collapse completed exercises while keeping them available to review.
-- Keep completed sets tied to the exercise actually performed. Saving a draft and marking a set complete should be separate actions if draft saving is added.
-- Provide a simple phone widget centered on the current exercise/set. Its native interaction details still need to be proven.
+| Area | Adopted decision |
+| --- | --- |
+| Routine preparation | Create and edit routines in the app. Configure exercises, set counts, rep targets for each set, and rest times. |
+| Saved settings | The same exercise can have different settings in different routines. A newly added exercise starts with 3 sets; users can change the count. |
+| Initial testing | Test one complete routine first, then support full-week use shortly afterward. The first test routine is not yet selected. |
+| Starting | Open the app, select a routine, and start the workout before locking the phone. |
+| Lock Screen | While the phone stays locked, adjust pounds, reps, and RIR; complete a set; add a set; and finish an exercise and advance. These actions must work without opening the app. Reaching the planned set count does not automatically finish the exercise. |
+| Rest | Completing a set starts that exercise’s configurable countdown. Bench press defaults to 3 minutes; cable exercises to 90 seconds. Allow skipping the countdown and stop it at zero. Undoing completion does not cancel or reset rest. |
+| Entries | RIR (repetitions in reserve) is optional. Bodyweight sets can use reps alone. Blank and zero remain distinct. |
+| Recovery | Automatically save drafts and completed sets separately. On resume, restore the current workout position and correct rest timing. |
+| Swaps | Swap in the app, including partway through an exercise. Keep completed sets under the original exercise; remaining sets belong to the replacement and use its own history. Remember swaps, but apply the active swap to today’s workout only. |
+| History | Review exercises and actual completed set values. Keep finished exercises available for review when collapsed. Edits to planned routine settings affect intended work; they never rewrite previously completed records. |
 
-### Flexibility and progress
-
-- Allow manual exercise changes and, later, suggested replacements.
-- Keep separate histories for different exercises and variations. A substitute uses its own history.
-- Preserve the exercises and values actually performed when plans change.
-- Use the user's own BodySpec scans as a progress resource.
-- Later, connect the weekly workout-log/review workflow to suggestions for future training. Suggestions must never overwrite completed records.
-- Provide predetermined routines for beginners as part of the broader product direction; the routines and implementation timing remain open.
+**Recommendation:** Consider the documented Push routine for the first test. The first routine remains open; Push/Pull/Leg is the longer-term training direction.
 
 ### User-supplied Push routine
 
@@ -61,7 +57,7 @@ Use these names and this order:
 4. Seated Machine Dips
 5. Overhead Dumbbell Triceps Extensions
 
-Planned set counts, rep targets, and rest durations have not been specified for this template.
+Template-specific settings have not been supplied. New exercises default to 3 sets; see the adopted rest defaults above.
 
 **Reference UI scenario — sample data only:**
 
@@ -73,122 +69,83 @@ Planned set counts, rep targets, and rest durations have not been specified for 
 
 These values illustrate how the logger should capture different results across sets. They are not verified completed workout records or prescribed targets.
 
-## Recommended first version
+## Core workout flow and planned acceptance checks
 
-**Proposed v0.1:** complete the Push workout inside the app, retain it locally, review its history, and manually replace an exercise without losing completed work.
+Prepare a routine → start in the app → lock the phone → adjust and complete sets → rest → finish the exercise → finish the workout → review history.
 
-**Recommended detail:** autosave unfinished entries as drafts so that interruptions do not lose typing. This goes beyond saving a completed set and is not yet an explicitly confirmed user requirement.
-
-Start a small native-widget proof early. Its result should help decide whether the widget is part of the first release or the next milestone. That release decision is still open.
-
-The implementation milestones below remain **planned**. Documentation and remote-repository checks do not establish that an app or local development environment works.
-
-### M0 — Verify setup, then prepare development
-
-**Setup progress:** inspection and documentation migration are verified. Initial local foundation commit prepared and reviewed. App planning/design comes next; the development portion of M0 remains incomplete.
-
-After setup is understood and app planning is complete, the future development work is to:
-
-- Adopt a development approach. Expo / React Native / TypeScript with EAS remains a proposal.
-- Reconcile local project files and version control with the known `fgzmac/Swoldier` repository while preserving existing work.
-- Create the smallest app for the chosen stack and run it on the intended iPhone path.
-
-**Current check complete when:** a local report distinguishes observed facts, user reports, missing tools, existing work, and remaining decisions. The report alone does not complete all of M0.
-
-**Future milestone acceptance:** the setup choices are recorded, the starter app opens through the chosen device/testing path, and the build log names what was actually tested. No widget result is implied by an app opening.
-
-### M1 — Log one exercise
-
-- Display Incline Bench Press with editable weight, reps, and RIR for each set.
-- Complete and undo a set. Count only completed sets.
-- Add a set and finish the exercise manually.
-- Keep sample values visibly labeled. An exercise without history must not inherit a different exercise's weight.
-
-**Acceptance:** a user can enter the three sample sets, change a value, complete/undo a set, add another set, and choose when the exercise is finished. Blank fields stay distinct from zero. Agreed input rules are checked.
-
-### M2 — Persist entries and add rest timing
-
-- Keep completed set records locally and, if the draft-saving recommendation is adopted, autosave unfinished entries too.
-- Start the rest timer when a set is completed.
-- Restore the workout and correct timer state after leaving and reopening the app.
-- Keep a completed set from being saved twice through repeated actions or reopening.
-
-**Acceptance:** close and reopen the app during a workout; completed records and completion states return correctly. Check unfinished entries too if draft saving is adopted. Complete a set once and verify one recorded set and one rest-timer start. Test the selected rest duration and the agreed undo behavior.
-
-### M3 — Complete the Push routine, swap manually, and view history
-
-- Move through all five exercises in the supplied order.
-- Collapse finished exercises and allow review.
-- Manually replace an exercise before its first completed set. Preserve all previously completed work elsewhere in the workout.
-- Use the substitute's own history, or blank weight if none exists.
-- Review the finished workout with exercise names, actual set values, and completion information.
-
-**Acceptance:** complete a Push workout, manually replace an exercise before starting it, and reopen the saved history. Completed sets keep their original exercise and values, while new sets belong to the substitute. The template behaves according to the chosen swap scope.
-
-**Possible extension:** allow replacing only the remaining work after some sets of an exercise are complete. This more specific behavior is proposed, not yet a confirmed first-version requirement. It must preserve the already completed original sets.
-
-### M4 — Prove the native widget early
-
-**Start this investigation during the development portion of M0 or during M1, after the completed setup check and app planning. It does not need to wait for M3.**
-
-- Build the smallest native-widget experiment on the intended iPhone testing path.
-- Verify the proposed display and completion action, and record which editing interactions are supported.
-- Check that app and widget agree about the current exercise/set, a completed set, and rest timing.
-- Identify any action that must open the app and make that transition clear.
-
-**Acceptance:** document a real device result for each tested interaction and its limitations. A browser mockup or app-only check does not satisfy this milestone. Revisit the first-release scope based on the result.
-
-### M5 — Later progress, scans, and review
-
-- Add dated progress entries from the user's own BodySpec scans; choose the entry/import method first.
-- Show scan checkpoints alongside workout history without claiming that a specific workout caused a scan change.
-- Add a review step for weekly suggestions that changes future plans only.
-- Consider beginner templates, suggested substitutions, and additional progress views as separate tasks.
-
-**Acceptance:** define criteria for each feature before building it. Keep this milestone out of the first logging task.
-
-## Open decisions
-
-| Decision | Current position |
+| Planned check | Expected result |
 | --- | --- |
-| Stack and tools | Expo / React Native / TypeScript with EAS is a proposal to evaluate. No framework is selected. |
-| Local environment | Windows 11 Home, native PowerShell, 32 GB RAM; D:\SwoldierApp contains the verified foundation. D: is Healthy / OK. |
-| iPhone test setup | iPhone is confirmed; model, OS version, and usable build/testing path still need verification. |
-| First-release widget | Start the native proof early; decide whether it is a v0.1 release requirement from the results and user priorities. |
-| Initial targets | Set counts and rep targets for the five Push exercises are not supplied. |
-| Rest duration | Not chosen. Also decide what undoing the latest set does to the active timer. |
-| Input rules | Decide whether weight and RIR are optional, accepted RIR values, and how to record bodyweight or assisted exercises. Keep blank different from zero. |
-| Swap scope | **Recommended:** default to today only, with an explicit option to update the future template. This default is not yet a confirmed user choice. |
-| Unfinished entries | **Recommended:** save them as drafts. Completed-set saving and draft saving are distinct behaviors. |
-| Scan entry | Manual values, document import, or another method remain open. Do not assume a BodySpec integration or API exists. |
-| Code backup and app sync | Remote refs checked successfully and empty. Local foundation history established; no push. App-data sync remains a separate future decision. |
+| Configure Bench Press differently in two routines | Each routine retains its own settings. |
+| Log while the phone remains locked | Adjust pounds, reps, and RIR; complete a set; add a set; and finish an exercise and advance, all without unlocking or opening the app. |
+| Complete a set | Save exactly one completed record and start rest. Repeated taps do not create duplicates. |
+| Undo completion | Return the set to a draft while rest continues without cancellation or reset. |
+| Interrupt and resume | Restore drafts, completed records, current position, and correct timer state. |
+| Swap after two Leg Press sets | Keep those sets under Leg Press. Subsequent Hack Squat sets use Hack Squat identity and history. The change applies only to today. |
+| Edit the routine afterward | Previously completed workout records remain unchanged. |
+
+These checks are planned. App, persistence, and Lock Screen tests have not run.
+
+### M0 — Research and define the Lock Screen proof
+
+Use official documentation to map each required action to candidate surfaces and constraints. Define a bounded physical-device proof before selecting a framework. In the later proof, record pass, fail, or untested for each action and verify that the phone stays locked, the app does not open in the foreground, and the resulting workout state is correct. An app-opening shortcut does not satisfy the requirement.
+
+### M1 — Log one exercise, run rest, and recover an interrupted workout
+
+Use the planned set completion, undo, and recovery checks above. Also check that a countdown can be skipped and stops at zero. Verify no duplicate records and distinguish blank from zero. Actual Lock Screen interaction needs the separate physical-device proof.
+
+### M2 — Edit routines and test one complete workout
+
+Verify that routine settings save independently. Select one routine, run the complete flow, and use the planned swap and history checks above. The first routine remains open.
+
+### M3 — Support and test full-week use
+
+After one-routine testing, extend to full-week use. Define the week’s test coverage once the multiple-routine versus calendar decision is made. Essential no-unlock actions must pass the physical-device checks for release. Release timing remains open.
+
+## Open questions
+
+- Which saved routine will be the first test?
+- Which native Lock Screen approach and controls support the required actions reliably?
+- What build/testing route and framework should we use? Expo / React Native / TypeScript with EAS remains a proposal to evaluate.
+- How should prepared pounds and reps be populated, and how should unknown RIR appear?
+- What input limits, weight increments, and assisted-exercise recording rules should apply?
+- How should users finish a workout and correct its history?
+- What are the remaining rest defaults and notification preferences?
+- Does initial full-week use mean multiple selectable routines or a calendar schedule?
+- What release timing is realistic once Lock Screen feasibility has been tested?
 
 ## Decision log
 
 | Date | Choice | Status and reason |
 | --- | --- | --- |
 | 2026-11-05 | iPhone first; start small and add features | User direction. Keep the first project manageable. |
-| 2026-11-05 | Push-only first usable version | Proposed. Prove logging and history with the routine already supplied. |
+| 2026-11-05 | Push-only first usable version | Earlier proposal. Push is a candidate for the first test; the routine is still unselected. |
 | 2026-11-05 | Expo / React Native / TypeScript with cloud builds | Proposed. Evaluate against the current Windows setup and native-widget needs. |
 | 2026-11-09 | Use `D:\SwoldierApp` as the working folder | Adopted by the user. Prefer the external SSD; verify its local mapping and contents before setup changes. |
-| 2026-11-09 | Use `fgzmac/Swoldier` as the project repository | User-specified. GitHub review confirmed it is public and empty; local connection is not yet checked. |
-| 2026-11-09 | Complete organization before app planning and coding | User direction. The recommended next task is a read-only local setup check. |
+| 2026-11-09 | Use `fgzmac/Swoldier` as the project repository | User-specified. At adoption, the public repository was empty and the local connection had not been checked. |
+| 2026-11-09 | Complete organization before app planning and coding | User direction. At the time, the next task was a read-only local setup check. |
 | 2026-11-09 | Copy foundation contents and establish local Git | Authorized; 8 files hash-verified before editing. Source and discovery agenda preserved. Local foundation history established. |
+| 2026-11-10 | Create and edit routines with settings saved per routine and exercise | Adopted. New exercises start with 3 editable sets. |
+| 2026-11-10 | Start in the app; log and advance from the Lock Screen | Adopted release requirement. Exact actions are listed above; native feasibility is unverified. |
+| 2026-11-10 | Separate drafts and completed records; restore interrupted workouts | Adopted. Undo returns a set to draft while rest continues. |
+| 2026-11-10 | Configure rest per exercise | Adopted. Bench press defaults to 3 minutes and cable exercises to 90 seconds; support skip and stop at zero. |
+| 2026-11-10 | Allow optional RIR and reps-only bodyweight sets | Adopted. Blank remains distinct from zero. |
+| 2026-11-10 | Remember in-app swaps and apply them to today only | Adopted. Support swapping mid-exercise while preserving completed original sets. |
+| 2026-11-10 | Test one routine before full-week use | Adopted test order. First routine and full-week format remain open. |
 
-Add adopted decisions and their reasons here as work progresses. Update the open-decision table when an answer is known.
+Add adopted decisions and their reasons here as work progresses. Update the open questions when an answer is known.
 
-## Feature backlog and idea inbox
+## Later features and idea inbox
 
-Keep the user’s longer-term product direction visible without adding all of it to v0.1. New ideas are proposals until adopted.
-
-| Idea | Problem it could solve | Status |
-| --- | --- | --- |
-| Complete Push/Pull/Leg routines | Hold the user's weekly training plan. | User product direction; Pull and Leg details are not supplied. |
-| Beginner routine templates | Help someone who does not already have a routine get started. | User product direction; template contents and timing are open. |
-| Suggested swaps filtered by available equipment | Reduce searching when a station is busy or unavailable. | User product direction; matching rules need a separate design. |
-| Scan checkpoints beside workout history | Bring the user's scan results into their progress review. | User product direction; planned later, exact view is open. |
-| Weekly suggestions awaiting review | Make the next plan easier to prepare. | User product direction; planned later, completed records stay intact. |
-| Your idea here | What problem does it solve? | New proposal; unprioritized. |
+| Later feature | Direction |
+| --- | --- |
+| Remembered swaps from the Lock Screen | In-app swaps and remembering them are first-version requirements; applying remembered swaps from the Lock Screen is later. |
+| Broader replacement suggestions | Explore options beyond remembered swaps, including available equipment. |
+| Progress charts and goals | Define useful measures and goals after the core workout flow. |
+| BodySpec progress | Explore scan checkpoints alongside workout history. Entry or import method is open. |
+| Weekly progression suggestions | Review proposed changes before applying them to future plans. Completed records stay intact. |
+| Beginner routine templates | Retain as a longer-term idea; template contents and timing are open. |
+| Account login and workout-data sync | Separate later product decisions. |
+| Your idea here | Add an idea and the problem it solves. |
 
 ## Next task and handoff
 

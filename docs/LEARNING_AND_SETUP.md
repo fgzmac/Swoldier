@@ -5,11 +5,10 @@
 - Working folder: D:\SwoldierApp. Source preserved at C:\Users\bbdaw\OneDrive\Desktop\WorkoutApp\workout-app-starter.
 - All 8 relative filenames and SHA-256 hashes matched immediately after copying and before editing. README and AGENTS are at the root; no nested starter folder.
 - Earlier local inspection verified Windows 11 Home, native PowerShell, and 32 GB installed RAM.
-- This task reran versions: Git 2.55.0.windows.4; Node.js v24.19.0; npm 11.17.0; VS Code 1.145.2 x64; Codex CLI 0.167.0-alpha.3.2.
-- This task rechecked D: as exFAT, Healthy / OK. The user supplied diagnostic results reporting no problems and exit 0. Separately, the earlier assistant-run /markclean check returned 0 and cleared the dirty flag. The original cause remains unknown. No repair was repeated during migration.
-- git ls-remote against https://github.com/fgzmac/Swoldier.git succeeded, exit 0, with no refs. This was an empty result, not a network/authentication error.
-- Git is initialized at D:\SwoldierApp on main; origin is https://github.com/fgzmac/Swoldier.git. The eight reviewed foundation files form the initial local commit, Initialize workout app project foundation. Author identity is configured locally from the user's supplied name/email. No push is authorized or performed.
-- Framework remains undecided. App planning/design is the next phase; no app, persistence, iPhone, or widget test has run.
+- During foundation setup, the tool versions were: Git 2.55.0.windows.4; Node.js v24.19.0; npm 11.17.0; VS Code 1.145.2 x64; Codex CLI 0.167.0-alpha.3.2.
+- During foundation setup, D: was rechecked as exFAT, Healthy / OK. The user supplied diagnostic results reporting no problems and exit 0. Separately, the earlier assistant-run /markclean check returned 0 and cleared the dirty flag. The original cause remains unknown. No repair was repeated during migration.
+- The foundation was pushed previously. A read-only check on 2026-11-10 confirmed that GitHub main still points to 75a4c62aefeb27dfdfbb7c3b5e87ad307115cbd4. Local main tracked origin/main and was clean at the start of the checkpoint.
+- Framework remains undecided. The next technical task is Lock Screen research and proof design. App, persistence, and Lock Screen tests have not run.
 - Local files, GitHub, and ChatGPT uploads do not synchronize automatically.
 
 ## 1. Build while you learn
@@ -18,7 +17,7 @@ Start the app after a short introduction to the tools. Continue the relevant les
 
 Your first goal is to explain one complete flow: **enter a set → update the screen → save the actual result → reopen it correctly**. Then repeat that pattern for a complete workout.
 
-Keep the milestones in [PROJECT.md](PROJECT.md) as the main plan. M0 sets up the project; M1 handles one exercise; M2 adds persistence and rest; M3 completes the routine and history. Start the small M4 widget investigation early because it can affect the technical choices.
+Keep the milestones in [PROJECT.md](PROJECT.md) as the main plan. Start with the Lock Screen research and proof design in M0, then move through one exercise, one complete routine, and a full training week as described in the plan.
 
 ## 2. Courses: before, during, and later
 
@@ -48,7 +47,7 @@ Treat the app and the courses as complementary. The Codex courses teach how to w
 
 The working folder is D:\SwoldierApp. The source remains unchanged on C:. See HANDOFF.md for current Git status. The earlier 186 GB free on C: report is historical.
 
-My proposed starting stack remains **TypeScript + React Native + Expo**, with **VS Code and Codex** and your physical iPhone for testing. It has not yet been selected. The existing repository is [fgzmac/Swoldier](https://github.com/fgzmac/Swoldier); a direct GitHub check on 2026-11-09 found it **public and empty**. Use fictional data in committed examples and keep personal scans and private exports separate.
+My proposed starting stack remains **TypeScript + React Native + Expo**, with **VS Code and Codex** and your physical iPhone for testing. It has not yet been selected. The existing repository is [fgzmac/Swoldier](https://github.com/fgzmac/Swoldier); the documentation foundation is published on its main branch. Use fictional data in committed examples and keep personal scans and private exports separate.
 
 | Tool | Job |
 | --- | --- |
@@ -67,11 +66,11 @@ The local iOS Simulator requires macOS. A physical iPhone is the testing device 
 
 If you now have access to a suitable Mac, revisit Swift/SwiftUI with Xcode as another reasonable route. Do not change stacks merely because an example uses a different one.
 
-### Native widgets need an early proof
+### The Lock Screen requirement needs an early proof
 
 Expo currently provides a widget library, but it does not run in Expo Go. Widget code and the main app have separate runtimes. The app-side interaction listener only runs while the app process is alive. Source: [Expo Widgets](https://docs.expo.dev/versions/latest/sdk/widgets/).
 
-For M4, test whether completing one set from the widget updates durable workout history correctly when the app is in the background and when its process is not running. Check repeat taps and reopening. A visible checkmark alone does not establish that the log was saved. Record which edits work on the widget and which open the app.
+Use [HANDOFF.md](HANDOFF.md) to define the early no-unlock proof. The existing Expo reference is a research lead, and app and Lock Screen feasibility have not been verified. An interaction that requires opening the app does not satisfy the adopted no-unlock requirement.
 
 For the standard EAS development-build route to your physical iPhone, plan for paid Apple Developer membership. Apple's listed fee is **US$99 per membership year**, with regional pricing differences. Verify current terms before buying. Basic Expo Go learning can start before that membership purchase. Sources: [iPhone cloud development build](https://docs.expo.dev/tutorial/eas/ios-development-build-for-devices/), [development build options](https://docs.expo.dev/develop/development-builds/introduction/), and [Apple enrollment](https://developer.apple.com/programs/enroll/).
 
@@ -150,6 +149,6 @@ Use a five-minute end-of-session entry if that keeps logging sustainable. A usef
 
 Codex may summarize work it actually performed. Keep “What I learned” in your own words. Save an occasional screenshot or short demo with fictional data once there is something working. Those records will help you explain the project later.
 
-## Next working session: app planning/design
+## Next working session: Lock Screen research and proof design
 
-Use [DISCOVERY_SESSION.md](DISCOVERY_SESSION.md) and the current [handoff](HANDOFF.md). Record scope and behavior decisions before choosing a framework or scaffolding.
+Follow the current [handoff](HANDOFF.md). Use official documentation to research the adopted Lock Screen actions and design a bounded device proof before choosing a framework.

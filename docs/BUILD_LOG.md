@@ -4,6 +4,35 @@ Record a short entry after each working session. Newest entries go first. Write 
 
 **Planned:** agreed or proposed work. **Implemented:** code exists. **Verified:** a named check ran and passed.
 
+## 2026-11-10 — Discovery documentation checkpoint
+
+**Phase/task:** Document the first-version direction and prepare the next Lock Screen research task.
+
+**Status:** The user supplied the full discovery summary after the initial status pass. The adopted decisions and planned checks are recorded in the local documentation.
+
+### Decisions and checks
+
+- Recorded routine-specific settings, exact no-unlock actions, rest defaults and undo behavior, automatic draft and completed-set recovery, mid-exercise swaps for today only, and one-routine testing before full-week use. Recorded the planned checks, later features, and open questions separately in [PROJECT.md](PROJECT.md).
+- Inspected the local Git root, branch, HEAD, upstream, origin, and working tree. At checkpoint start, local main was clean and tracked origin/main. Follow-up inspection found only the five expected Markdown edits.
+- Rechecked GitHub main read-only. The query succeeded and matched local HEAD at 75a4c62aefeb27dfdfbb7c3b5e87ad307115cbd4, the previously published foundation commit.
+- iPhone 15 Pro / iOS 26.6.1 is user-reported. No device inspection, app test, persistence test, or Lock Screen test ran. Framework and Lock Screen feasibility remain open.
+- Reviewed the diff and decision wording, passed the whitespace check, resolved all 23 local Markdown links, and verified historical log entries were preserved.
+- Saved documentation locally; did not commit or push.
+
+### What I learned — user-written
+
+_Leave blank for the user._
+
+### My small edit
+
+Not attempted.
+
+### Next small task
+
+Follow [HANDOFF.md](HANDOFF.md) to research the required Lock Screen actions using official documentation and define a bounded physical-device proof.
+
+---
+
 ## 2026-11-09 — Migrate and verify the local foundation
 
 ## Verified foundation status — 2026-11-09
