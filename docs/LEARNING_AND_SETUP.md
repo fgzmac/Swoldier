@@ -70,7 +70,7 @@ If you now have access to a suitable Mac, revisit Swift/SwiftUI with Xcode as an
 
 Expo currently provides a widget library, but it does not run in Expo Go. Widget code and the main app have separate runtimes. The app-side interaction listener only runs while the app process is alive. Source: [Expo Widgets](https://docs.expo.dev/versions/latest/sdk/widgets/).
 
-Face ID is acceptable during the proof while the Lock Screen remains visible. An action that opens the foreground app fails the release requirement. Expo Build is recommended for the proof, with a native Swift Live Activity and durable native storage. Device tests are **Not run**. [Device proof](LOCK_SCREEN_FEASIBILITY.md)
+Face ID is acceptable during the proof while the Lock Screen remains visible. An action that opens the foreground app fails the release requirement. Expo Build is recommended for the proof, with a native Swift Live Activity and durable native storage. The guided one-set test is Passed — user-reported, not independently observed; other device trials are **Not run**. [Device proof](LOCK_SCREEN_FEASIBILITY.md)
 
 The proof uses Expo Free and requires Apple Developer Program membership when preparing the signed ad hoc iPhone build. The route plan lists the costs, signing requirements, and install steps. [Proof route](LOCK_SCREEN_FEASIBILITY.md#recommended-first-proof-from-windows)
 
@@ -149,6 +149,6 @@ Use a five-minute end-of-session entry if that keeps logging sustainable. A usef
 
 Codex may summarize work it actually performed. Keep “What I learned” in your own words. Save an occasional screenshot or short demo with fictional data once there is something working. Those records will help you explain the project later.
 
-## Next working session: account readiness
+## Next working session: first proof milestone
 
-The user reports an iPhone 15 Pro, iOS 26.6.1 (23G83), and working Face ID; the phone has not been independently inspected. The isolated proof source is prepared. Follow the [current handoff](HANDOFF.md) to confirm Expo account access and active Apple Developer Program membership when ready, before any device registration or build upload.
+The user reports an iPhone 15 Pro, iOS 26.6.1 (23G83), and working Face ID; the phone has not been independently inspected. The isolated proof source is prepared. Expo access, signing, and the successful preview are established; the user reports installation and the guided one-set pass. Follow the [current handoff](HANDOFF.md) for publication preparation and the recommended rest/Skip rest proof.

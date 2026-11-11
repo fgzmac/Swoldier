@@ -1,4 +1,4 @@
-import ExpoModulesCore
+public import ExpoModulesCore
 
 public final class LockScreenProofModule: Module {
     public func definition() -> ModuleDefinition {

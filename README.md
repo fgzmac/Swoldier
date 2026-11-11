@@ -17,13 +17,13 @@ The goal is to make logging a workout quick: follow a routine, enter the sets yo
 
 ## Current proof status
 
-The [one-set proof](proofs/lock-screen/README.md) has Expo and native Swift source. Windows SQL, TypeScript, dependency, and JavaScript export checks passed. The SQL tests use the production statements through a separate JavaScript transaction wrapper; they do not execute the Swift implementation. Swift compilation, signing, installation, and all iPhone checks are **Not run**. Device and account prerequisites remain in [the handoff](docs/HANDOFF.md).
+The [one-set proof](proofs/lock-screen/README.md) has Expo and native Swift source. Windows SQL, TypeScript, dependency, and JavaScript export checks passed. The SQL tests use the production statements through a separate JavaScript transaction wrapper; they do not execute the Swift implementation. Native compilation and signing passed for the patched preview. The user reports installation and the guided one-set sequence passed on build `2a692799-0280-4f0c-b7f7-1f65b65c1149`: Face ID left the Lock Screen visible, +1 and both Complete taps stayed out of the foreground app, and reopening showed 40 lb × 9 reps, one record, and two received completion requests. This was not independently observed. Other device trials remain **Not run**; production framework selection remains open. See [the handoff](docs/HANDOFF.md) for the recommended rest/Skip rest proof.
 
 ## Start here
 
 1. Read [the current handoff](docs/HANDOFF.md) for the phase, verified state, and exact next task.
 2. Read [the project plan](docs/PROJECT.md) for product direction and decisions, and [learning and setup](docs/LEARNING_AND_SETUP.md) for environment guidance.
-3. Review the [proof instructions](proofs/lock-screen/README.md) and [feasibility plan](docs/LOCK_SCREEN_FEASIBILITY.md), then follow the handoff for account readiness.
+3. Review the [proof instructions](proofs/lock-screen/README.md) and [feasibility plan](docs/LOCK_SCREEN_FEASIBILITY.md), then follow the handoff for milestone publication and the next bounded proof.
 4. For later coding tasks, check the result yourself, explain the main change in your own words, and update [the build log](docs/BUILD_LOG.md).
 
 Keep these documents beside the isolated proof code. Keep one main copy of the project so that code, decisions, and progress stay together.
@@ -37,7 +37,7 @@ Keep these documents beside the isolated proof code. Keep one main copy of the p
 | [docs/HANDOFF.md](docs/HANDOFF.md) | Current phase, active task, evidence, blockers, and the next-session prompt. |
 | [docs/BUILD_LOG.md](docs/BUILD_LOG.md) | What changed, what was checked, what you learned, and what comes next. |
 | [docs/LEARNING_AND_SETUP.md](docs/LEARNING_AND_SETUP.md) | Learning resources and computer/storage setup guidance. |
-| [docs/LOCK_SCREEN_FEASIBILITY.md](docs/LOCK_SCREEN_FEASIBILITY.md) | Apple capability research and unrun device test plan. |
+| [docs/LOCK_SCREEN_FEASIBILITY.md](docs/LOCK_SCREEN_FEASIBILITY.md) | Apple capability research, the limited user-reported pass, and remaining device test plan. |
 | [proofs/lock-screen/README.md](proofs/lock-screen/README.md) | Proof source, Windows checks, and later signing and device steps. |
 | [.gitignore](.gitignore) | Files to keep out of future Git commits. |
 

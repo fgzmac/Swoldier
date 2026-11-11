@@ -1,6 +1,6 @@
 # Workout App — project plan
 
-Last updated: **2026-11-10**
+Last updated: **2026-11-11**
 
 ## Goal and status
 
@@ -8,13 +8,13 @@ Build an iPhone-first workout tracker that makes it easy to log actual sets, ada
 
 | Area | Status |
 | --- | --- |
-| Current phase | The isolated Expo + Swift Lock Screen proof source is implemented. Signed build and iPhone verification are pending. |
+| Current phase | First one-set iPhone milestone Passed — user-reported, not independently observed. Next recommendation: rest countdown and Skip rest. |
 | Product notes | Adopted scope and planned checks recorded below. |
 | GitHub repository | [fgzmac/Swoldier](https://github.com/fgzmac/Swoldier), foundation published. Remote main independently rechecked on 2026-11-10. |
 | Application code | One fictional set in the [Lock Screen proof](../proofs/lock-screen/README.md); production app not started. |
 | Development stack | Proposed options only; not selected. |
-| Local persistence | Proof uses native SQLite. Production SQL passed file-backed Windows checks through a separate JavaScript transaction wrapper; Swift and iPhone persistence are **Not run**. |
-| Lock Screen experience | Essential to the first version. Face ID may authenticate the device while the Lock Screen remains visible. Device proof is **Not run**. |
+| Local persistence | Native SQLite proof: Windows SQL checks passed; reopening the single tested set showed the expected saved result (user-reported). Other persistence/recovery device trials remain Not run. |
+| Lock Screen experience | Essential to the first version. Face ID may authenticate the device while the Lock Screen remains visible. Guided +1/Complete sequence Passed — user-reported; other device trials Not run. |
 | Earlier interactive screen | Illustrative mockup only. |
 
 ## Verified foundation status — 2026-11-09
@@ -84,17 +84,23 @@ Prepare a routine → start in the app → show the Lock Screen → authenticate
 | Swap after two Leg Press sets | Keep those sets under Leg Press. Subsequent Hack Squat sets use Hack Squat identity and history. The change applies only to today. |
 | Edit the routine afterward | Previously completed workout records remain unchanged. |
 
-These product checks are planned and **Not run**. The separate, smaller M0 proof has Windows SQL checks only.
+These broader product checks remain **Not run**. The separate one-set M0 sequence has user-reported pass evidence below; that does not pass the wider product checks.
 
 ### M0 — Research and define the Lock Screen proof
 
 Apple documents an unlock gate for buttons and toggles embedded in widgets and Live Activities. The general App Intent authentication policy does not establish an override. A Live Activity can still display session data, and WidgetKit documents dynamic timer display without continuous extension execution. [WidgetKit interactivity](https://developer.apple.com/documentation/widgetkit/adding-interactivity-to-widgets-and-live-activities) · [App Intent authentication](https://developer.apple.com/documentation/appintents/appintent/authenticationpolicy) · [Dynamic dates](https://developer.apple.com/documentation/widgetkit/displaying-dynamic-dates)
 
-The adopted scope allows Face ID while the Lock Screen remains visible. The proof checks whether actions work in that state without bringing the app to the foreground and whether their results persist. It retains a closed-padlock trial for comparison. All physical-device cases are **Not run**. [Capability map and proof plan](LOCK_SCREEN_FEASIBILITY.md)
+The adopted scope allows Face ID while the Lock Screen remains visible. The proof checks whether actions work in that state without bringing the app to the foreground and whether their results persist. It retains a closed-padlock trial for comparison. Only the guided one-set sequence is **Passed — user-reported**; all other device trials remain **Not run**. [Capability map and proof plan](LOCK_SCREEN_FEASIBILITY.md)
 
 The first proof is implemented in [proofs/lock-screen](../proofs/lock-screen/README.md) using Expo SDK 57, a Swift Live Activity, two background App Intents, and app-local SQLite. It starts at 40 lb × 8 reps. The device trial must verify +1 rep and two Complete requests while the authenticated Lock Screen remains visible, then reopen to see exactly one 40 lb × 9 record. Rest and full workout controls remain outside this proof.
 
-The user reports iPhone 15 Pro, iOS 26.6.1 (23G83), and working Face ID. Apple’s published version/build pairing agrees; the phone was not independently inspected. Both targets use iOS 26.0 as the minimum for explicit background intent mode. On Windows, Expo dependency validation, TypeScript, the iOS JavaScript bundle, three file-backed SQLite tests, and generated native configuration inspection passed. Swift compilation, signing, installation, and device interaction and persistence are **Not run**. The Expo account and proof project are now linked, and the local upload archive was verified. The user reports that Apple Developer membership is paid but activation is pending; activation, signing, a signed preview, and device verification are still needed.
+The user reports iPhone 15 Pro, iOS 26.6.1 (23G83), and working Face ID. Apple’s published version/build pairing agrees; the phone was not independently inspected. Both targets use iOS 26.0 as the minimum for explicit background intent mode. On Windows, Expo dependency validation, TypeScript, the iOS JavaScript bundle, three file-backed SQLite tests, and generated native configuration inspection passed. The separately authorized one-line import patch compiled and signed successfully in the next preview build. Installation and the guided one-set interaction/reopen sequence are **Passed — user-reported**, not independently observed. All other device trials remain **Not run**. The Expo account and proof project are now linked, and the local upload archive was verified. On 2026-11-11, Apple provisioning access and both ad hoc signing profiles were verified. The first preview failed on the inline module import; patched [preview 2a692799-0280-4f0c-b7f7-1f65b65c1149](https://expo.dev/accounts/fgzmacaraeg/projects/swoldier-lock-screen-proof/builds/2a692799-0280-4f0c-b7f7-1f65b65c1149) finished successfully. The user-reported result below covers only that build and sequence.
+
+### First one-set milestone — user-reported evidence
+
+On 2026-11-11, the user reported installation and the guided one-set test passed on EAS build `2a692799-0280-4f0c-b7f7-1f65b65c1149`. Face ID authenticated while the Lock Screen stayed visible; +1 rep and both Complete taps did not open the foreground app. Deliberately reopening showed 40 lb × 9 reps, one saved record, and two received completion requests. This is user-reported evidence, not independent observation. Only this sequence is marked passed.
+
+Recommended next proof (planned, Not run): completing the fictional set starts rest and Skip rest works on the visible Lock Screen after Face ID. See the bounded checks in [HANDOFF.md](HANDOFF.md#next-task); this does not authorize implementation or a build.
 
 ### M1 — Log one exercise, run rest, and recover an interrupted workout
 
@@ -112,7 +118,7 @@ After one-routine testing, extend to full-week use. Define the week’s test cov
 
 - Which saved routine will be the first test?
 - Which widget or Live Activity controls reliably handle the required actions on the visible Lock Screen after Face ID? Which surface has room for usable numeric editing and the workout controls?
-- Can Expo Build compile and sign both proof targets, and do the actions and saved record pass on the reported iPhone 15 Pro? The production framework remains open.
+- Which remaining actions and recovery states work reliably beyond the user-reported one-set pass? Expo compilation/signing is verified for the successful build; the production framework remains open.
 - How should prepared pounds and reps be populated, and how should unknown RIR appear?
 - What input limits, weight increments, and assisted-exercise recording rules should apply?
 - How should users finish a workout and correct its history?

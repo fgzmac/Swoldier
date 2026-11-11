@@ -4,6 +4,87 @@ Record a short entry after each working session. Newest entries go first. Write 
 
 **Planned:** agreed or proposed work. **Implemented:** code exists. **Verified:** a named check ran and passed.
 
+## 2026-11-11 — Record the user-reported first iPhone proof
+
+**Status** — Installation and the guided one-set sequence are **Passed — user-reported**, not independently observed, for EAS build `2a692799-0280-4f0c-b7f7-1f65b65c1149`.
+
+- The user reports Face ID authentication with the Lock Screen remaining visible. The +1 rep action and both Complete taps did not open the foreground app.
+- The user reports that deliberately reopening showed 40 lb × 9 reps, one saved record, and two received completion requests. This is limited to the guided sequence; no independent device observation or instrumented trace is claimed.
+- Kept reset, post-completion edits, rapid-tap stress testing, genuinely locked/widget comparisons, interruptions, system termination, force quit, rest, and all other device trials **Not run**. Production framework selection remains open.
+- Refreshed the current status, proof results, and handoff, including stale summary statements in the repository README and learning/setup guide. Historical logs and personal learning reflections were preserved.
+- Reviewed the existing source diff: only `import ExpoModulesCore` → `public import ExpoModulesCore` remains over base commit `7da44d93b1f6d47b42d2ce0d07120e03bb26c6f0`; no source was edited in this documentation task. Publication review includes the existing build/signing history and focused patch.
+- Recommended the next bounded proof: completion starts one saved rest countdown and Skip rest works on the Face ID-authenticated visible Lock Screen, without opening the app. Use a short fictional interval; verify zero, skip persistence, and that repeated completion does not duplicate or restart rest. These are planned checks, not passed tests or implemented behavior.
+- Review checks passed: 51 local Markdown links, git diff --check, unchanged one-line Swift patch, exact publication file inventory, and historical log/reflection preservation. Documentation only: no cloud build, source change, staging, commit, or push.
+
+### What I learned — user-written
+
+### Next small task
+
+Review and publish this milestone when authorized, then separately scope the recommended rest/Skip rest proof. [Current handoff](HANDOFF.md)
+
+---
+
+## 2026-11-11 — Build the one-line Swift import patch
+
+**Status** — The single authorized patched preview build **FINISHED** successfully. Native compilation and signing passed. Installation and device tests are **Not run**.
+
+- Base source commit: `7da44d93b1f6d47b42d2ce0d07120e03bb26c6f0`. Verified the only proof source change is `import ExpoModulesCore` → `public import ExpoModulesCore` in `modules/LockScreenProofModule.swift`. All other local changes are session documentation excluded from the upload. EAS No VCS mode does not attach a Git commit hash; this records the independently checked source base and exact patch.
+- Rechecked the inspected archive's exact 15-file manifest and SHA-256 hashes against current source, including the corrected inline module and required nested source and lockfile.
+- Reused the existing Expo project, registered phone, certificate, and both active ad hoc profiles. Independent checks again confirmed that each profile includes the same single phone and that the certificate and profiles are unexpired. Submitted with frozen credentials; no unnecessary signing changes, plan changes, identifiers, dependencies, or application behavior changes.
+- Uploaded once and submitted exactly one preview in this task: [build 2a692799-0280-4f0c-b7f7-1f65b65c1149](https://expo.dev/accounts/fgzmacaraeg/projects/swoldier-lock-screen-proof/builds/2a692799-0280-4f0c-b7f7-1f65b65c1149). Monitored to **FINISHED**. The Xcode log includes the inline source, reports `ARCHIVE SUCCEEDED`, and contains no original ambiguous-import diagnostic. EAS produced an installable IPA.
+- [Installation page](https://expo.dev/accounts/fgzmacaraeg/projects/swoldier-lock-screen-proof/builds/2a692799-0280-4f0c-b7f7-1f65b65c1149): open in Safari on the registered iPhone and use Install. Successful compilation/signing does not establish runtime persistence or Lock Screen behavior.
+- Device test still **Not run**: start 40 lb × 8 reps; allow Face ID while staying on the visible Lock Screen; tap +1 once and Complete twice; deliberately reopen and verify 40 lb × 9 reps, one saved record, and two received completion requests.
+- Preserved prior local documentation and historical entries. No automatic retry, App Store submission, commit, or push.
+
+### What I learned — user-written
+
+### Next small task
+
+Install the successful preview and perform the one-set device checklist, recording the result without private records or identifiers.
+
+---
+
+## 2026-11-11 — Prepare the focused Swift import patch
+
+**Status** — One-line source patch prepared; native compilation pending. No upload or new cloud build.
+
+- Inspected the failed build's full relevant Xcode diagnostics. The compiler identifies `modules/LockScreenProofModule.swift:1:8` and notes `internal import ExpoModulesCore` in the generated `ios/Pods/Target Support Files/Pods-SwoldierLockScreenProof/ExpoModulesProvider.swift:8:1`.
+- Installed Expo 57.0.32 / expo-modules-autolinking 57.0.17 generates that internal import and registers the inline class directly. The inline source is synchronized into the main app target; CocoaPods adds the generated provider to that same app target. They compile in the app's Swift module, not separate Swift modules. The Live Activity extension is a separate target and does not include this inline module.
+- Changed only `import ExpoModulesCore` to `public import ExpoModulesCore`. The original implicit import was public in the current Swift language mode; making it explicit removes the diagnosed ambiguity while preserving the existing public class and definition signatures. An internal import alone would require reviewing their visibility. Swift permits different explicit import levels across files in one module. [Swift SE-0409](https://github.com/swiftlang/swift-evolution/blob/main/proposals/0409-access-level-on-imports.md) · [Expo inline targets](https://docs.expo.dev/modules/inline-modules-reference/)
+- Kept all class/method declarations, bridge name, persistence, intents, Live Activity behavior, target identifiers, signing, dependencies, and production scope unchanged. No generated file or dependency was patched.
+- Windows checks passed: TypeScript and all three existing file-backed SQL tests. These do not execute the Swift code. Regenerated native configuration in an ignored fixture and regenerated the provider with the installed SDK tooling: the class is still discovered, both explicit import levels are present, and the inline folder belongs only to the app target. CocoaPods integration and Swift compilation were not run locally.
+- Generated a fresh archive-only inspection directory. It contains exactly the expected 15 proof files; all SHA-256 hashes match local source and the corrected inline module is included. No credentials, device/signing files, dependencies, generated artifacts, or unrelated repository files are present.
+- Existing local documentation work and historical log entries were preserved. No upload, cloud build, commit, or push. Installation and all device tests remain **Not run**.
+
+### What I learned — user-written
+
+### Next small task
+
+Review the one-line patch, then separately authorize one preview build to test native compilation. Signing remains configured; do not revoke credentials or resubmit automatically after a failure.
+
+---
+
+## 2026-11-11 — Submit the first signed preview build
+
+**Status** — Apple access and two-target ad hoc signing verified. One preview build submitted; final status **ERRORED** in Xcode.
+
+- Started clean on main at the published Expo-linking commit, `7da44d93b1f6d47b42d2ce0d07120e03bb26c6f0`. Corrected the handoff's stale uncommitted statement.
+- EAS reported the Free plan with 0 of 15 monthly iOS builds used. The existing 15-file reviewed archive still matched published source.
+- The user completed Apple login and two-factor authentication privately. The read-only Apple provisioning/certificate-list check succeeded. No credentials or device identifiers are recorded here.
+- The registration command initially only produced a website link; its exit 0 did not establish phone registration. The user resolved a blank Safari page, installed the registration profile, and provided the registration-success screen.
+- Completed credential setup privately. Independent Expo metadata checks verified active ad hoc profiles for both targets, each containing the same single registered phone, with unexpired profiles and distribution certificate. The user reused the same distribution certificate for both targets; no revocation was requested. No sensitive identifiers are recorded here.
+- Uploaded the reviewed proof once and submitted [preview build 87687ca0-ead7-47ee-a7e8-d1174ba043e9](https://expo.dev/accounts/fgzmacaraeg/projects/swoldier-lock-screen-proof/builds/87687ca0-ead7-47ee-a7e8-d1174ba043e9). Source matches commit `7da44d93b1f6d47b42d2ce0d07120e03bb26c6f0`; only local session documentation changed and it was excluded from the 15-file upload. EAS has no Git commit hash because the build used the documented No VCS mode.
+- Monitored that single submission to **ERRORED**, error code `XCODE_BUILD_ERROR`. The Xcode log points to `modules/LockScreenProofModule.swift:1:8`: `ambiguous implicit access level for import of 'ExpoModulesCore'; it is imported as 'internal' elsewhere`. No second submission or implementation change was made.
+- Native compilation ran and failed. No installable artifact was produced. Installation and all workout/Lock Screen device tests remain **Not run**. No paid-plan change, App Store submission, commit, or push performed.
+
+### What I learned — user-written
+
+### Next small task
+
+Investigate and align the inline module import and declaration visibility with SDK 57 internal-import rules. Run available local checks; obtain separate authorization before another cloud build.
+
+---
+
 ## 2026-11-10 — Link the Expo proof and inspect its local archive
 
 **Status** — Linked the existing proof to Expo and verified the corrected local archive. Apple Developer activation is pending according to the user.

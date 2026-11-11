@@ -1,10 +1,16 @@
 # Lock Screen feasibility and device proof
 
-Research reviewed on 2026-11-10. The user reports iPhone 15 Pro / iOS 26.6.1 (23G83) with working Face ID. This is not an independent device inspection. All physical-device, signing, and installation trials below are **Not run**.
+Research reviewed on 2026-11-10. The user reports iPhone 15 Pro / iOS 26.6.1 (23G83) with working Face ID. This is not an independent device inspection. Native compilation and signing passed for the successful preview. Installation and only the guided one-set sequence are **Passed — user-reported**, not independently observed; all other device trials remain **Not run**.
 
 The isolated [one-set proof source](../proofs/lock-screen/README.md) now exists. Windows SQL, TypeScript, dependency, JavaScript export, and generated configuration checks passed. The SQL tests reuse production statements in a separate JavaScript transaction wrapper and do not execute Swift or ActivityKit. The broader two-exercise plan below remains future work.
 
 Apple documents an unlock gate for buttons and toggles embedded in both Lock Screen widgets and Live Activities. Apple describes intent-backed controls that can run without opening the app once the device authenticates. The 2026-11-10 scope decision allows Face ID while the Lock Screen remains visible, so both surfaces are candidates. The proof must verify the actions and durable state on the reported device. A Live Activity is also a candidate for passive workout and rest display. [Apple’s interactivity guide][interaction] · [ActivityKit display and lifecycle][activity]
+
+## First one-set result
+
+On 2026-11-11, the user reported installation and the guided one-set test passed on EAS build `2a692799-0280-4f0c-b7f7-1f65b65c1149`. Face ID authenticated while the Lock Screen stayed visible; +1 rep and both Complete taps did not open the foreground app. Deliberately reopening showed 40 lb × 9 reps, one saved record, and two received completion requests. This is user-reported evidence, not independent observation. Only this sequence is marked passed.
+
+Recommended next proof (planned, Not run): completing the fictional set starts rest, with Skip rest on the visible Lock Screen after Face ID. See [the bounded checks](HANDOFF.md#next-task). Broader workout behavior remains outside this recommendation.
 
 ## Lock Screen widgets and Live Activities
 
@@ -51,7 +57,7 @@ Use **Expo Build (EAS) Free for an ad hoc internal preview build**, with a one-s
 | Durable saving | Use a small native local store as the source of truth. The intent writes to it directly in the app process and the proof screen reads the same store. Publish ActivityKit state after the write succeeds. The proposed app and intents can use the app container if the extension only renders ActivityKit state. If both targets access the store, provision the same App Group on both. [Apple intent execution][interaction] · [ActivityKit lifecycle][activity] · [App Groups][groups] · [EAS capability signing][expo-capabilities] |
 | Remote build limits | Choose a hosted Xcode image and an iOS deployment target compatible with the confirmed phone. Record the SDK and image. Windows has no local Xcode for native debugging, so use cloud build logs and a native action trace that the proof app can display on the phone. Physical-device behavior after Face ID remains to be tested. [Expo build images][expo-images] · [Expo troubleshooting][expo-troubleshooting] · [Apple intent runtime modes][runtime] |
 
-### Accounts, cost, and timing
+### Accounts, cost, and timing — historical research on 2026-11-10
 
 | Requirement | Status and expected cost |
 | --- | --- |
@@ -70,14 +76,13 @@ Use **Expo Build (EAS) Free for an ad hoc internal preview build**, with a one-s
 
 Use one fictional set at 40 lb and 8 reps. The implemented app has **Start fictional set**, **Show Live Activity** for an existing draft, **Reset proof data**, and a readout of the durable draft or completed record. The Live Activity displays reps with **+1 rep** and **Complete set**. The second exercise, timer, skip, add-set, and lifecycle tests belong to the broader proof below.
 
-| Planned check | Pass condition | Status |
+| Tested sequence component | User-reported result | Status |
 | --- | --- | --- |
-| Start | Start the fictional session in the app, show the Lock Screen, and authenticate with Face ID. The Live Activity displays 8 reps. | Not run |
-| Edit | Tap **+1 rep** once while staying on the visible Lock Screen. The native store records 9 reps and the activity reflects that value. | Not run |
-| Complete | Tap **Complete set** twice while the proof keeps the button available. The intent reads the saved draft and uses stable session and set IDs to enforce one completion in a serialized durable write. The completed row's request counter records each received completion for that session/set. Confirm the counter is two; rapid screen taps may be coalesced by iOS. The Lock Screen stays visible and the app stays out of the foreground. | Not run |
-| Verify | Deliberately reopen the app after the actions. It shows exactly one completed record for the set at 40 lb and 9 reps. Before reopening, confirm the card displayed 9 reps and then saved completion. The current proof has a durable completion-request counter, not a timestamped process or foreground trace; use the observed screen behavior alongside the persisted result. Opening the foreground app during either action fails. | Not run |
+| Install and start | Installed build 2a692799-0280-4f0c-b7f7-1f65b65c1149 and started the 40 lb × 8 reps fictional set. | Passed — user-reported |
+| Authenticate and act | Face ID authentication left the Lock Screen visible. +1 rep and both Complete taps did not open the foreground app. | Passed — user-reported |
+| Reopen and inspect | Reopening showed 40 lb × 9 reps, one saved record, and two received completion requests. | Passed — user-reported |
 
-Account setup and Apple membership block an installable build today. The reported device details informed the source's iOS 26.0 minimum and SDK 57 hosted image; the signed build and physical-device compatibility remain unverified. Account enrollment is a signing prerequisite. The signed extension and native intent path remain unverified until the first build and device test.
+No timestamped native process trace, independent screen observation, rapid-tap stress trial, reset trial, or additional lifecycle/recovery trial was reported. Those checks remain Not run. Expo linking, signing, and native compilation were verified earlier; this device result does not choose the production framework.
 
 ## Bounded physical-device proof
 
@@ -98,7 +103,7 @@ The proof design calls for a durable local record independent of the displayed c
 | --- | --- | --- |
 | Widget, Face ID authenticated | Open padlock, visible Lock Screen, intent dispatch, saved value, and any app foreground transition. | Not run |
 | Widget, genuinely locked comparison | Closed padlock, authentication prompt if present, intent dispatch, and any saved change. Apple documents that the embedded action is inactive in this state. | Not run |
-| Live Activity, Face ID authenticated | Open padlock, visible Lock Screen, intent dispatch, saved value, and any app foreground transition. | Not run |
+| Live Activity, Face ID authenticated | Guided +1 and two Complete actions: user reports visible Lock Screen, no foreground app, and expected saved result. Independent or instrumented trace trial is Not run. | Passed — user-reported for the guided sequence only |
 | Live Activity, genuinely locked comparison | Closed padlock, authentication prompt if present, intent dispatch, and any saved change. Apple documents that the embedded action is inactive in this state. | Not run |
 
 Use the authenticated result to decide whether to try the full sequence on that surface. If the authenticated action fails, check signing, configuration, and dispatch before expanding the proof. A blocked genuinely locked trial is compatible with the adopted scope. If the genuinely locked action works despite the documentation, repeat it and verify durable state before recording it as observed on that build and device. A separate system Control probe would have its own result.
@@ -134,13 +139,13 @@ Run the paired-state button check and the smallest completion/reopen check separ
 - **Signing.** The app and extension each need a bundle ID and signing and provisioning under an eligible Apple team. If the app and extension share the proof store, both need the same App Group entitlement and matching profiles. [Signing for devices][run-device] · [App Groups][groups] · [iOS capabilities][capabilities]
 - **Installation.** Choose one route. Direct Xcode testing needs a Mac that can pair with the phone. Development and ad hoc routes need applicable device registration, provisioning, and Developer Mode. Internal TestFlight needs an eligible team, a signed uploaded build, and tester access. [Registered-device distribution][registered] · [Developer Mode][developer-mode] · [Internal TestFlight][testflight]
 
-### Requires confirmation
+### Current prerequisite status
 
 | Minimum information | Current status |
 | --- | --- |
 | Physical iPhone model, iOS version and build, and ability to test Face ID | User reports iPhone 15 Pro / iOS 26.6.1 (23G83) and working Face ID. Independent device inspection and interaction tests are Not run. |
-| Access to a compatible Mac that can pair with the phone, or an existing hosted macOS build route | No Mac or cloud build account is available. Expo Build Free is recommended for the proof. Expo account access remains pending. |
-| Apple signing team and permitted installation method for that route | A regular Apple Account is available. Active Apple Developer Program membership and signing credentials are pending for the recommended ad hoc install. Confirm that both target profiles match their entitlements and include the device. |
+| Access to a compatible Mac that can pair with the phone, or an existing hosted macOS build route | Windows-only; Expo account and hosted preview route are established. The successful build is recorded above. |
+| Apple signing team and permitted installation method for that route | Apple provisioning access and both active ad hoc profiles were independently verified on 2026-11-11; each profile includes the registered phone. Successful native build/signing is recorded above. |
 
 ### Previously researched build options
 
@@ -154,7 +159,7 @@ The Mac and Codemagic rows retain earlier research. The current recommendation a
 
 ## Device results
 
-Every button, interaction, persistence, timing, lifecycle, and installation trial is **Not run**. Open issues include authenticated control behavior on the reported device, practical layout and interaction speed, and the available signing and installation path. Framework selection remains open. See [the handoff](HANDOFF.md) for the next task and [the project plan](PROJECT.md) for the adopted requirements.
+Only installation and the guided one-set sequence above are **Passed — user-reported**, not independently observed. Other button, persistence/recovery, timing, lifecycle, genuinely locked comparison, widget, reset, and stress trials remain **Not run**. Broader control coverage, layout, and interaction speed remain open. Production framework selection remains open. See [the handoff](HANDOFF.md) for the next task and [the project plan](PROJECT.md) for the adopted requirements.
 
 [interaction]: https://developer.apple.com/documentation/widgetkit/adding-interactivity-to-widgets-and-live-activities
 [activity]: https://developer.apple.com/documentation/activitykit/displaying-live-data-with-live-activities

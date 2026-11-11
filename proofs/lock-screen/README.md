@@ -27,7 +27,7 @@ Use Node 24 for the included SQLite test. The test runs the same SQL that ships 
 
 The reported iPhone 15 Pro is on iOS 26.6.1 (23G83) with working Face ID. Apple’s [iOS 26 releases](https://support.apple.com/en-us/123075) and [published iPhone 15 Pro restore filename](https://updates.cdn-apple.com/2026SummerFCS/fullrestores/140-73047/45AC73E2-4D2D-44B5-8E43-440C19C7DF74/iPhone16,1_26.6.1_23G83_Restore.ipsw) corroborate the version and build pairing. The restore file is a large download and is not needed. The app and extension target iOS 26.0, the minimum for the explicit [background intent mode](https://developer.apple.com/documentation/appintents/intentmodes/background). The preview uses Expo’s [SDK 57 hosted image](https://docs.expo.dev/build-reference/infrastructure/), which lists Xcode 26.6. None of this confirms operation on the physical phone.
 
-Expo login, project linking, and local archive inspection require the Expo account. Apple Developer activation is needed later for provisioning and signing the ad hoc device build, not for these source-preparation steps. The user reports membership is paid and activation is pending; see the [current handoff](../../docs/HANDOFF.md) for the verified Expo link and archive result. The Expo Free route is subject to its [current build allowance](https://expo.dev/pricing).
+Expo login, project linking, and local archive inspection require the Expo account. Apple Developer activation is needed later for provisioning and signing the ad hoc device build, not for these source-preparation steps. Apple provisioning access and preview signing were verified on 2026-11-11; see the [current handoff](../../docs/HANDOFF.md) for the verified Expo link and archive result. The Expo Free route is subject to its [current build allowance](https://expo.dev/pricing).
 
 ```powershell
 Set-Location D:\SwoldierApp\proofs\lock-screen
@@ -60,12 +60,22 @@ npx.cmd eas-cli@latest build --platform ios --profile preview
 
 Use the enrolled Apple team when prompted. Allow EAS to create or reuse a distribution certificate and create ad hoc provisioning profiles for both the app and its WidgetKit extension; confirm that the iPhone is included. Keep those credentials and device identifiers out of Git. Open the resulting EAS installation URL in Safari on that iPhone and tap **Install**. Enable [Developer Mode](https://developer.apple.com/documentation/xcode/enabling-developer-mode-on-a-device) if prompted, and allow Live Activities for the app. See [Expo internal distribution](https://docs.expo.dev/build/internal-distribution/) and [iOS extension signing](https://docs.expo.dev/build-reference/app-extensions/). This standalone preview does not require a Metro server.
 
-## Device checklist — all Not run
+## Device result — Passed, user-reported
 
-1. Install the signed preview. Open it and confirm **Saved records: 0**. Start the fictional set and check the Live Activity shows **40 lb × 8 reps**.
-2. Lock and wake the phone. Let Face ID authenticate; check for an open padlock while the Lock Screen is still visible. Do not swipe into the app. Tap **+1 rep** once. Confirm the card shows **40 lb × 9 reps** and the foreground app did not open.
-3. Still on the Lock Screen, tap **Complete set** twice, waiting for the first **Set saved** before tapping again. Neither tap may open the app. Test rapid taps in a separate reset run. iOS may coalesce taps, so only a stored attempt count of two demonstrates that both requests reached storage.
-4. After the trial, deliberately reopen the app and verify **Saved set: 40 lb × 9 reps**, **Saved records: 1**, and **Complete requests received: 2** for the two-request trial. Close and relaunch the app again and verify the same values. A late +1 must leave the saved reps unchanged.
-5. Use the in-app reset and confirm the row and card are gone. A fresh start should be back at 8 reps with zero saved records. A closed-padlock comparison is optional and is not a pass condition.
+On 2026-11-11, the user reported installation and the guided one-set test passed on EAS build `2a692799-0280-4f0c-b7f7-1f65b65c1149`. Face ID authenticated while the Lock Screen stayed visible; +1 rep and both Complete taps did not open the foreground app. Deliberately reopening showed 40 lb × 9 reps, one saved record, and two received completion requests. This is user-reported evidence, not independent observation. Only this sequence is marked passed.
+
+The tested sequence was: start 40 lb × 8 reps → authenticate with Face ID while the Lock Screen stays visible → +1 rep once → Complete twice → deliberately reopen to inspect the record and request count. Production framework selection remains open.
+
+### Other device trials — Not run
+
+- Rapid-tap stress testing beyond the guided two Complete taps.
+- Closing and relaunching again, post-completion +1 rejection, interrupted execution, system termination, and user force-quit recovery.
+- Reset/restart and stale actions after reset.
+- Genuinely locked comparisons and accessory-widget trials.
+- Rest countdown/Skip rest, other numeric controls, add-set, exercise advancement, and wider workouts.
+
+## Recommended next proof — planned, Not run
+
+Complete the fictional set to start a short rest countdown, then Skip rest from the visible Lock Screen after Face ID without opening the app. See [the bounded checks](../../docs/HANDOFF.md#next-task). This is a recommendation only; no rest behavior was implemented or tested in this milestone.
 
 Sources: [Expo SDK 57](https://expo.dev/changelog/sdk-57) · [Expo inline modules](https://docs.expo.dev/modules/inline-modules-reference/) · [Apple’s Live Activity interactivity guide](https://developer.apple.com/documentation/widgetkit/adding-interactivity-to-widgets-and-live-activities) · [App Intent authentication policy](https://developer.apple.com/documentation/appintents/intentauthenticationpolicy/requireslocaldeviceauthentication).
