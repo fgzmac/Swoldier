@@ -27,7 +27,7 @@ Use Node 24 for the included SQLite test. The test runs the same SQL that ships 
 
 The reported iPhone 15 Pro is on iOS 26.6.1 (23G83) with working Face ID. Apple’s [iOS 26 releases](https://support.apple.com/en-us/123075) and [published iPhone 15 Pro restore filename](https://updates.cdn-apple.com/2026SummerFCS/fullrestores/140-73047/45AC73E2-4D2D-44B5-8E43-440C19C7DF74/iPhone16,1_26.6.1_23G83_Restore.ipsw) corroborate the version and build pairing. The restore file is a large download and is not needed. The app and extension target iOS 26.0, the minimum for the explicit [background intent mode](https://developer.apple.com/documentation/appintents/intentmodes/background). The preview uses Expo’s [SDK 57 hosted image](https://docs.expo.dev/build-reference/infrastructure/), which lists Xcode 26.6. None of this confirms operation on the physical phone.
 
-Before running these commands, create an Expo account and obtain active [Apple Developer Program membership](https://developer.apple.com/support/compare-memberships/) with access to manage devices, identifiers, certificates and profiles. Apple lists US$99/year at U.S. pricing. The Expo Free route is subject to its [current build allowance](https://expo.dev/pricing). No enrollment, project linking, device registration, or upload was performed during source preparation.
+Expo login, project linking, and local archive inspection require the Expo account. Apple Developer activation is needed later for provisioning and signing the ad hoc device build, not for these source-preparation steps. The user reports membership is paid and activation is pending; see the [current handoff](../../docs/HANDOFF.md) for the verified Expo link and archive result. The Expo Free route is subject to its [current build allowance](https://expo.dev/pricing).
 
 ```powershell
 Set-Location D:\SwoldierApp\proofs\lock-screen
@@ -40,12 +40,17 @@ npx.cmd eas-cli@latest init
 Link only the proof to your Expo account. If EAS cannot write the dynamic app config, add the public project UUID it prints as `extra.eas.projectId` in `app.config.js`, next to `build`. The default app identifier is `com.fgzmac.swoldier.lockproof`; the extension appends `.LiveActivity`. If these IDs are unavailable to your team, change the default app identifier in `app.config.js` before signing so both IDs stay consistent on Windows and in the cloud.
 
 ```powershell
-npx.cmd eas-cli@latest device:create
 $archive = Join-Path $env:TEMP ('swoldier-proof-archive-' + [guid]::NewGuid())
 npx.cmd eas-cli@latest build:inspect --platform ios --profile preview --stage archive --output $archive
 ```
 
-Open the device registration link in Safari on the target iPhone and follow the registration steps. Inspect the local archive before any upload. It should contain this proof’s source and lockfile, without credentials, a device UDID, or other repository files. The proof’s [upload ignore rules](https://docs.expo.dev/build-reference/easignore/) are scoped to this directory by the two environment variables above.
+Inspect the local archive before any upload. Check that the module, native Swift, and plugin folders are present; a successful archive command alone does not establish that all source was included. It should contain this proof’s source and lockfile, without credentials, a device UDID, or other repository files. The proof’s [upload ignore rules](https://docs.expo.dev/build-reference/easignore/) are scoped to this directory by the two environment variables above.
+
+After Apple Developer activation, separately authorize device registration and signing setup. Register the phone with the following command, open the registration link in Safari on that iPhone, and follow its steps:
+
+```powershell
+npx.cmd eas-cli@latest device:create
+```
 
 When you explicitly approve uploading and building the proof:
 

@@ -4,6 +4,25 @@ Record a short entry after each working session. Newest entries go first. Write 
 
 **Planned:** agreed or proposed work. **Implemented:** code exists. **Verified:** a named check ran and passed.
 
+## 2026-11-10 — Link the Expo proof and inspect its local archive
+
+**Status** — Linked the existing proof to Expo and verified the corrected local archive. Apple Developer activation is pending according to the user.
+
+- Started from a clean working tree on main at `937368810272c0180e14976dee5a3d263e3cc3ef`. Ran EAS CLI 27.7.2 from npm's cache without adding a project dependency.
+- The user completed Expo browser login privately. CLI verification returned account `fgzmacaraeg`; created only [@fgzmacaraeg/swoldier-lock-screen-proof](https://expo.dev/accounts/fgzmacaraeg/projects/swoldier-lock-screen-proof). Initialization created the project but returned exit 1 because the dynamic config could not be written automatically. Added the returned project ID, `8b7ce1c7-0553-42b3-b7a3-e8b5a5ccce58`, to the existing app config; project-info verification then returned exit 0.
+- Scoped `EAS_NO_VCS=1` and `EAS_PROJECT_ROOT` to the proof directory for EAS commands. Used only `build:inspect --platform ios --profile preview --stage archive`, with a new output directory under Windows temporary storage.
+- The first archive command returned 0 but its contents failed inspection: it held seven top-level files and omitted eight required nested source files. Changed the three folder exceptions in `.easignore` to match bare directory paths used during traversal. Regenerated the archive and verified the exact 15-file proof-only manifest, dependency lockfile, and all 15 SHA-256 hashes against local source.
+- Inspected the final archive for credentials, signing files, device identifiers, dependencies, generated artifacts, private records, and unrelated repository files; none were found. JavaScript syntax, resolved Expo project/identifier configuration, directory-level ignore checks, 47 local Markdown links, and git diff --check passed.
+- The user reports membership payment is complete and activation is pending. No Apple team inspection, phone registration, signing configuration, source upload, cloud build, purchase, commit, or push was performed. Native compilation and device tests remain **Not run**.
+
+### What I learned — user-written
+
+### Next small task
+
+After Apple activation, confirm the team is active before separately authorizing device registration or signing. [Current handoff](HANDOFF.md)
+
+---
+
 ## 2026-11-10 — Review the first proof checkpoint for publication
 
 **Status** — Reviewed the proof source and earlier unpublished feasibility plan. No material source defect was identified. Native and device behavior remains unverified.

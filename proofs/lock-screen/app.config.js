@@ -15,6 +15,7 @@ module.exports = {
   plugins: ['./plugins/withLockScreenProof'],
   extra: {
     eas: {
+      projectId: '8b7ce1c7-0553-42b3-b7a3-e8b5a5ccce58',
       build: {
         experimental: {
           ios: {

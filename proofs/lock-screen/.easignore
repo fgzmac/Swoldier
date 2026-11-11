@@ -7,10 +7,10 @@
 !package.json
 !package-lock.json
 !tsconfig.json
-!modules/
+!modules
 modules/*
 !modules/LockScreenProofModule.swift
-!native/
+!native
 native/*
 !native/ProofActivity.swift
 !native/ProofCoordinator.swift
@@ -18,6 +18,6 @@ native/*
 !native/ProofSQL.json
 !native/ProofStore.swift
 !native/ProofWidget.swift
-!plugins/
+!plugins
 plugins/*
 !plugins/withLockScreenProof.js
