@@ -8,13 +8,13 @@ Build an iPhone-first workout tracker that makes it easy to log actual sets, ada
 
 | Area | Status |
 | --- | --- |
-| Current phase | Discovery decisions recorded. Lock Screen feasibility research and proof design come next. |
+| Current phase | The isolated Expo + Swift Lock Screen proof source is implemented. Signed build and iPhone verification are pending. |
 | Product notes | Adopted scope and planned checks recorded below. |
 | GitHub repository | [fgzmac/Swoldier](https://github.com/fgzmac/Swoldier), foundation published. Remote main independently rechecked on 2026-11-10. |
-| Application code | Not implemented in this starter pack. |
+| Application code | One fictional set in the [Lock Screen proof](../proofs/lock-screen/README.md); production app not started. |
 | Development stack | Proposed options only; not selected. |
-| Local persistence | Planned; not implemented or verified. |
-| Lock Screen experience | Essential to the first version. Technical feasibility is unverified; no device proof has run. |
+| Local persistence | Proof uses native SQLite. Production SQL passed file-backed Windows checks through a separate JavaScript transaction wrapper; Swift and iPhone persistence are **Not run**. |
+| Lock Screen experience | Essential to the first version. Face ID may authenticate the device while the Lock Screen remains visible. Device proof is **Not run**. |
 | Earlier interactive screen | Illustrative mockup only. |
 
 ## Verified foundation status — 2026-11-09
@@ -38,7 +38,7 @@ The goal is quick preparation in the app and minimal distraction during training
 | Saved settings | The same exercise can have different settings in different routines. A newly added exercise starts with 3 sets; users can change the count. |
 | Initial testing | Test one complete routine first, then support full-week use shortly afterward. The first test routine is not yet selected. |
 | Starting | Open the app, select a routine, and start the workout before locking the phone. |
-| Lock Screen | While the phone stays locked, adjust pounds, reps, and RIR; complete a set; add a set; and finish an exercise and advance. These actions must work without opening the app. Reaching the planned set count does not automatically finish the exercise. |
+| Lock Screen | While the Lock Screen remains visible, adjust pounds, reps, and optional RIR, complete a set, display or skip rest, add a set, and finish an exercise and advance. Face ID is acceptable. Swiping into or opening the foreground app fails the requirement. Reaching the planned set count does not automatically finish the exercise. |
 | Rest | Completing a set starts that exercise’s configurable countdown. Bench press defaults to 3 minutes; cable exercises to 90 seconds. Allow skipping the countdown and stop it at zero. Undoing completion does not cancel or reset rest. |
 | Entries | RIR (repetitions in reserve) is optional. Bodyweight sets can use reps alone. Blank and zero remain distinct. |
 | Recovery | Automatically save drafts and completed sets separately. On resume, restore the current workout position and correct rest timing. |
@@ -71,23 +71,30 @@ These values illustrate how the logger should capture different results across s
 
 ## Core workout flow and planned acceptance checks
 
-Prepare a routine → start in the app → lock the phone → adjust and complete sets → rest → finish the exercise → finish the workout → review history.
+Prepare a routine → start in the app → show the Lock Screen → authenticate with Face ID as needed and stay on the Lock Screen → adjust and complete sets → rest → finish the exercise → finish the workout → review history.
 
 | Planned check | Expected result |
 | --- | --- |
 | Configure Bench Press differently in two routines | Each routine retains its own settings. |
-| Log while the phone remains locked | Adjust pounds, reps, and RIR; complete a set; add a set; and finish an exercise and advance, all without unlocking or opening the app. |
-| Complete a set | Save exactly one completed record and start rest. Repeated taps do not create duplicates. |
+| Log on the visible Lock Screen | After Face ID as needed, adjust pounds, reps, and optional RIR, complete a set, view and skip rest, add a set, and finish an exercise. Each action leaves the Lock Screen visible. The app stays out of the foreground. |
+| Complete a set and run rest | Save exactly one record with the edited values and start one rest countdown. Repeated taps preserve that record and its deadline. Rest stops at zero or stays stopped when skipped. |
+| Finish an exercise | Advance exactly once and persist the next exercise. Earlier records retain their original exercise and values. |
 | Undo completion | Return the set to a draft while rest continues without cancellation or reset. |
 | Interrupt and resume | Restore drafts, completed records, current position, and correct timer state. |
 | Swap after two Leg Press sets | Keep those sets under Leg Press. Subsequent Hack Squat sets use Hack Squat identity and history. The change applies only to today. |
 | Edit the routine afterward | Previously completed workout records remain unchanged. |
 
-These checks are planned. App, persistence, and Lock Screen tests have not run.
+These product checks are planned and **Not run**. The separate, smaller M0 proof has Windows SQL checks only.
 
 ### M0 — Research and define the Lock Screen proof
 
-Use official documentation to map each required action to candidate surfaces and constraints. Define a bounded physical-device proof before selecting a framework. In the later proof, record pass, fail, or untested for each action and verify that the phone stays locked, the app does not open in the foreground, and the resulting workout state is correct. An app-opening shortcut does not satisfy the requirement.
+Apple documents an unlock gate for buttons and toggles embedded in widgets and Live Activities. The general App Intent authentication policy does not establish an override. A Live Activity can still display session data, and WidgetKit documents dynamic timer display without continuous extension execution. [WidgetKit interactivity](https://developer.apple.com/documentation/widgetkit/adding-interactivity-to-widgets-and-live-activities) · [App Intent authentication](https://developer.apple.com/documentation/appintents/appintent/authenticationpolicy) · [Dynamic dates](https://developer.apple.com/documentation/widgetkit/displaying-dynamic-dates)
+
+The adopted scope allows Face ID while the Lock Screen remains visible. The proof checks whether actions work in that state without bringing the app to the foreground and whether their results persist. It retains a closed-padlock trial for comparison. All physical-device cases are **Not run**. [Capability map and proof plan](LOCK_SCREEN_FEASIBILITY.md)
+
+The first proof is implemented in [proofs/lock-screen](../proofs/lock-screen/README.md) using Expo SDK 57, a Swift Live Activity, two background App Intents, and app-local SQLite. It starts at 40 lb × 8 reps. The device trial must verify +1 rep and two Complete requests while the authenticated Lock Screen remains visible, then reopen to see exactly one 40 lb × 9 record. Rest and full workout controls remain outside this proof.
+
+The user reports iPhone 15 Pro, iOS 26.6.1 (23G83), and working Face ID. Apple’s published version/build pairing agrees; the phone was not independently inspected. Both targets use iOS 26.0 as the minimum for explicit background intent mode. On Windows, Expo dependency validation, TypeScript, the iOS JavaScript bundle, three file-backed SQLite tests, and generated native configuration inspection passed. Swift compilation, signing, installation, and device interaction and persistence are **Not run**. The Expo account, active Apple Developer Program membership, and signed internal preview are still needed.
 
 ### M1 — Log one exercise, run rest, and recover an interrupted workout
 
@@ -99,13 +106,13 @@ Verify that routine settings save independently. Select one routine, run the com
 
 ### M3 — Support and test full-week use
 
-After one-routine testing, extend to full-week use. Define the week’s test coverage once the multiple-routine versus calendar decision is made. Essential no-unlock actions must pass the physical-device checks for release. Release timing remains open.
+After one-routine testing, extend to full-week use. Define the week’s test coverage once the multiple-routine versus calendar decision is made. The required actions on the visible Lock Screen must pass the physical-device checks for release. Face ID is acceptable. Release timing remains open.
 
 ## Open questions
 
 - Which saved routine will be the first test?
-- Which native Lock Screen approach and controls support the required actions reliably?
-- What build/testing route and framework should we use? Expo / React Native / TypeScript with EAS remains a proposal to evaluate.
+- Which widget or Live Activity controls reliably handle the required actions on the visible Lock Screen after Face ID? Which surface has room for usable numeric editing and the workout controls?
+- Can Expo Build compile and sign both proof targets, and do the actions and saved record pass on the reported iPhone 15 Pro? The production framework remains open.
 - How should prepared pounds and reps be populated, and how should unknown RIR appear?
 - What input limits, weight increments, and assisted-exercise recording rules should apply?
 - How should users finish a workout and correct its history?
@@ -131,6 +138,8 @@ After one-routine testing, extend to full-week use. Define the week’s test cov
 | 2026-11-10 | Allow optional RIR and reps-only bodyweight sets | Adopted. Blank remains distinct from zero. |
 | 2026-11-10 | Remember in-app swaps and apply them to today only | Adopted. Support swapping mid-exercise while preserving completed original sets. |
 | 2026-11-10 | Test one routine before full-week use | Adopted test order. First routine and full-week format remain open. |
+| 2026-11-10 | Allow Face ID while the Lock Screen remains visible | Supersedes the earlier strict no-unlock criterion. Required actions must work while the user stays on the Lock Screen, with Face ID allowed. Swiping into or opening the foreground app fails the requirement. The genuinely locked trial is a comparison. |
+| 2026-11-10 | Use Expo SDK 57 and Swift for the one-set proof | Adopted for proof tooling only. Source and Windows checks are complete; the signed iPhone build and trial remain open. |
 
 Add adopted decisions and their reasons here as work progresses. Update the open questions when an answer is known.
 

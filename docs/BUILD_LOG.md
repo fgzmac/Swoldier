@@ -4,6 +4,102 @@ Record a short entry after each working session. Newest entries go first. Write 
 
 **Planned:** agreed or proposed work. **Implemented:** code exists. **Verified:** a named check ran and passed.
 
+## 2026-11-10 — Review the first proof checkpoint for publication
+
+**Status** — Reviewed the proof source and earlier unpublished feasibility plan. No material source defect was identified. Native and device behavior remains unverified.
+
+- Re-ran the three file-backed SQLite tests, TypeScript, Expo dependency validation, and the iOS JavaScript export on Windows; all passed. Generated configuration inspection passed for both targets, source membership, embedding and dependency, app-only SQLite resource and link, Expo module registration, identifiers, entitlements, deployment targets, and plists.
+- The tests execute the bundled production SQL using a separate JavaScript open/read/write and transaction wrapper. They do not execute the Swift store, coordinator serialization, intent dispatch, or success/failure display. Native compilation, CocoaPods integration, signing, installation, and all device checks are **Not run**.
+- Reviewed stable session/set IDs, single-row completion, commit-before-success ordering, retryable failed transactions, and rejection of rep changes after completion. The extension only renders ActivityKit state; the app and native intents use the same app-local store without an App Group.
+- Reviewed the publication manifest including source, dependency lockfile, and feasibility documentation. Dependencies, generated artifacts, signing material, credentials, device identifiers, and private records are excluded. Refreshed stale documentation pointers and made the SQL test limitation explicit.
+- A successful read-only remote query returned exit 0 and found main at the starting local commit, `2b2b811f72ecb40c1dcd92a68fad5c913774d4eb`. This entry records the prepublication review; the commit and push result are verified separately through Git refs and the session report. No EAS upload, cloud build, account creation, or enrollment was performed.
+
+### What I learned — user-written
+
+### Next small task
+
+When ready, confirm Expo account access and active Apple Developer Program membership before device registration or any source upload. [Current handoff](HANDOFF.md)
+
+---
+
+## 2026-11-10 — Implement the one-set Lock Screen proof
+
+**Status** — Implemented the isolated [proof app](../proofs/lock-screen/README.md). Production framework selection remains open.
+
+- The user reported iPhone 15 Pro, iOS 26.6.1 (23G83), and working Face ID. Apple’s published release and restore filename corroborated the version/build pairing. Set the minimum to iOS 26.0 for explicit background intents and selected the Expo SDK 57 hosted image for later.
+- Added a 40 lb × 8 reps fixture, two Swift App Intents, and app-local SQLite. The database commits edits and completion before the card updates. A second completion updates only the proof’s request counter; late rep edits are ignored. The in-app screen can inspect and reset the fictional data.
+- On Windows, Expo dependency validation, TypeScript, and an iOS JavaScript export passed. Three tests ran the bundled SQL in file-backed SQLite and passed: persistence and two overlapping completions, reset and stale IDs, and rollback after a blocked commit.
+- Standard Expo iOS prebuild skipped Windows. An inspection fixture using the installed Expo template and configuration steps verified both targets, the embedded extension, source membership, app-only SQL resource, bundle IDs, deployment targets, plists, and generated Expo module registration. This did not compile Swift.
+- Swift compilation, CocoaPods integration, signing, installation, and device tests are **Not run**. No Expo project was linked, no device was registered, and no cloud build was submitted.
+
+### What I learned — user-written
+
+### Next small task
+
+When ready, confirm active Apple Developer Program membership and Expo account access for the preview build. [Current handoff](HANDOFF.md)
+
+---
+
+## 2026-11-10 — Recommend the first Windows-to-iPhone proof route
+
+**Status** — Recommended Expo Build Free with an internal preview build and a native Swift Live Activity for the proof. Production framework selection remains open.
+
+- Recorded the Windows-only setup, regular Apple Account, lack of a cloud build account, and willingness to enroll in the Apple Developer Program when ready.
+- Checked Apple's and Expo's official documentation for native intents, extension signing, registered-device installation, and current costs. Expected first-year service cost is US$99 at U.S. pricing if builds fit within Expo's free monthly iOS limit.
+- Specified one fictional set, a rep edit, and one durable completion from the Face ID-authenticated Lock Screen. A repeated request for the same set must leave exactly one record. [Route and acceptance](LOCK_SCREEN_FEASIBILITY.md#recommended-first-proof-from-windows)
+- All build, signing, installation, and device tests are **Not run**.
+
+### What I learned — user-written
+
+_Leave blank for the user._
+
+### Next small task
+
+Confirm the target iPhone model, iOS version and build, and Face ID availability. [Current handoff](HANDOFF.md)
+
+---
+
+## 2026-11-10 — Allow Face ID for Lock Screen workout actions
+
+**Status** — The user approved Face ID authentication while staying on the visible Lock Screen. This supersedes the earlier strict no-unlock criterion. Entering or opening the foreground app during a required action fails acceptance.
+
+- Updated the planned checks for saved edits, duplicate prevention, rest timing and skipping, and advancing exactly once. The genuinely locked trial remains a comparison.
+- Recorded the minimum prerequisites for building, signing, and installing the proof. Device details, Mac or hosted access, and the available signing and installation route need confirmation.
+- All build, installation, persistence, and device tests are **Not run**. [Project plan](PROJECT.md) · [Device proof](LOCK_SCREEN_FEASIBILITY.md)
+
+### What I learned — user-written
+
+_Leave blank for the user._
+
+### Next small task
+
+Confirm one available build, signing, and install route for the authenticated button trial. [Current handoff](HANDOFF.md)
+
+---
+
+## 2026-11-10 — Lock Screen feasibility research
+
+**Phase/task** — Compare the Apple surfaces and design a bounded device proof.
+
+**Status** — Documentation research and proof design complete. Device and installation results are **Not run**.
+
+### Findings and checks
+
+- Reviewed Apple’s widget and Live Activity interaction, authentication, lifecycle, and timer documentation. Apple documents an unlock gate for embedded buttons and toggles on both surfaces. Passive countdown display remains a candidate.
+- Recorded the action map, paired closed/open padlock test, two-exercise fixture, persistence and interruption checks, and separate background, system-termination, and force-quit cases. [Feasibility research and proof plan](LOCK_SCREEN_FEASIBILITY.md)
+- Compared Xcode on an accessible Mac and hosted build routes using Apple, Codemagic, and Expo documentation. Device OS, Mac access, signing team, install path, and framework are still open.
+- Confirmed the initial working tree was clean on main at 2b2b811f72ecb40c1dcd92a68fad5c913774d4eb. The whitespace checks passed, 25 local Markdown links resolved, and 38 source URLs returned HTTP 200. Earlier log entries and reflections were preserved. This session adds local documentation only.
+
+### What I learned — user-written
+
+_Leave blank for the user._
+
+### Next small task
+
+Confirm a build and install route for the paired-state button gate. [Current handoff](HANDOFF.md)
+
+---
+
 ## 2026-11-10 — Discovery documentation checkpoint
 
 **Phase/task:** Document the first-version direction and prepare the next Lock Screen research task.

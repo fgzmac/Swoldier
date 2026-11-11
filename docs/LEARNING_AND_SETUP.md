@@ -8,7 +8,7 @@
 - During foundation setup, the tool versions were: Git 2.55.0.windows.4; Node.js v24.19.0; npm 11.17.0; VS Code 1.145.2 x64; Codex CLI 0.167.0-alpha.3.2.
 - During foundation setup, D: was rechecked as exFAT, Healthy / OK. The user supplied diagnostic results reporting no problems and exit 0. Separately, the earlier assistant-run /markclean check returned 0 and cleared the dirty flag. The original cause remains unknown. No repair was repeated during migration.
 - The foundation was pushed previously. A read-only check on 2026-11-10 confirmed that GitHub main still points to 75a4c62aefeb27dfdfbb7c3b5e87ad307115cbd4. Local main tracked origin/main and was clean at the start of the checkpoint.
-- Framework remains undecided. The next technical task is Lock Screen research and proof design. App, persistence, and Lock Screen tests have not run.
+- Production framework remains undecided. This foundation snapshot predates the isolated proof. See the current [handoff](HANDOFF.md) for Windows check results and unrun native/device checks.
 - Local files, GitHub, and ChatGPT uploads do not synchronize automatically.
 
 ## 1. Build while you learn
@@ -60,7 +60,7 @@ My proposed starting stack remains **TypeScript + React Native + Expo**, with **
 | GitHub | A remote copy of commits you push; it does not automatically back up every file on the SSD. |
 | Expo cloud builds, using EAS | Build the native iPhone app on remote machines when needed. |
 
-Expo documents Windows as a supported development environment for its beginner workflow. Its cloud build service can create iOS builds from any operating system without local native build tools. Start ordinary screen work in Expo Go, then use a development build for the widget experiment. Sources: [first app setup](https://docs.expo.dev/tutorial/create-your-first-app/) and [development builds](https://docs.expo.dev/develop/development-builds/introduction/).
+Expo documents Windows as a supported development environment for its beginner workflow. Its cloud build service can create iOS builds from any operating system without local native build tools. Expo Go can support ordinary screen exercises. The Lock Screen proof uses a custom signed preview build to include its native extension. Sources: [first app setup](https://docs.expo.dev/tutorial/create-your-first-app/) and [development builds](https://docs.expo.dev/develop/development-builds/introduction/).
 
 The local iOS Simulator requires macOS. A physical iPhone is the testing device in this Windows proposal. Source: [iOS Simulator requirements](https://docs.expo.dev/workflow/ios-simulator/).
 
@@ -70,9 +70,9 @@ If you now have access to a suitable Mac, revisit Swift/SwiftUI with Xcode as an
 
 Expo currently provides a widget library, but it does not run in Expo Go. Widget code and the main app have separate runtimes. The app-side interaction listener only runs while the app process is alive. Source: [Expo Widgets](https://docs.expo.dev/versions/latest/sdk/widgets/).
 
-Use [HANDOFF.md](HANDOFF.md) to define the early no-unlock proof. The existing Expo reference is a research lead, and app and Lock Screen feasibility have not been verified. An interaction that requires opening the app does not satisfy the adopted no-unlock requirement.
+Face ID is acceptable during the proof while the Lock Screen remains visible. An action that opens the foreground app fails the release requirement. Expo Build is recommended for the proof, with a native Swift Live Activity and durable native storage. Device tests are **Not run**. [Device proof](LOCK_SCREEN_FEASIBILITY.md)
 
-For the standard EAS development-build route to your physical iPhone, plan for paid Apple Developer membership. Apple's listed fee is **US$99 per membership year**, with regional pricing differences. Verify current terms before buying. Basic Expo Go learning can start before that membership purchase. Sources: [iPhone cloud development build](https://docs.expo.dev/tutorial/eas/ios-development-build-for-devices/), [development build options](https://docs.expo.dev/develop/development-builds/introduction/), and [Apple enrollment](https://developer.apple.com/programs/enroll/).
+The proof uses Expo Free and requires Apple Developer Program membership when preparing the signed ad hoc iPhone build. The route plan lists the costs, signing requirements, and install steps. [Proof route](LOCK_SCREEN_FEASIBILITY.md#recommended-first-proof-from-windows)
 
 ## 4. Storage, RAM, cloud development, and hosting
 
@@ -149,6 +149,6 @@ Use a five-minute end-of-session entry if that keeps logging sustainable. A usef
 
 Codex may summarize work it actually performed. Keep “What I learned” in your own words. Save an occasional screenshot or short demo with fictional data once there is something working. Those records will help you explain the project later.
 
-## Next working session: Lock Screen research and proof design
+## Next working session: account readiness
 
-Follow the current [handoff](HANDOFF.md). Use official documentation to research the adopted Lock Screen actions and design a bounded device proof before choosing a framework.
+The user reports an iPhone 15 Pro, iOS 26.6.1 (23G83), and working Face ID; the phone has not been independently inspected. The isolated proof source is prepared. Follow the [current handoff](HANDOFF.md) to confirm Expo account access and active Apple Developer Program membership when ready, before any device registration or build upload.

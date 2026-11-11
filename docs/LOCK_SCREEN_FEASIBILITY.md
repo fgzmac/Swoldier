@@ -1,0 +1,208 @@
+# Lock Screen feasibility and device proof
+
+Research reviewed on 2026-11-10. The user reports iPhone 15 Pro / iOS 26.6.1 (23G83) with working Face ID. This is not an independent device inspection. All physical-device, signing, and installation trials below are **Not run**.
+
+The isolated [one-set proof source](../proofs/lock-screen/README.md) now exists. Windows SQL, TypeScript, dependency, JavaScript export, and generated configuration checks passed. The SQL tests reuse production statements in a separate JavaScript transaction wrapper and do not execute Swift or ActivityKit. The broader two-exercise plan below remains future work.
+
+Apple documents an unlock gate for buttons and toggles embedded in both Lock Screen widgets and Live Activities. Apple describes intent-backed controls that can run without opening the app once the device authenticates. The 2026-11-10 scope decision allows Face ID while the Lock Screen remains visible, so both surfaces are candidates. The proof must verify the actions and durable state on the reported device. A Live Activity is also a candidate for passive workout and rest display. [Apple’s interactivity guide][interaction] · [ActivityKit display and lifecycle][activity]
+
+## Lock Screen widgets and Live Activities
+
+| Topic | Lock Screen widget | Live Activity |
+| --- | --- | --- |
+| Purpose and placement | A small accessory tile the user adds to the Lock Screen. Apple lists circular and rectangular iPhone accessory families for interactivity. Inline is absent from that list. [Widget families and interactivity][interaction] | A session card the app can start as the workout begins. It appears on the Lock Screen and can also appear in the Dynamic Island. Buttons and toggles are supported in the Lock Screen and expanded presentations. [ActivityKit][activity] · [Supported presentations][interaction] |
+| Interaction model | An App Intent is a named operation the system can invoke. Use intent-backed buttons for discrete actions and toggles for Boolean state. Widget intents receive already assigned parameters. [App Intent parameters and controls][interaction] | Uses the same button and toggle pattern. Numeric editing would need discrete intent-backed actions such as plus, minus, or clear. The documented interactive controls do not provide a native numeric keyboard, text field, or bound stepper for this surface. [Supported controls][interaction] |
+| When the phone is locked | Apple documents that actions wait for authentication and unlock. An authenticated phone can still show the Lock Screen. [WidgetKit interactivity][interaction] · [Apple’s unlock guide][unlock] | The same WidgetKit rule covers Live Activity controls. A visible card and a working countdown do not establish that a tap can run an intent while locked. [WidgetKit interactivity][interaction] |
+| Execution and refresh | WidgetKit renders archived views from a timeline in a separate extension. A regular widget intent generally runs in that extension. After a handled interaction, WidgetKit reloads the timeline. Persist changes before returning and observe when the display catches up. [WidgetKit execution][interaction] · [Keeping widgets up to date][timeline] | Live Activities use an extension for rendering and ActivityKit updates for state instead of a widget timeline. Apple’s interactivity guide routes a `LiveActivityIntent` to the app process. A process starting and an app screen opening are distinct observations. [WidgetKit execution][interaction] · [ActivityKit][activity] · [LiveActivityIntent][liveintent] |
+| Lifetime and limits | The system controls timeline refreshes. An accessory is space constrained and provides no continuously running app code. [Widget design][widget-design] · [Widget timelines][timeline] | User settings can disable Live Activities. Apple documents an eight-hour active limit, up to four more hours on the Lock Screen after expiry, and a 4 KB combined data budget. The Live Activity view’s sandbox cannot access the network or receive location updates. App code or ActivityKit pushes can update it. [ActivityKit constraints][activity] · [Activity authorization][authorization] |
+
+### Authentication and execution
+
+- General App Intent policy defaults to `alwaysAllowed`, which allows intent execution without authentication in eligible contexts. `requiresAuthentication` requires authentication before execution and `requiresLocalDeviceAuthentication` requires unlocking the device executing the intent. The WidgetKit article documents a separate, surface-specific unlock gate for embedded buttons and toggles. The general policy does not document an override for that gate. [Authentication policy][auth] · [Authentication choices][auth-choices] · [Local-device authentication][auth-local] · [WidgetKit gate][interaction]
+- Apple’s runtime guide describes `supportedModes` as a preference the system can override and lists `LiveActivityIntent` among protocols that configure foreground modes. Its `LiveActivityIntent` reference also documents a start example where the system starts the app process without opening the app. The proof checks whether the button dispatches on the visible Lock Screen after Face ID, and whether the app stays out of the foreground. Record the actual intent execution, process, and app foreground state for the tested surface. Deep links and card taps that open the app fail the requirement. [Intent runtime modes][runtime] · [LiveActivityIntent][liveintent] · [Opening an app from a card][deep-link]
+- iOS can suspend a background app. Apple documents recovery of an existing Live Activity after a system stop or crash by inspecting activities when the app next launches. Apple Developer Technical Support separately describes a force-quit flag that generally suppresses background launches until a manual relaunch, with undocumented exceptions. Treat action dispatch, card survival, timer display, and record recovery as separate observations in each state. [Background modes][background] · [ActivityKit lifecycle][activity] · [Apple DTS on force quit][force-quit]
+- If a widget extension and app both need the same durable state, App Groups provide a shared container. File protection still applies. Apple's file-protection reference distinguishes files available only while unlocked from a class accessible after first unlock even when re-locked. Inspect the protection of the actual proof store and any auxiliary files. A successful read of an after-first-unlock file is not evidence that the phone unlocked. Use fictional data and record storage denial separately from an intent that never started. [App Groups][groups] · [File protection after first unlock][protection]
+
+WidgetKit also offers separate, user-installed system Controls for locations such as the bottom of the Lock Screen and Control Center. Apple documents action buttons, Boolean toggles, and configurable authentication for Controls. This is a distinct candidate for a single action probe, with its own placement and layout constraints. Full workout control coverage on this surface remains open. An action in Control Center would need a separate decision about whether that location meets the product requirement. [Creating system Controls][controls] · [Control design and authentication][control-design] · [Lock Screen placement][customize]
+
+## Capability map for the required actions
+
+Each action below must work while the Lock Screen remains visible and the app stays out of the foreground. Face ID is acceptable. For actions that change workout state, verify the expected durable result before intentionally opening the app to inspect it. Use a genuinely locked trial to compare behavior.
+
+| Required action | Candidate surface or control | What Apple documents | What the phone must establish |
+| --- | --- | --- | --- |
+| Adjust pounds, reps, and optional RIR | Discrete plus and minus buttons in a Live Activity or rectangular widget, plus a clear-RIR button. Each intent gets an explicit draft and field identifier. | Buttons invoke an intent with assigned parameters. Toggles are Boolean. Apple documents an unlock gate and no numeric entry control for these views. [WidgetKit controls and parameters][interaction] | Verify dispatch on the visible Lock Screen after Face ID. Test layout, edit speed, repeated taps, field targeting, and retention of blank versus zero after reopening. |
+| Complete a set and save exactly one record | Complete button on the Live Activity or widget. The candidate operation targets the displayed set’s stable identity. | An eligible tap invokes asynchronous `perform()`. Apple advises saving widget data before returning. This does not supply exactly-once delivery or an atomic workout write. [WidgetKit intent execution][interaction] | Whether a tap on the visible Lock Screen dispatches and stores the edited values once. Check rapid taps, stale controls after advance, interruption, retry, and the persisted record after reopening. |
+| Start and display rest, then stop at zero | Start rest as part of the successful Complete operation. Publish an absolute deadline to a Live Activity or widget and use a bounded timer display. | Dynamic dates can update a widget countdown without running its extension each second. Apple describes a pause date to stop at zero. ActivityKit carries changing content and supports timer text. A display reaching zero does not imply a callback ran or a record was saved. [Dynamic dates][dates] · [ActivityKit display][activity] | Verify that the completion starts one countdown, that sleeping and waking preserve the deadline, and that the display reaches zero without counting up. Reopening must calculate remaining time from saved state. Start rest in the app for the separate passive-display trial. |
+| Skip rest | Skip button on the rest card, targeting the current rest interval. | The button is an intent action subject to the same unlock gate. ActivityKit can publish changed state from the app. [WidgetKit buttons][interaction] · [Activity operations][activity-api] | Verify dispatch on the visible Lock Screen and immediate logical cancellation. A repeated or delayed skip must not alter a later rest interval, complete a set, or restart the timer after reopening. |
+| Add a set | Add Set button on the workout card. | An eligible intent can execute an application action using supplied parameters. There is no built-in workout or set model. [WidgetKit actions][interaction] | Verify dispatch on the visible Lock Screen. One accepted tap adds one draft for the current exercise without completing it or changing the routine template. Check that stale taps cannot append to the wrong exercise. |
+| Finish an exercise and advance | Finish Exercise button on the workout card. | An eligible intent can perform the operation, and ActivityKit or a widget reload can reflect new content. Opening a specific app scene is a separate, foreground action. [WidgetKit actions][interaction] · [Activity operations][activity-api] · [App launch behavior][deep-link] | Verify dispatch on the visible Lock Screen. After one accepted action, the card and persisted workout should point at the second exercise. Repeated or stale taps must not advance again, lose history, or assign edits to the next exercise. |
+
+## Recommended first proof from Windows
+
+Use **Expo Build (EAS) Free for an ad hoc internal preview build**, with a one-screen Expo app and a native Swift Live Activity. Windows handles editing and submitting the build. Expo supplies macOS and Xcode and returns a signed package for the registered iPhone. A preview build includes its JavaScript bundle and runs without Metro. This is a recommendation for the experiment. Production framework selection remains open. [Expo Build on Windows][expo-windows] · [Expo iOS build process][expo-ios-build] · [Internal preview build][expo-preview]
+
+### What Expo supplies and what the proof needs
+
+| Concern | Plan for this proof |
+| --- | --- |
+| Live Activity display | Expo Widgets documents starting and updating a Live Activity with a generated widget extension. Expo Go lacks this library. Expo’s interactive widget example persists widget props, and the app-side interaction listener only fires while the app process is alive. The documentation does not establish a Live Activity button path that writes a durable workout record. Expo's alpha AppIntents package still uses Swift declarations and documents delivery to JavaScript. The proof's intent performs the native write itself. [Expo Widgets][expo-widgets] · [Expo AppIntents][expo-app-intents] |
+| Native extension and actions | Use a small SwiftUI WidgetKit extension for the Live Activity with intent-backed **+1 rep** and **Complete set** buttons. Put the `LiveActivityIntent` implementations in the app target as Apple documents. The proof app uses a local Expo module to call the native start and read operations. Have a config plugin add the extension and its Swift sources at Prebuild. Declare the extension’s bundle ID and entitlements in the EAS app extension configuration for provisioning. Expo labels extension support for generated projects experimental. The first build must verify target membership, intent metadata, embedding, and signing. [Apple interactivity][interaction] · [Custom native Expo code][expo-native] · [Expo extension configuration][expo-extensions] |
+| Durable saving | Use a small native local store as the source of truth. The intent writes to it directly in the app process and the proof screen reads the same store. Publish ActivityKit state after the write succeeds. The proposed app and intents can use the app container if the extension only renders ActivityKit state. If both targets access the store, provision the same App Group on both. [Apple intent execution][interaction] · [ActivityKit lifecycle][activity] · [App Groups][groups] · [EAS capability signing][expo-capabilities] |
+| Remote build limits | Choose a hosted Xcode image and an iOS deployment target compatible with the confirmed phone. Record the SDK and image. Windows has no local Xcode for native debugging, so use cloud build logs and a native action trace that the proof app can display on the phone. Physical-device behavior after Face ID remains to be tested. [Expo build images][expo-images] · [Expo troubleshooting][expo-troubleshooting] · [Apple intent runtime modes][runtime] |
+
+### Accounts, cost, and timing
+
+| Requirement | Status and expected cost |
+| --- | --- |
+| Expo account on Free | No cloud build account exists. An Expo account is needed to submit a cloud build. Free costs **US$0/month** and includes up to **15 iOS builds per month** in a low-priority queue. It also lists 15 Android builds and 60 CI/CD Workflows minutes, which this proof does not use. Limits reset monthly. [Expo setup][expo-setup] · [Expo pricing][expo-pricing] · [Monthly limits][expo-plans] |
+| Apple Account and Developer Program | The user has a regular Apple Account and is willing to enroll when ready. Individual enrollment uses the existing account with two-factor authentication and Apple verification. Apple lists **US$99 per membership year**, with regional pricing. Active membership is needed before provisioning and signing the ad hoc device build. Planning and source preparation can happen first. Xcode Personal Team testing requires a Mac that can pair with the phone. [Apple enrollment][apple-enrollment] · [Apple account options][personal] · [Expo device signing][expo-device] |
+| Expected first-year service cost | **US$99 at U.S. pricing** if builds fit within Expo Free. The proof uses a direct internal install and local ActivityKit updates, so it needs no TestFlight distribution, push service, or app server. [Apple enrollment][apple-enrollment] · [Expo pricing][expo-pricing] · [Internal distribution][expo-distribution] |
+
+### Signing and installation when ready
+
+1. Confirm the iPhone model, iOS version and build, and Face ID availability. The iPhone 15 Pro / iOS 26.6.1 is user-reported. Use the confirmed OS to check the deployment target and hosted Xcode image for the device build. [Expo build images][expo-images]
+2. When ready to sign, use the Expo account and an active Apple Developer Program team. Register the iPhone through `eas device:create` and open the registration link on the phone. Apple may take time to process device registration for a newly enrolled or renewed team. [Expo internal distribution][expo-distribution]
+3. Give the app and embedded extension distinct bundle IDs on the same team. Use an Apple distribution certificate and ad hoc profiles for both targets with the iPhone's UDID and the appropriate entitlements. Check `NSSupportsLiveActivities` on the app and the App Group if applicable. Request an iOS device preview build with internal distribution. Keep signing credentials private. [Expo extension signing][expo-extensions] · [Expo iOS device signing][expo-device] · [Live Activity configuration][activity]
+4. Open the build page’s install link on the registered iPhone. Install the preview, follow the on-device Developer Mode steps when needed, and confirm Live Activities are enabled for the proof app. [Expo preview installation][expo-preview] · [Developer Mode on iPhone][expo-developer-mode] · [Live Activity authorization][authorization]
+
+### Smallest first implementation and acceptance
+
+Use one fictional set at 40 lb and 8 reps. The implemented app has **Start fictional set**, **Show Live Activity** for an existing draft, **Reset proof data**, and a readout of the durable draft or completed record. The Live Activity displays reps with **+1 rep** and **Complete set**. The second exercise, timer, skip, add-set, and lifecycle tests belong to the broader proof below.
+
+| Planned check | Pass condition | Status |
+| --- | --- | --- |
+| Start | Start the fictional session in the app, show the Lock Screen, and authenticate with Face ID. The Live Activity displays 8 reps. | Not run |
+| Edit | Tap **+1 rep** once while staying on the visible Lock Screen. The native store records 9 reps and the activity reflects that value. | Not run |
+| Complete | Tap **Complete set** twice while the proof keeps the button available. The intent reads the saved draft and uses stable session and set IDs to enforce one completion in a serialized durable write. The completed row's request counter records each received completion for that session/set. Confirm the counter is two; rapid screen taps may be coalesced by iOS. The Lock Screen stays visible and the app stays out of the foreground. | Not run |
+| Verify | Deliberately reopen the app after the actions. It shows exactly one completed record for the set at 40 lb and 9 reps. Before reopening, confirm the card displayed 9 reps and then saved completion. The current proof has a durable completion-request counter, not a timestamped process or foreground trace; use the observed screen behavior alongside the persisted result. Opening the foreground app during either action fails. | Not run |
+
+Account setup and Apple membership block an installable build today. The reported device details informed the source's iOS 26.0 minimum and SDK 57 hosted image; the signed build and physical-device compatibility remain unverified. Account enrollment is a signing prerequisite. The signed extension and native intent path remain unverified until the first build and device test.
+
+## Bounded physical-device proof
+
+### Fixture and evidence
+
+For the broader follow-up after the first proof, use a single fictional workout. Exercise A is Bench Press with one prepared set at 40 lb and 8 reps with blank RIR. Exercise B is Cable Row with one prepared set at 25 lb and 10 reps with blank RIR. Set rest to 20 seconds for A and 30 seconds for B to keep the proof short. These fixture durations are deliberate overrides of the planned production defaults. One workout screen can start the fixture, display the stored drafts and completed sets, and show the current position and rest deadline. No workout data from the user is needed.
+
+The proof design calls for a durable local record independent of the displayed card. Use stable workout, exercise, set, and rest identifiers. Completion should commit the draft values and the rest deadline together, once per set, before publishing the new UI. Treat a repeated completion for the same set as already handled. A timestamped trace should record intent entry and outcome, process identity, foreground transitions, persistent writes, and the rendered state version when observable. Compare the trace with an external recording of the padlock and screen behavior. Keep signing credentials, device identifiers, and the device passcode out of the evidence shared in the repository.
+
+### Compare the Face ID-authenticated Lock Screen with the genuinely locked state
+
+1. Start the fixture in the app. Add the accessory widget for its trial and confirm Live Activities are enabled for the card trial. Use the same simple, preconfigured `+1 rep` action in each surface. Reset the fixture between trials and run from the installed build without an attached debugger.
+2. For the acceptance trial, press the side button to lock and wake the display. Let Face ID authenticate. Verify that the padlock opens while the Lock Screen is still visible, then tap the button. Keep the Lock Screen visible throughout the action and record any foreground transition.
+3. For the comparison, lock again, then cover the TrueDepth camera or keep the enrolled face outside its view. Prevent alternate unlock from a paired Apple Watch if active. Wake the screen and verify a **closed** padlock before and during the tap. If it opens, label the run authenticated and repeat the genuinely locked trial. Record and cancel any authentication prompt in this comparison. [Apple’s padlock and Face ID sequence][unlock] · [Unlock with Apple Watch][watch-unlock]
+4. After each trial ends, deliberately enter the app and inspect the persisted result and trace. The authenticated trial passes if the Lock Screen stayed visible, the app stayed out of the foreground, and the intended value was written during the interaction. Swiping into or opening the app during the action fails. The later inspection verifies the write and cannot stand in for it. Unclear screen state or write timing makes the result inconclusive.
+
+| Button trial | Evidence to record | Status |
+| --- | --- | --- |
+| Widget, Face ID authenticated | Open padlock, visible Lock Screen, intent dispatch, saved value, and any app foreground transition. | Not run |
+| Widget, genuinely locked comparison | Closed padlock, authentication prompt if present, intent dispatch, and any saved change. Apple documents that the embedded action is inactive in this state. | Not run |
+| Live Activity, Face ID authenticated | Open padlock, visible Lock Screen, intent dispatch, saved value, and any app foreground transition. | Not run |
+| Live Activity, genuinely locked comparison | Closed padlock, authentication prompt if present, intent dispatch, and any saved change. Apple documents that the embedded action is inactive in this state. | Not run |
+
+Use the authenticated result to decide whether to try the full sequence on that surface. If the authenticated action fails, check signing, configuration, and dispatch before expanding the proof. A blocked genuinely locked trial is compatible with the adopted scope. If the genuinely locked action works despite the documentation, repeat it and verify durable state before recording it as observed on that build and device. A separate system Control probe would have its own result.
+
+### Workout sequence and persistence
+
+Use a surface that passes the authenticated button trial. During each action, stay on the visible Lock Screen and allow Face ID when needed. Record the result before deliberately entering the app to inspect it. A separate passive-display trial starts rest in the app and then locks the phone.
+
+| Trial | Procedure and pass condition | Status |
+| --- | --- | --- |
+| Edited draft survives reopening | Change A to 45 lb, 9 reps, and 2 RIR. In a separate draft trial, clear RIR and verify blank survives distinctly from zero. Record the visible Lock Screen result and trace before deliberately entering the app. Reopen and verify the stored draft, current exercise, and absence of any completed record. | Not run |
+| Rapid edits and repeated completion | Use a burst of taps on one numeric field and record which edits were accepted. Verify the saved draft matches the accepted edits and the display catches up. Complete A using the edited values and tap Complete repeatedly before refresh. Reopen and find exactly one completed set with the saved values, one rest start, and the original deadline. An old Complete control must never complete a newly displayed set. | Not run |
+| Countdown through sleep and zero | Complete A, note its stored deadline, let the display sleep for part of the interval, then wake it and authenticate with Face ID while staying on the Lock Screen. Compare the visible countdown to elapsed time, observe zero, and check that it stays at zero or shows rest ended. Reopening after expiry must show no active rest. Use the separate passive-display comparison to observe countdown behavior with a closed padlock. | Not run |
+| Skip and add | Start a fresh rest interval and skip before expiry. Verify the saved rest is skipped, the timer stays stopped, and reopening does not revive it. Add one set to A and check exactly one additional draft, unchanged prior history, and unchanged planned set count. | Not run |
+| Finish and advance | Finish A explicitly. Verify the display and saved current position advance to B exactly once. Retry the stale Finish action if reproducible. Edit and complete one set of B, then reopen and confirm correct exercise identity, values, and the 30-second fixture rest. A’s history remains intact. | Not run |
+| Interrupted operation and retry | For an instrumented proof, inject a controlled failure before durable completion and separately after durable completion but before display publication. Before commit, the draft survives with no completed set or new rest. After commit, reopening shows one completed set and its original deadline even if the card was stale. In both cases, retry and verify exactly one eventual record and one rest start. Label injected interruption separately from OS process termination. | Not run |
+
+### Runtime cases
+
+Run the paired-state button check and the smallest completion/reopen check separately for these cases. In every run, record whether the surface remains present, whether the intent ran, whether a process was started, whether the app opened, whether the timer was correct, and what persisted. Missing or expired surfaces are recorded as unavailable.
+
+| Case | Establish the starting state | Expected evidence on recovery | Status |
+| --- | --- | --- | --- |
+| Background or suspended | Start the fixture, leave the app or lock, and do not swipe it away. Record scene state and whether there was a new process at the next action. Avoid relying on a debugger to keep it alive. | An eligible action uses the saved draft. Reopening recovers committed values, position, and the existing deadline. | Not run |
+| System-terminated | Preserve the workout and obtain evidence that iOS terminated the process, such as a matching jetsam event report. Do not manually relaunch before the trial. A development-injected kill may test recovery in a separate row but does not establish OS termination behavior. | Record independently whether the card survives, the intent is dispatched, and a process starts. On deliberate reopen, read durable state and reconcile any existing Live Activity. Leave this case not run if termination cannot be confirmed. [Apple’s jetsam guide][jetsam] | Not run |
+| User force-quit | Swipe the app away in the app switcher, then lock without manually reopening it. Use a fresh fixture from the previous cases. | Record presence, dispatch, and any writes without assuming a background relaunch. On deliberate reopen, verify prior durable state and elapsed rest. A denied tap must not silently become a completed record later. [Apple DTS][force-quit] | Not run |
+
+## Minimum build, signing, and installation prerequisites
+
+### Known from the research
+
+- **Build environment.** The proof needs a small iOS app and embedded widget extension built using a compatible macOS/Xcode environment and SDK. For the Live Activity trial, the app needs `NSSupportsLiveActivities` and Live Activities must be allowed on the phone. [Xcode requirements][xcode] · [Live Activity configuration][activity]
+- **Signing.** The app and extension each need a bundle ID and signing and provisioning under an eligible Apple team. If the app and extension share the proof store, both need the same App Group entitlement and matching profiles. [Signing for devices][run-device] · [App Groups][groups] · [iOS capabilities][capabilities]
+- **Installation.** Choose one route. Direct Xcode testing needs a Mac that can pair with the phone. Development and ad hoc routes need applicable device registration, provisioning, and Developer Mode. Internal TestFlight needs an eligible team, a signed uploaded build, and tester access. [Registered-device distribution][registered] · [Developer Mode][developer-mode] · [Internal TestFlight][testflight]
+
+### Requires confirmation
+
+| Minimum information | Current status |
+| --- | --- |
+| Physical iPhone model, iOS version and build, and ability to test Face ID | User reports iPhone 15 Pro / iOS 26.6.1 (23G83) and working Face ID. Independent device inspection and interaction tests are Not run. |
+| Access to a compatible Mac that can pair with the phone, or an existing hosted macOS build route | No Mac or cloud build account is available. Expo Build Free is recommended for the proof. Expo account access remains pending. |
+| Apple signing team and permitted installation method for that route | A regular Apple Account is available. Active Apple Developer Program membership and signing credentials are pending for the recommended ad hoc install. Confirm that both target profiles match their entitlements and include the device. |
+
+### Previously researched build options
+
+| Route | What Windows can do | Dependencies and limits |
+| --- | --- | --- |
+| Access to a compatible Mac with Xcode | Use Windows for source editing and review, then use the Mac to build, sign, and run on the paired iPhone. | Requires access to the Mac and a viable pairing and installation route. Apple supports Xcode Personal Team testing on personal devices with a free Apple Account, with seven-day provisioning. Confirm the exact targets and entitlements before treating this as available. A remote desktop to a Mac alone does not pair the local iPhone. [Apple account options][personal] · [Xcode device setup][run-device] |
+| Hosted macOS CI for a native Xcode project, such as Codemagic | Submit the project from Windows and have the service archive and sign it on its build host. | Codemagic documents native iOS builds, Apple Developer Program signing, and profiles for app extensions. An ad hoc build needs the registered iPhone in its profiles and an installation route. Internal TestFlight is another route with an eligible Apple team, an App Store Connect build upload, and tester access. Neither route supplies a physical phone or establishes entitlement availability. [Codemagic native iOS][codemagic] · [Codemagic signing][codemagic-sign] · [Codemagic test devices][codemagic-device] · [Apple internal TestFlight][testflight] |
+| Expo Build / EAS, recommended for the proof | Start a cloud build from Windows and install the resulting device build on the iPhone. | Expo documents Apple Developer Program access for the device build, device registration for ad hoc distribution, and provisioning of extension targets. Its widget library requires a custom native build. Check whether the exact native targets and intents needed for the proof are exposed or require native extension work. This route does not change Apple’s Lock Screen behavior. [Expo on Windows][expo-windows] · [iOS device builds][expo-device] · [Internal distribution][expo-distribution] · [Extension signing][expo-extensions] · [Expo widgets][expo-widgets] |
+
+The Mac and Codemagic rows retain earlier research. The current recommendation and enrollment sequence appear above.
+
+## Device results
+
+Every button, interaction, persistence, timing, lifecycle, and installation trial is **Not run**. Open issues include authenticated control behavior on the reported device, practical layout and interaction speed, and the available signing and installation path. Framework selection remains open. See [the handoff](HANDOFF.md) for the next task and [the project plan](PROJECT.md) for the adopted requirements.
+
+[interaction]: https://developer.apple.com/documentation/widgetkit/adding-interactivity-to-widgets-and-live-activities
+[activity]: https://developer.apple.com/documentation/activitykit/displaying-live-data-with-live-activities
+[activity-api]: https://developer.apple.com/documentation/activitykit/activity
+[authorization]: https://developer.apple.com/documentation/activitykit/activityauthorizationinfo
+[auth]: https://developer.apple.com/documentation/appintents/appintent/authenticationpolicy
+[auth-choices]: https://developer.apple.com/documentation/appintents/intentauthenticationpolicy
+[auth-local]: https://developer.apple.com/documentation/appintents/intentauthenticationpolicy/requireslocaldeviceauthentication
+[runtime]: https://developer.apple.com/documentation/appintents/configuring-the-runtime-behavior-of-your-app-intents
+[liveintent]: https://developer.apple.com/documentation/appintents/liveactivityintent
+[deep-link]: https://developer.apple.com/documentation/activitykit/launching-your-app-from-a-live-activity
+[widget-design]: https://developer.apple.com/design/human-interface-guidelines/widgets
+[timeline]: https://developer.apple.com/documentation/widgetkit/keeping-a-widget-up-to-date
+[dates]: https://developer.apple.com/documentation/widgetkit/displaying-dynamic-dates
+[controls]: https://developer.apple.com/documentation/widgetkit/creating-controls-to-perform-actions-across-the-system
+[control-design]: https://developer.apple.com/design/human-interface-guidelines/controls/
+[customize]: https://support.apple.com/guide/iphone/create-a-custom-iphone-lock-screen-iph4d0e6c351/ios
+[unlock]: https://support.apple.com/guide/iphone/wake-unlock-and-lock-iph5a0b5b9c5/ios
+[watch-unlock]: https://support.apple.com/en-us/102438
+[background]: https://developer.apple.com/documentation/xcode/configuring-background-execution-modes
+[force-quit]: https://developer.apple.com/forums/thread/685525
+[jetsam]: https://developer.apple.com/documentation/xcode/identifying-high-memory-use-with-jetsam-event-reports
+[groups]: https://developer.apple.com/documentation/xcode/configuring-app-groups
+[protection]: https://developer.apple.com/documentation/foundation/urlfileprotection/completeuntilfirstuserauthentication
+[xcode]: https://developer.apple.com/xcode/system-requirements/
+[capabilities]: https://developer.apple.com/help/account/reference/supported-capabilities-ios/
+[run-device]: https://developer.apple.com/documentation/xcode/building-and-running-an-app
+[registered]: https://developer.apple.com/documentation/xcode/distributing-your-app-to-registered-devices
+[developer-mode]: https://developer.apple.com/documentation/xcode/enabling-developer-mode-on-a-device
+[personal]: https://developer.apple.com/help/account/basics/about-your-developer-account
+[testflight]: https://developer.apple.com/help/app-store-connect/test-a-beta-version/add-internal-testers
+[codemagic]: https://docs.codemagic.io/yaml-quick-start/building-a-native-ios-app/
+[codemagic-sign]: https://docs.codemagic.io/yaml-code-signing/signing-ios/
+[codemagic-device]: https://docs.codemagic.io/flutter-testing/ios-provisioning/
+[expo-windows]: https://docs.expo.dev/faq/#can-i-develop-ios-apps-on-a-windows-computer
+[expo-device]: https://docs.expo.dev/tutorial/eas/ios-development-build-for-devices/
+[expo-distribution]: https://docs.expo.dev/build/internal-distribution/
+[expo-extensions]: https://docs.expo.dev/build-reference/app-extensions/
+[expo-widgets]: https://docs.expo.dev/versions/latest/sdk/widgets/
+[expo-pricing]: https://expo.dev/pricing
+[expo-plans]: https://docs.expo.dev/billing/plans/
+[expo-setup]: https://docs.expo.dev/build/setup/
+[expo-native]: https://docs.expo.dev/workflow/customizing/
+[expo-ios-build]: https://docs.expo.dev/build-reference/ios-builds/
+[expo-preview]: https://docs.expo.dev/tutorial/eas/internal-distribution-builds/
+[expo-capabilities]: https://docs.expo.dev/build-reference/ios-capabilities/
+[expo-images]: https://docs.expo.dev/build-reference/infrastructure/
+[expo-troubleshooting]: https://docs.expo.dev/build-reference/troubleshooting/
+[expo-developer-mode]: https://docs.expo.dev/guides/ios-developer-mode/
+[apple-enrollment]: https://developer.apple.com/programs/enroll/
+[expo-app-intents]: https://docs.expo.dev/versions/latest/sdk/app-intents/

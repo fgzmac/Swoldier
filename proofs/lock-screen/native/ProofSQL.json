@@ -1,0 +1,8 @@
+{
+  "schema": "CREATE TABLE IF NOT EXISTS proof_set (\n  slot INTEGER PRIMARY KEY CHECK (slot = 1),\n  session_id TEXT NOT NULL,\n  set_id TEXT NOT NULL,\n  pounds INTEGER NOT NULL DEFAULT 40,\n  reps INTEGER NOT NULL DEFAULT 8 CHECK (reps >= 0),\n  completed INTEGER NOT NULL DEFAULT 0 CHECK (completed IN (0, 1)),\n  completion_attempts INTEGER NOT NULL DEFAULT 0 CHECK (completion_attempts >= 0)\n)",
+  "start": "INSERT INTO proof_set (slot, session_id, set_id) VALUES (1, ?, ?)\nON CONFLICT(slot) DO NOTHING",
+  "read": "SELECT session_id, set_id, pounds, reps, completed, completion_attempts\nFROM proof_set WHERE slot = 1",
+  "increment": "UPDATE proof_set SET reps = reps + 1\nWHERE slot = 1 AND session_id = ? AND set_id = ? AND completed = 0",
+  "complete": "UPDATE proof_set SET completed = 1, completion_attempts = completion_attempts + 1\nWHERE slot = 1 AND session_id = ? AND set_id = ?",
+  "reset": "DELETE FROM proof_set WHERE slot = 1"
+}

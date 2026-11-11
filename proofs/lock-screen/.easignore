@@ -1,0 +1,23 @@
+# Intended for EAS_NO_VCS=1 and EAS_PROJECT_ROOT set to this directory.
+*
+!App.tsx
+!app.config.js
+!eas.json
+!index.js
+!package.json
+!package-lock.json
+!tsconfig.json
+!modules/
+modules/*
+!modules/LockScreenProofModule.swift
+!native/
+native/*
+!native/ProofActivity.swift
+!native/ProofCoordinator.swift
+!native/ProofIntents.swift
+!native/ProofSQL.json
+!native/ProofStore.swift
+!native/ProofWidget.swift
+!plugins/
+plugins/*
+!plugins/withLockScreenProof.js
