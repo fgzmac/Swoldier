@@ -49,6 +49,32 @@ struct ProofCompleteSet: LiveActivityIntent {
     }
 }
 
+struct ProofSkipRest: LiveActivityIntent {
+    static let title: LocalizedStringResource = "Skip proof rest"
+    static var supportedModes: IntentModes { .background }
+    static var authenticationPolicy: IntentAuthenticationPolicy { .requiresLocalDeviceAuthentication }
+
+    @Parameter(title: "Session") var sessionID: String
+    @Parameter(title: "Set") var setID: String
+
+    init() {}
+    init(sessionID: String, setID: String) {
+        self.sessionID = sessionID
+        self.setID = setID
+    }
+
+    func perform() async throws -> some IntentResult {
+        #if PROOF_WIDGET_EXTENSION
+        try rejectExtensionExecution()
+        #else
+        await ProofCoordinator.shared.apply(
+            sessionID: sessionID, setID: setID, complete: false, skipRest: true
+        )
+        #endif
+        return .result()
+    }
+}
+
 #if PROOF_WIDGET_EXTENSION
 private func rejectExtensionExecution() throws {
     // LiveActivityIntent normally runs in the containing app process.

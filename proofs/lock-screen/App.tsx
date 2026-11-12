@@ -8,6 +8,10 @@ type Snapshot = {
   completed: boolean;
   completionAttempts: number;
   recordCount: number;
+  restDeadline: number | null;
+  restSkippedAt: number | null;
+  restState: 'not_started' | 'running' | 'expired' | 'skipped';
+  restRemainingSeconds: number;
 };
 
 type ProofModule = {
@@ -47,6 +51,15 @@ export default function App() {
     };
   }, []);
 
+  // Foreground readout only. Native deadlines and the Live Activity never rely on this polling.
+  useEffect(() => {
+    if (saved?.restState !== 'running') return;
+    const timer = setInterval(() => {
+      if (AppState.currentState === 'active') void refresh();
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [saved?.restState, saved?.restDeadline]);
+
   async function act(action: 'start' | 'reset') {
     if (!proof || operation.current) return;
     operation.current = true;
@@ -80,6 +93,11 @@ export default function App() {
               : 'No session started.'}</Text>
             <Text>Saved records: {saved?.recordCount ?? 0}</Text>
             <Text>Complete requests received: {saved?.completionAttempts ?? 0}</Text>
+            <Text>Rest: {saved?.restState === 'running'
+              ? saved.restRemainingSeconds + ' seconds remaining'
+              : saved?.restState === 'skipped' ? 'Skipped'
+              : saved?.restState === 'expired' ? 'Expired (0 seconds)'
+              : 'Not started'}</Text>
             <Button
               title={saved && !saved.completed ? 'Show Live Activity' : 'Start fictional set'}
               onPress={() => void act('start')}

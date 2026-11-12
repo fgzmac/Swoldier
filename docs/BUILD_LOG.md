@@ -4,6 +4,138 @@ Record a short entry after each working session. Newest entries go first. Write 
 
 **Planned:** agreed or proposed work. **Implemented:** code exists. **Verified:** a named check ran and passed.
 
+## 2026-11-11 — Review the rest milestone for publication
+
+**Status** — Compact layout results recorded as **Passed — user-reported**. Accumulated rest implementation reviewed for the authorized commit and normal push; Git history and the session report identify the final commit/publication result. No new features or build.
+
+- For build `cacac282-0ac2-43d5-9c66-70ebd3479ae6`, recorded draft, active-rest, zero, and skipped layouts as **Passed — user-reported**. The user reports text/buttons fit without clipping and controls remain reachable. These observations were not independently observed and do not imply every functional test was repeated on this build.
+- Preserved the five earlier rest/Skip functional passes for build `aec6ed60-6c49-4883-9f53-9f3513ae4333` separately. Compact-upgrade preservation remains inconclusive because before-values were not recorded; original upgrade preservation is also inconclusive after the possible earlier reset. Earlier blackout cause remains unconfirmed and no fix is claimed.
+- Reviewed the full accumulated source diff from baseline `73b277dee50af3286380084a49b3f071dd111b97`: atomic first completion/deadline, no restart on duplicates, commit-before-display Skip with stale/expiry guards, additive migration without retroactive rest, retry/rollback handling, bounded native countdown, reset, Foundation imports, foreground readout, and compact controls retaining duplicate testing. No blocking source defect found and no application source edited in this task.
+- Re-ran all nine production-SQL/migration tests through the separate JavaScript wrapper and TypeScript; passed. The SQL-wrapper tests do not execute Swift or ActivityKit. All 15 application/configuration hashes still match the previously successful compact-build manifest. Native compilation/signing evidence belongs to that earlier build; no new native build or independent device check ran here.
+- Reviewed the intended 14-file publication inventory: six Markdown documents, seven application-source files, and the persistence test. Dependencies/lockfile remain unchanged and already tracked. Reviewed ignore rules and publication contents; no credentials, signing files, device identifiers, generated artifacts, screenshots, or private records are included. Historical build-log diff is additive; existing reflections preserved.
+- Fresh read-only remote refs returned exit 0 and remote main matched the baseline before publication. Restricted staging/commit to the reviewed milestone; normal push only, no history integration or force push. Commit message: `Add rest countdown and compact Lock Screen controls`. Exact Git outcome is reported in the session after execution.
+- Refreshed current status and handoff. Next recommendation: plan one bounded active-rest background/resume recovery trial with before/after evidence, keeping system termination and user force-quit separate and unrun. No additional features, cloud build, or App Store submission.
+- Final review checks passed: 51 local Markdown links/anchors, working-tree whitespace, unchanged application-source hashes, and every pre-existing build-log byte/reflection preserved. Staged contents and whitespace are checked again before the authorized commit.
+
+### What I learned — user-written
+
+### Next small task
+
+Plan the active-rest background/resume recovery check on the existing proof; capture values/counts/time before and after, without inferring upgrade preservation from the layout pass.
+
+---
+
+## 2026-11-11 — Record rest results and build the compact layout
+
+**Status** — Exactly one compact preview submitted; **FINISHED**. Native compilation and signing Passed. New upgrade/layout/device checks **Not run**. Original upgrade preservation remains inconclusive; blackout cause unconfirmed.
+
+- Recorded the user's five named passes for installed build `aec6ed60-6c49-4883-9f53-9f3513ae4333`: rest starts on completion; duplicate Complete does not restart it; zero holds; Skip stops rest while the authenticated Lock Screen stays visible; Skipped remains saved after closing/reopening. All are **Passed — user-reported**, not independently observed or transferred to the new layout build.
+- Recorded the display comparison accurately: screen went black within five seconds without tapping; a later duplicate-Complete comparison stayed visible. The original immediate blackout was not reproduced in that comparison. Cause remains unconfirmed; no fix or keep-awake capability claimed. Authentication-during-action comparison C has no reported result. Original upgrade preservation stays inconclusive because an earlier reset may have occurred.
+- Reviewed the prepared compact layout against the successful rest upload: only `native/ProofWidget.swift` differs. The other 14 archive files, including storage/SQL, timer calculation, intents/authentication, configuration, identifiers, dependencies, and lockfile, are unchanged. Bounded timer, duplicate Complete access, stable intent IDs, and expiry-safe Skip behavior remain. No application source edited in this task; all existing local work preserved.
+- Nine production-SQL/migration tests through the separate JavaScript wrapper and TypeScript passed again. These do not execute Swift. The generated widget source still matches the prepared source. Fresh local EAS archive contained exactly 15 required files, including nested module/native/plugin sources and package-lock.json; SHA-256 hashes matched local source. No credentials, signing/device files, dependencies, generated artifacts, or unrelated files were included.
+- Rechecked existing active ad hoc profiles: both include the same registered phone and profiles/certificate are unexpired. EAS reported Free, 2 of 15 iOS builds used and zero overage before submission. Used directory-scoped isolation and frozen credentials for the existing Expo project; no credential or paid-plan change.
+- Uploaded/submitted exactly one [compact preview cacac282-0ac2-43d5-9c66-70ebd3479ae6](https://expo.dev/accounts/fgzmacaraeg/projects/swoldier-lock-screen-proof/builds/cacac282-0ac2-43d5-9c66-70ebd3479ae6), monitored to **FINISHED**. Its Xcode log reports `ARCHIVE SUCCEEDED`, includes ProofWidget.swift, and contains zero compiler errors; EAS produced an IPA. Native compilation and signing Passed. App/extension version remains 1.0.0 (1). No automatic retry.
+- Source base: `73b277dee50af3286380084a49b3f071dd111b97` plus the existing local rest changes in App.tsx and native/ProofActivity.swift, ProofCoordinator.swift, ProofIntents.swift, ProofSQL.json, ProofStore.swift, and ProofWidget.swift, including the earlier Foundation imports and prepared compact widget. Relative to the installed rest build, only the widget presentation differs. EAS No VCS mode does not attach a Git commit; the independently checked base and exact local manifest identify the submitted source. Tests and documentation were excluded from upload.
+- Updated the next task to snapshot actual current values/counts/Skipped, install over the existing app without deleting/resetting, close/reopen to verify preservation, and only then perform deliberate fresh draft/rest/zero/skipped layout trials. Later comparison taps mean the earlier six-request snapshot may no longer be current. New upgrade/layout/device checks remain Not run; compilation is not evidence that clipping or blackout is fixed.
+- Final checks passed: 52 local Markdown links/anchors, working-tree/staged whitespace, all 15 submitted source/archive hashes still matching, and every historical build-log byte/reflection preserved. Only six status documents changed during this task; no application files changed. Existing 14 modified files remain unstaged at the same HEAD.
+- No new features, App Store submission, commit, or push. Historical entries and user-written learning reflections preserved.
+
+### What I learned — user-written
+
+### Next small task
+
+Perform the [compact upgrade/device checklist](../proofs/lock-screen/README.md#compact-layout-upgradedevice-checklist--not-run), preserving the existing data before any fresh-data reset.
+
+---
+
+## 2026-11-11 — Investigate black display and compact the rest card
+
+**Status** — Limited relaunch/countdown observations Passed — user-reported. Black-screen cause unknown. Compact layout prepared locally; its native compilation and physical-device checks are **Not run**. Skip persistence Not run; original upgrade preservation inconclusive.
+
+- Read current instructions and project documents; preserved pre-existing work on baseline `73b277dee50af3286380084a49b3f071dd111b97`. The user reports closing/reopening revealed the Rest row without changing the existing 40 lb × 9 record, one saved record, or six requests. On a fresh trial, countdown started, duplicate Complete did not restart it, and zero held. Marked only those observations Passed — user-reported, not independently observed. The user also reports immediate black display after Complete until a wake tap, clipped title/bottom controls, and Skip/Complete still visible at zero. No new screenshot or runtime trace was independently captured in this task.
+- Traced Complete: stable IDs → locally authenticated background LiveActivityIntent → serialized coordinator → SQLite commit of set/deadline → update the existing matching activity → return. The Complete path neither requests nor ends/recreates an activity, resets data, opens a URL/foreground continuation, nor controls display sleep. Creation occurs only in Start, dismissal only in Reset. Static trace cannot rule out an OS/process/display event at runtime.
+- Reviewed current official Apple guidance linked in the [proof diagnosis](../proofs/lock-screen/README.md#complete-trace-and-black-screen-comparison): app-process/background intent execution, local authentication, optional activity alerts, system-managed Always-On rendering, and Live Activity dimensions/margins. These do not establish the black-screen cause or a keep-awake guarantee. Added no alert, keep-awake workaround, or instrumentation.
+- Only new application-source edit this task: native/ProofWidget.swift. Replaced the tall stack with three rows: title/status, values/rest, and controls. Uses 14-point margins, 6-point row spacing, single-line labels with limited scaling, 44-point-minimum button labels, and the same emphasized monospaced bounded countdown. Intended to fit Apple's 84–160-point Lock Screen guidance; actual SwiftUI dimensions, accessibility sizes, and clipping are not verified on Windows.
+- Kept Complete available for duplicate-request tests. Skip remains available when a deadline exists and no skip is saved, including at zero; the unchanged SQL safely rejects expired requests. No exact-zero callback or view refresh is assumed. Storage, timer/deadline calculation, App Intents/authentication, identifiers, dependencies, signing configuration, and Dynamic Island content are unchanged.
+- Nine existing production-SQL/migration tests through a separate JavaScript wrapper and TypeScript passed. The tests do not execute Swift. Regenerated the ignored iOS configuration and verified the generated widget exactly matches source and belongs only to the Live Activity extension. No CocoaPods/native compile, rendered layout check, installation, or physical-device comparison ran for this patch. Earlier successful rest preview aec6ed60-6c49-4883-9f53-9f3513ae4333 does not compile or test this later layout.
+- Proposed a short no-reset comparison on the existing completed set: A no tap after Face ID; B duplicate Complete after Face ID; C Complete with Face ID during the action. Keep settings/position constant and record padlock, time to darkness, whole display versus activity-only black, wake result, and foreground transitions. Comparison Complete taps intentionally increment requests without changing set values or restarting rest. These comparisons remain Not run; any association is not yet a causal finding.
+- Updated current evidence/status, retained legacy Markdown anchors, and kept original upgrade preservation inconclusive after the possible earlier reset. Do not delete or reset for the next comparison. Skip persistence remains a separate unrun fresh trial. No cloud upload/build, commit, push, or additional features.
+- Final checks passed: 51 local Markdown file/anchor links, working-tree/staged whitespace, all prior build-log bytes/reflections preserved, and task-start hashes confirming every application file except ProofWidget.swift is unchanged. No extra tests were added for the reversible presentation change.
+
+### What I learned — user-written
+
+### Next small task
+
+Perform and record the installed-proof [A/B/C display comparison](../proofs/lock-screen/README.md#complete-trace-and-black-screen-comparison) without deleting or resetting data. Review the compact patch before separately authorizing a native build.
+
+---
+
+## 2026-11-11 — Build the corrected Foundation imports
+
+**Status** — Exactly one corrected rest preview submitted in this task; **FINISHED**. Corrected native compilation and signing passed. Upgrade migration, installation, and all rest device tests are **Not run**.
+
+- Read the current instructions, handoff, project status, latest log, and proof README. Preserved the existing 14 modified files and all historical entries/reflections. Local HEAD remains `73b277dee50af3286380084a49b3f071dd111b97`; nothing staged, committed, or pushed.
+- Compared all 15 upload files with the recorded manifest for failed build `d3568ab8-654b-49cf-a0ee-d43bfe91497f`. The only subsequent source corrections are one `import Foundation` line in each of `native/ProofActivity.swift` and `native/ProofCoordinator.swift`. Removing those lines reproduces the failed upload's hashes; no behavior, dependency, identifier, or signing configuration change.
+- Verified generated source copies and Xcode source-phase membership: ProofActivity.swift with Foundation belongs to both the app and extension; ProofCoordinator.swift with Foundation belongs to the app only. Windows inspection is not a Swift compile.
+- Re-ran nine production-SQL/migration tests through the separate JavaScript wrapper and TypeScript; passed. The wrapper tests do not execute Swift, App Intents, or the native renderer. Fresh local archive contained exactly the 15 required files, including nested native/module/plugin sources and package-lock.json; every SHA-256 matched local source. No secrets, signing files, device identifiers, dependencies, generated artifacts, or unrelated repository files were included.
+- Independently rechecked both active, unexpired ad hoc profiles and certificate: each profile includes the same registered phone. EAS reported Free, 1 of 15 iOS builds used and zero overage cost before submission. Reused the existing project and frozen credentials without changing plans or credentials.
+- Uploaded and submitted exactly one corrected preview: [aec6ed60-6c49-4883-9f53-9f3513ae4333](https://expo.dev/accounts/fgzmacaraeg/projects/swoldier-lock-screen-proof/builds/aec6ed60-6c49-4883-9f53-9f3513ae4333). Monitored to **FINISHED**. Downloaded its Xcode log to a temporary directory outside the repository; it reports `ARCHIVE SUCCEEDED`, zero compiler errors, and neither the Date error nor the old ExpoModulesCore ambiguity. EAS produced an installable IPA. Corrected native compilation and signing passed.
+- Exact uploaded source: base commit above plus the local rest changes in App.tsx, native/ProofActivity.swift, native/ProofCoordinator.swift, native/ProofIntents.swift, native/ProofSQL.json, native/ProofStore.swift, and native/ProofWidget.swift, including the two Foundation imports. The other eight archive files, including the dependency lockfile, remain unchanged from the failed upload. No VCS mode does not attach a source commit; the base, file list, and locally verified hashes identify the source. Tests and documentation were excluded from upload.
+- Updated current status and the upgrade-first checklist: install over the existing proof without deleting/resetting, verify the existing record survives without retroactive rest, then use separate fresh expiry and Skip trials, each retaining +1 once and Complete twice. No migration, installation, or rest device trial has been performed or marked passed.
+- Final documentation checks passed: 47 local Markdown file/anchor links and working-tree/staged whitespace. Verified all prior build-log bytes/reflections unchanged and all 15 uploaded application/configuration files still matching local source.
+- No automatic retry, additional features, App Store submission, commit, or push. Personal learning reflections remain blank for the user.
+
+### What I learned — user-written
+
+### Next small task
+
+Install the corrected preview over the existing proof and record legacy-record preservation before any reset; then perform the separate natural-expiry and Skip trials in the [device checklist](../proofs/lock-screen/README.md#rest-device-checklist--all-not-run).
+
+---
+
+## 2026-11-11 — Review and attempt the rest preview build
+
+**Status** — Exactly one rest preview submitted in this task; final status **ERRORED**. Two narrow Foundation import corrections are prepared locally but were not uploaded or compiled.
+
+- Reviewed atomic set/deadline completion, stable deadlines on duplicate Complete, commit-before-display Skip, expiry/stale-ID guards, additive migration without retroactive rest, bounded native countdown, and reset. No blocking issue was identified before submission; the review missed the Foundation imports later required by Xcode.
+- Re-ran all nine production-SQL/migration tests through the separate JavaScript wrapper and TypeScript; passed. These do not execute the Swift migration or native renderer. Both existing active ad hoc profiles independently verified with the same registered phone and unexpired certificate/profiles.
+- EAS reported the Free plan, 1 of 15 iOS builds used, and no overage charges before submission. Reused credentials with freeze-credentials; no revocation or paid-plan change.
+- Fresh pre-build archive: exact 15 required files and dependency lockfile; SHA-256 hashes matched local source, with no secrets, signing/device files, dependencies, generated artifacts, or unrelated repository files.
+- Base commit: `73b277dee50af3286380084a49b3f071dd111b97`. Included local application changes: `App.tsx` (rest readout), `native/ProofSQL.json` and `native/ProofStore.swift` (migration, atomic deadlines, guarded skip and expiry reads), `native/ProofCoordinator.swift` (native mutation/publication), `native/ProofActivity.swift` (optional rest dates), `native/ProofIntents.swift` (Skip intent), and `native/ProofWidget.swift` (bounded countdown and Skip button). Tests and documentation were excluded. No dependency or identifier changes.
+- Uploaded once and monitored [rest preview d3568ab8-654b-49cf-a0ee-d43bfe91497f](https://expo.dev/accounts/fgzmacaraeg/projects/swoldier-lock-screen-proof/builds/d3568ab8-654b-49cf-a0ee-d43bfe91497f) to **ERRORED**, `XCODE_BUILD_ERROR`. Earliest compiler error: generated extension `ios/SwoldierProofLiveActivity/ProofActivity.swift:8:27`, `cannot find type 'Date' in scope`. The old ExpoModulesCore ambiguity is absent.
+- Applied the narrow post-failure correction: `import Foundation` in source-owned `native/ProofActivity.swift` and `native/ProofCoordinator.swift`, both of which directly use Date. No behavior change. These two lines were **not included in the failed build**. Regenerated source copies and a fresh local 15-file archive matched the corrected source; the only differences from the uploaded application are these two import lines.
+- After correction, nine SQL-wrapper tests and TypeScript passed again. Corrected native compilation is pending. Migration on the actual installed database, upgrade installation, and all rest device trials are **Not run**.
+- Updated the device checklist to install a future successful build over the existing proof without deleting/resetting first, verify record preservation, then use separate fresh natural-expiry and Skip trials with the original +1/duplicate-Complete regression.
+- Final documentation checks: 46 local Markdown file/anchor links passed across the six affected documents, working-tree/staged whitespace checks passed, and every pre-existing build-log byte (including reflections) was verified preserved.
+- No second build, App Store submission, commit, or push. Historical entries and learning reflections preserved.
+
+### What I learned — user-written
+
+### Next small task
+
+Review the two Foundation imports and separately authorize one native preview build. Do not retry automatically. After a successful build, perform the upgrade-first device checklist.
+
+---
+
+## 2026-11-11 — Prepare the 20-second rest and Skip rest extension
+
+**Status** — Implemented local source on published baseline `73b277dee50af3286380084a49b3f071dd111b97`. New native compilation and device trials are **Not run**. The earlier one-set pass remains user-reported for its original build.
+
+- First completion now commits one set and a 20-second absolute deadline together. Repeated completion preserves that deadline and any skip while retaining the completion-request counter. Native mutation time is sampled after acquiring the write lock.
+- Added a background, locally authenticated Skip rest intent. It commits an early-end timestamp before publishing ActivityKit state. Repeated, expired, pre-completion, and stale-ID skips are harmless; save failures show retry without claiming success.
+- The Live Activity uses Apple's bounded system timer format, available below the unchanged iOS 26 minimum. Reopening derives running, expired, skipped, or not-started state from SQLite. No continuous JavaScript execution or exact-zero background callback is needed.
+- Added transactional, additive migration of two nullable rest columns. Existing drafts and completed records are preserved; completed legacy records get no retroactive rest. Reset clears rest with the fictional set and ends the activity.
+- Nine production-SQL/migration tests through a separate JavaScript wrapper passed, as did TypeScript. These tests do not execute Swift. Local JavaScript export and generated app/extension source/configuration inspection passed; CocoaPods integration, Xcode compilation, installation, and all rest device trials are Not run.
+- Final review passed 52 local Markdown links and git diff --check; historical entries/reflections and the original installed schema were checked unchanged. Kept dependencies, identifiers, signing configuration, production framework status, and the one-set boundary unchanged. Prepared the [new device checklist](../proofs/lock-screen/README.md#rest-device-checklist--all-not-run). No cloud upload/build, commit, or push.
+
+### What I learned — user-written
+
+### Next small task
+
+Review the local rest source and separately authorize one native preview build; then perform the rest/Skip rest checklist.
+
+---
+
 ## 2026-11-11 — Record the user-reported first iPhone proof
 
 **Status** — Installation and the guided one-set sequence are **Passed — user-reported**, not independently observed, for EAS build `2a692799-0280-4f0c-b7f7-1f65b65c1149`.

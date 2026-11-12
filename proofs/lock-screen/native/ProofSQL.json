@@ -1,8 +1,19 @@
 {
   "schema": "CREATE TABLE IF NOT EXISTS proof_set (\n  slot INTEGER PRIMARY KEY CHECK (slot = 1),\n  session_id TEXT NOT NULL,\n  set_id TEXT NOT NULL,\n  pounds INTEGER NOT NULL DEFAULT 40,\n  reps INTEGER NOT NULL DEFAULT 8 CHECK (reps >= 0),\n  completed INTEGER NOT NULL DEFAULT 0 CHECK (completed IN (0, 1)),\n  completion_attempts INTEGER NOT NULL DEFAULT 0 CHECK (completion_attempts >= 0)\n)",
   "start": "INSERT INTO proof_set (slot, session_id, set_id) VALUES (1, ?, ?)\nON CONFLICT(slot) DO NOTHING",
-  "read": "SELECT session_id, set_id, pounds, reps, completed, completion_attempts\nFROM proof_set WHERE slot = 1",
+  "read": "WITH clock(now) AS (VALUES(CAST(? AS REAL)))\nSELECT session_id, set_id, pounds, reps, completed, completion_attempts,\n       rest_deadline, rest_skipped_at,\n       CASE WHEN rest_deadline IS NULL THEN 'not_started'\n            WHEN rest_skipped_at IS NOT NULL THEN 'skipped'\n            WHEN rest_deadline <= (SELECT now FROM clock) THEN 'expired'\n            ELSE 'running' END AS rest_state,\n       CASE WHEN rest_deadline IS NULL OR rest_skipped_at IS NOT NULL\n                 OR rest_deadline <= (SELECT now FROM clock) THEN 0\n            ELSE rest_deadline - (SELECT now FROM clock) END AS rest_remaining_seconds\nFROM proof_set WHERE slot = 1",
   "increment": "UPDATE proof_set SET reps = reps + 1\nWHERE slot = 1 AND session_id = ? AND set_id = ? AND completed = 0",
-  "complete": "UPDATE proof_set SET completed = 1, completion_attempts = completion_attempts + 1\nWHERE slot = 1 AND session_id = ? AND set_id = ?",
-  "reset": "DELETE FROM proof_set WHERE slot = 1"
+  "complete": "UPDATE proof_set\nSET rest_deadline = CASE WHEN completed = 0 THEN CAST(? AS REAL) + 20.0 ELSE rest_deadline END,\n    completed = 1, completion_attempts = completion_attempts + 1\nWHERE slot = 1 AND session_id = ? AND set_id = ?",
+  "reset": "DELETE FROM proof_set WHERE slot = 1",
+  "migrations": [
+    {
+      "column": "rest_deadline",
+      "statement": "ALTER TABLE proof_set ADD COLUMN rest_deadline REAL"
+    },
+    {
+      "column": "rest_skipped_at",
+      "statement": "ALTER TABLE proof_set ADD COLUMN rest_skipped_at REAL"
+    }
+  ],
+  "skip": "WITH clock(now) AS (VALUES(CAST(? AS REAL)))\nUPDATE proof_set SET rest_skipped_at = (SELECT now FROM clock)\nWHERE slot = 1 AND session_id = ? AND set_id = ? AND completed = 1\n  AND rest_skipped_at IS NULL AND rest_deadline > (SELECT now FROM clock)"
 }

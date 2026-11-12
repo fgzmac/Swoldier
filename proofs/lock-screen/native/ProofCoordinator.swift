@@ -1,4 +1,5 @@
 import ActivityKit
+import Foundation
 
 actor ProofCoordinator {
     static let shared = ProofCoordinator()
@@ -26,14 +27,20 @@ actor ProofCoordinator {
 
     func read() throws -> ProofSnapshot? { try ProofStore().read() }
 
-    func apply(sessionID: String, setID: String, complete: Bool) async {
+    func apply(sessionID: String, setID: String, complete: Bool, skipRest: Bool = false) async {
         await acquire()
         defer { release() }
 
         do {
-            guard let snapshot = try ProofStore().mutate(
-                sessionID: sessionID, setID: setID, complete: complete
-            ), snapshot.sessionID == sessionID, snapshot.setID == setID else { return }
+            let store = try ProofStore()
+            let result: ProofSnapshot?
+            if skipRest {
+                result = try store.skipRest(sessionID: sessionID, setID: setID)
+            } else {
+                result = try store.mutate(sessionID: sessionID, setID: setID, complete: complete)
+            }
+            guard let snapshot = result,
+                  snapshot.sessionID == sessionID, snapshot.setID == setID else { return }
 
             for activity in activities(sessionID, setID) {
                 await activity.update(content(snapshot))
@@ -60,7 +67,9 @@ actor ProofCoordinator {
     private func content(_ snapshot: ProofSnapshot) -> ActivityContent<ProofActivity.ContentState> {
         ActivityContent(
             state: ProofActivity.ContentState(
-                pounds: snapshot.pounds, reps: snapshot.reps, completed: snapshot.completed
+                pounds: snapshot.pounds, reps: snapshot.reps, completed: snapshot.completed,
+                restDeadline: snapshot.restDeadline.map { Date(timeIntervalSince1970: $0) },
+                restSkippedAt: snapshot.restSkippedAt.map { Date(timeIntervalSince1970: $0) }
             ), staleDate: nil
         )
     }
