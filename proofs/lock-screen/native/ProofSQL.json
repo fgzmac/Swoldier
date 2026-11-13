@@ -1,10 +1,5 @@
 {
   "schema": "CREATE TABLE IF NOT EXISTS proof_set (\n  slot INTEGER PRIMARY KEY CHECK (slot = 1),\n  session_id TEXT NOT NULL,\n  set_id TEXT NOT NULL,\n  pounds INTEGER NOT NULL DEFAULT 40,\n  reps INTEGER NOT NULL DEFAULT 8 CHECK (reps >= 0),\n  completed INTEGER NOT NULL DEFAULT 0 CHECK (completed IN (0, 1)),\n  completion_attempts INTEGER NOT NULL DEFAULT 0 CHECK (completion_attempts >= 0)\n)",
-  "start": "INSERT INTO proof_set (slot, session_id, set_id) VALUES (1, ?, ?)\nON CONFLICT(slot) DO NOTHING",
-  "read": "WITH clock(now) AS (VALUES(CAST(? AS REAL)))\nSELECT session_id, set_id, pounds, reps, completed, completion_attempts,\n       rest_deadline, rest_skipped_at,\n       CASE WHEN rest_deadline IS NULL THEN 'not_started'\n            WHEN rest_skipped_at IS NOT NULL THEN 'skipped'\n            WHEN rest_deadline <= (SELECT now FROM clock) THEN 'expired'\n            ELSE 'running' END AS rest_state,\n       CASE WHEN rest_deadline IS NULL OR rest_skipped_at IS NOT NULL\n                 OR rest_deadline <= (SELECT now FROM clock) THEN 0\n            ELSE rest_deadline - (SELECT now FROM clock) END AS rest_remaining_seconds\nFROM proof_set WHERE slot = 1",
-  "increment": "UPDATE proof_set SET reps = reps + 1\nWHERE slot = 1 AND session_id = ? AND set_id = ? AND completed = 0",
-  "complete": "UPDATE proof_set\nSET rest_deadline = CASE WHEN completed = 0 THEN CAST(? AS REAL) + 20.0 ELSE rest_deadline END,\n    completed = 1, completion_attempts = completion_attempts + 1\nWHERE slot = 1 AND session_id = ? AND set_id = ?",
-  "reset": "DELETE FROM proof_set WHERE slot = 1",
   "migrations": [
     {
       "column": "rest_deadline",
@@ -15,5 +10,36 @@
       "statement": "ALTER TABLE proof_set ADD COLUMN rest_skipped_at REAL"
     }
   ],
-  "skip": "WITH clock(now) AS (VALUES(CAST(? AS REAL)))\nUPDATE proof_set SET rest_skipped_at = (SELECT now FROM clock)\nWHERE slot = 1 AND session_id = ? AND set_id = ? AND completed = 1\n  AND rest_skipped_at IS NULL AND rest_deadline > (SELECT now FROM clock)"
+  "schemaV2": [
+    "CREATE TABLE IF NOT EXISTS proof_session_v2 (slot INTEGER PRIMARY KEY CHECK(slot = 1), session_id TEXT NOT NULL UNIQUE, active_rest_id TEXT NOT NULL DEFAULT 'none')",
+    "CREATE TABLE IF NOT EXISTS proof_sets_v2 (session_id TEXT NOT NULL, set_id TEXT NOT NULL, ordinal INTEGER NOT NULL CHECK(ordinal BETWEEN 1 AND 3), planned_pounds INTEGER NOT NULL, planned_reps INTEGER NOT NULL, pounds INTEGER NOT NULL, reps INTEGER NOT NULL CHECK(reps >= 0), completed INTEGER NOT NULL DEFAULT 0 CHECK(completed IN (0,1)), completion_attempts INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(session_id, set_id), UNIQUE(session_id, ordinal))",
+    "CREATE TABLE IF NOT EXISTS proof_rests_v2 (session_id TEXT NOT NULL, rest_id TEXT NOT NULL, set_id TEXT NOT NULL, deadline REAL NOT NULL, skipped_at REAL, PRIMARY KEY(session_id, rest_id), UNIQUE(session_id, set_id))"
+  ],
+  "importLegacy": [
+    "INSERT INTO proof_session_v2 (slot, session_id, active_rest_id) SELECT 1, session_id, CASE WHEN rest_deadline IS NULL THEN 'none' ELSE set_id || ':rest' END FROM proof_set WHERE slot = 1",
+    "WITH fixture(ordinal, pounds, reps) AS (VALUES (1, 40, 8), (2, 50, 8), (3, 45, 10)) INSERT INTO proof_sets_v2 (session_id,set_id,ordinal,planned_pounds,planned_reps,pounds,reps,completed,completion_attempts) SELECT legacy.session_id, CASE WHEN f.ordinal = 1 THEN legacy.set_id ELSE legacy.set_id || ':planned:' || f.ordinal END, f.ordinal,f.pounds,f.reps,CASE WHEN f.ordinal = 1 THEN legacy.pounds ELSE f.pounds END, CASE WHEN f.ordinal = 1 THEN legacy.reps ELSE f.reps END, CASE WHEN f.ordinal = 1 THEN legacy.completed ELSE 0 END,CASE WHEN f.ordinal = 1 THEN legacy.completion_attempts ELSE 0 END FROM proof_set legacy CROSS JOIN fixture f WHERE legacy.slot = 1",
+    "INSERT INTO proof_rests_v2 (session_id,rest_id,set_id,deadline,skipped_at) SELECT session_id,set_id || ':rest',set_id,rest_deadline,rest_skipped_at FROM proof_set WHERE slot = 1 AND rest_deadline IS NOT NULL"
+  ],
+  "startSession": "INSERT INTO proof_session_v2 (slot,session_id) VALUES (1,:sessionID) ON CONFLICT(slot) DO NOTHING",
+  "startSets": "WITH fixture(ordinal,pounds,reps) AS (VALUES (1, 40, 8), (2, 50, 8), (3, 45, 10)) INSERT OR IGNORE INTO proof_sets_v2 (session_id,set_id,ordinal,planned_pounds,planned_reps,pounds,reps) SELECT :sessionID,:sessionID || ':set:' || ordinal,ordinal,pounds,reps,pounds,reps FROM fixture WHERE EXISTS (SELECT 1 FROM proof_session_v2 WHERE session_id = :sessionID)",
+  "readSession": "SELECT session_id,active_rest_id FROM proof_session_v2 WHERE slot = 1",
+  "readSets": "SELECT set_id,ordinal,planned_pounds,planned_reps,pounds,reps,completed,completion_attempts FROM proof_sets_v2 WHERE session_id = :sessionID ORDER BY ordinal",
+  "readRest": "SELECT deadline,skipped_at,CASE WHEN skipped_at IS NOT NULL THEN 'skipped' WHEN deadline <= CAST(:now AS REAL) THEN 'expired' ELSE 'running' END,CASE WHEN skipped_at IS NOT NULL THEN 0 ELSE MAX(0,deadline - CAST(:now AS REAL)) END,continued_at FROM proof_rests_v2 WHERE session_id = :sessionID AND rest_id = :restID",
+  "countCompleteRequest": "UPDATE proof_sets_v2 SET completion_attempts = completion_attempts + 1 WHERE session_id = :sessionID AND set_id = :setID AND EXISTS (SELECT 1 FROM proof_session_v2 WHERE session_id = :sessionID)",
+  "complete": "UPDATE proof_sets_v2 SET completed = 1 WHERE session_id = :sessionID AND set_id = :setID AND completed = 0 AND set_id = (SELECT set_id FROM proof_sets_v2 WHERE session_id = :sessionID AND completed = 0 ORDER BY ordinal LIMIT 1) AND EXISTS (SELECT 1 FROM proof_session_v2 WHERE slot = 1 AND session_id = :sessionID AND active_rest_id = :restID) AND NOT EXISTS (SELECT 1 FROM proof_rests_v2 WHERE session_id = :sessionID AND rest_id = :restID AND skipped_at IS NULL AND deadline > CAST(:now AS REAL)) AND NOT EXISTS (SELECT 1 FROM proof_rests_v2 WHERE session_id = :sessionID AND rest_id = :restID AND continued_at IS NULL)",
+  "createRest": "INSERT INTO proof_rests_v2 (session_id,rest_id,set_id,deadline) VALUES (:sessionID,:newRestID,:setID,CAST(:now AS REAL) + 20.0)",
+  "advanceRest": "UPDATE proof_session_v2 SET active_rest_id = :newRestID WHERE session_id = :sessionID AND active_rest_id = :restID",
+  "weight": "UPDATE proof_sets_v2 SET pounds = MIN(200,MAX(0,pounds + CAST(:delta AS INTEGER))) WHERE session_id = :sessionID AND set_id = :setID AND completed = 0 AND set_id = (SELECT set_id FROM proof_sets_v2 WHERE session_id = :sessionID AND completed = 0 ORDER BY ordinal LIMIT 1) AND EXISTS (SELECT 1 FROM proof_session_v2 WHERE slot = 1 AND session_id = :sessionID AND active_rest_id = :restID) AND CAST(:delta AS INTEGER) IN (-5,5)",
+  "reps": "UPDATE proof_sets_v2 SET reps = MIN(30,MAX(0,reps + CAST(:delta AS INTEGER))) WHERE session_id = :sessionID AND set_id = :setID AND completed = 0 AND set_id = (SELECT set_id FROM proof_sets_v2 WHERE session_id = :sessionID AND completed = 0 ORDER BY ordinal LIMIT 1) AND EXISTS (SELECT 1 FROM proof_session_v2 WHERE slot = 1 AND session_id = :sessionID AND active_rest_id = :restID) AND CAST(:delta AS INTEGER) IN (-1,1)",
+  "reset": [
+    "DELETE FROM proof_rests_v2",
+    "DELETE FROM proof_sets_v2",
+    "DELETE FROM proof_session_v2",
+    "DELETE FROM proof_set"
+  ],
+  "migrationsV3": [
+    "ALTER TABLE proof_rests_v2 ADD COLUMN continued_at REAL",
+    "UPDATE proof_rests_v2 SET continued_at = skipped_at WHERE skipped_at IS NOT NULL"
+  ],
+  "continueRest": "UPDATE proof_rests_v2 SET continued_at = CAST(:now AS REAL), skipped_at = CASE WHEN skipped_at IS NOT NULL THEN skipped_at WHEN deadline > CAST(:now AS REAL) THEN CAST(:now AS REAL) ELSE NULL END WHERE session_id = :sessionID AND rest_id = :restID AND continued_at IS NULL AND EXISTS (SELECT 1 FROM proof_session_v2 WHERE slot = 1 AND session_id = :sessionID AND active_rest_id = :restID) AND :setID = COALESCE((SELECT set_id FROM proof_sets_v2 WHERE session_id = :sessionID AND completed = 0 ORDER BY ordinal LIMIT 1), (SELECT set_id FROM proof_sets_v2 WHERE session_id = :sessionID ORDER BY ordinal DESC LIMIT 1))"
 }

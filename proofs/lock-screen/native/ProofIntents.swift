@@ -1,25 +1,59 @@
 import AppIntents
 import Foundation
 
-struct ProofIncrementReps: LiveActivityIntent {
-    static let title: LocalizedStringResource = "Add one proof rep"
+struct ProofAdjustWeight: LiveActivityIntent {
+    static let title: LocalizedStringResource = "Adjust proof weight"
     static var supportedModes: IntentModes { .background }
     static var authenticationPolicy: IntentAuthenticationPolicy { .requiresLocalDeviceAuthentication }
 
     @Parameter(title: "Session") var sessionID: String
     @Parameter(title: "Set") var setID: String
+    @Parameter(title: "Rest", default: "none") var restID: String
+    @Parameter(title: "Change") var delta: Int
 
     init() {}
-    init(sessionID: String, setID: String) {
+    init(sessionID: String, setID: String, restID: String, delta: Int) {
         self.sessionID = sessionID
         self.setID = setID
+        self.restID = restID
+        self.delta = delta
     }
 
     func perform() async throws -> some IntentResult {
         #if PROOF_WIDGET_EXTENSION
         try rejectExtensionExecution()
         #else
-        await ProofCoordinator.shared.apply(sessionID: sessionID, setID: setID, complete: false)
+        await ProofCoordinator.shared.apply(sessionID: sessionID, setID: setID,
+                                            restID: restID, action: .weight(delta))
+        #endif
+        return .result()
+    }
+}
+
+struct ProofAdjustReps: LiveActivityIntent {
+    static let title: LocalizedStringResource = "Adjust proof reps"
+    static var supportedModes: IntentModes { .background }
+    static var authenticationPolicy: IntentAuthenticationPolicy { .requiresLocalDeviceAuthentication }
+
+    @Parameter(title: "Session") var sessionID: String
+    @Parameter(title: "Set") var setID: String
+    @Parameter(title: "Rest", default: "none") var restID: String
+    @Parameter(title: "Change") var delta: Int
+
+    init() {}
+    init(sessionID: String, setID: String, restID: String, delta: Int) {
+        self.sessionID = sessionID
+        self.setID = setID
+        self.restID = restID
+        self.delta = delta
+    }
+
+    func perform() async throws -> some IntentResult {
+        #if PROOF_WIDGET_EXTENSION
+        try rejectExtensionExecution()
+        #else
+        await ProofCoordinator.shared.apply(sessionID: sessionID, setID: setID,
+                                            restID: restID, action: .reps(delta))
         #endif
         return .result()
     }
@@ -32,23 +66,54 @@ struct ProofCompleteSet: LiveActivityIntent {
 
     @Parameter(title: "Session") var sessionID: String
     @Parameter(title: "Set") var setID: String
+    @Parameter(title: "Rest", default: "none") var restID: String
 
     init() {}
-    init(sessionID: String, setID: String) {
+    init(sessionID: String, setID: String, restID: String) {
         self.sessionID = sessionID
         self.setID = setID
+        self.restID = restID
     }
 
     func perform() async throws -> some IntentResult {
         #if PROOF_WIDGET_EXTENSION
         try rejectExtensionExecution()
         #else
-        await ProofCoordinator.shared.apply(sessionID: sessionID, setID: setID, complete: true)
+        await ProofCoordinator.shared.apply(sessionID: sessionID, setID: setID,
+                                            restID: restID, action: .complete)
         #endif
         return .result()
     }
 }
 
+struct ProofContinueRest: LiveActivityIntent {
+    static let title: LocalizedStringResource = "Continue"
+    static var supportedModes: IntentModes { .background }
+    static var authenticationPolicy: IntentAuthenticationPolicy { .requiresLocalDeviceAuthentication }
+
+    @Parameter(title: "Session") var sessionID: String
+    @Parameter(title: "Set") var setID: String
+    @Parameter(title: "Rest", default: "none") var restID: String
+
+    init() {}
+    init(sessionID: String, setID: String, restID: String) {
+        self.sessionID = sessionID
+        self.setID = setID
+        self.restID = restID
+    }
+
+    func perform() async throws -> some IntentResult {
+        #if PROOF_WIDGET_EXTENSION
+        try rejectExtensionExecution()
+        #else
+        await ProofCoordinator.shared.apply(sessionID: sessionID, setID: setID,
+                                            restID: restID, action: .continueRest)
+        #endif
+        return .result()
+    }
+}
+
+// Retained for already-archived cards; storage still validates all action IDs.
 struct ProofSkipRest: LiveActivityIntent {
     static let title: LocalizedStringResource = "Skip proof rest"
     static var supportedModes: IntentModes { .background }
@@ -56,20 +121,48 @@ struct ProofSkipRest: LiveActivityIntent {
 
     @Parameter(title: "Session") var sessionID: String
     @Parameter(title: "Set") var setID: String
+    @Parameter(title: "Rest", default: "none") var restID: String
 
     init() {}
-    init(sessionID: String, setID: String) {
+    init(sessionID: String, setID: String, restID: String) {
         self.sessionID = sessionID
         self.setID = setID
+        self.restID = restID
     }
 
     func perform() async throws -> some IntentResult {
         #if PROOF_WIDGET_EXTENSION
         try rejectExtensionExecution()
         #else
-        await ProofCoordinator.shared.apply(
-            sessionID: sessionID, setID: setID, complete: false, skipRest: true
-        )
+        await ProofCoordinator.shared.apply(sessionID: sessionID, setID: setID,
+                                            restID: restID, action: .skip)
+        #endif
+        return .result()
+    }
+}
+
+struct ProofIncrementReps: LiveActivityIntent {
+    static let title: LocalizedStringResource = "Add one proof rep"
+    static var supportedModes: IntentModes { .background }
+    static var authenticationPolicy: IntentAuthenticationPolicy { .requiresLocalDeviceAuthentication }
+
+    @Parameter(title: "Session") var sessionID: String
+    @Parameter(title: "Set") var setID: String
+    @Parameter(title: "Rest", default: "none") var restID: String
+
+    init() {}
+    init(sessionID: String, setID: String, restID: String) {
+        self.sessionID = sessionID
+        self.setID = setID
+        self.restID = restID
+    }
+
+    func perform() async throws -> some IntentResult {
+        #if PROOF_WIDGET_EXTENSION
+        try rejectExtensionExecution()
+        #else
+        await ProofCoordinator.shared.apply(sessionID: sessionID, setID: setID,
+                                            restID: restID, action: .reps(1))
         #endif
         return .result()
     }
@@ -77,8 +170,6 @@ struct ProofSkipRest: LiveActivityIntent {
 
 #if PROOF_WIDGET_EXTENSION
 private func rejectExtensionExecution() throws {
-    // LiveActivityIntent normally runs in the containing app process.
-    // If iOS ever executes here, fail without showing a successful save.
     throw NSError(domain: "LockScreenProof", code: 1, userInfo: [
         NSLocalizedDescriptionKey: "The workout action could not run in the app process."
     ])

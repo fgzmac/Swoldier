@@ -12,5 +12,9 @@ public final class LockScreenProofModule: Module {
         AsyncFunction("reset") { () async throws in
             try await ProofCoordinator.shared.reset()
         }
+        AsyncFunction("readPublicationDiagnostics") { () async -> [[String: Any]] in
+            let diagnostics = await ProofCoordinator.shared.readPublicationDiagnostics()
+            return diagnostics.map { $0.dictionary }
+        }
     }
 }

@@ -4,7 +4,7 @@
 
 Read `docs/HANDOFF.md`, `docs/PROJECT.md`, and the latest entry in `docs/BUILD_LOG.md` before working. Follow the user's latest instructions. Keep confirmed requirements, recommendations, and open decisions distinct. Use `docs/HANDOFF.md` as the current task and resume record.
 
-The project at D:\SwoldierApp contains product documentation and an isolated one-set proof in proofs/lock-screen. Local setup, research, and implementation checks are recorded in docs/HANDOFF.md and docs/BUILD_LOG.md. Recheck Git state before work. The production framework remains open; follow the current handoff and the user's authorized scope.
+The project at D:\SwoldierApp contains product documentation and an isolated fictional Lock Screen proof in proofs/lock-screen. Local setup, research, and implementation checks are recorded in docs/HANDOFF.md and docs/BUILD_LOG.md. Recheck Git state before work. The production framework remains open; follow the current handoff and the user's authorized scope.
 
 Honor the task's mode. For a read-only setup check, report observations without changing files, installing tools, initializing Git, moving existing work, or scaffolding an app. Do not infer permission to start implementation from the future milestone list.
 
