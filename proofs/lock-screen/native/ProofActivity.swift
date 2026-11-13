@@ -2,7 +2,7 @@ import ActivityKit
 import Foundation
 
 enum ProofAction: Codable, Hashable, Sendable {
-    case complete, skip, continueRest
+    case complete, skip, continueRest, undo
     case weight(Int), reps(Int)
 }
 
@@ -25,6 +25,9 @@ struct ProofActivity: ActivityAttributes {
         var restContinuedAt: Date? = nil
         // Set confirmed completed in the stored snapshot for this rest; absent on older cards.
         var savedRestSetID: String? = nil
+        // Explicit association replaces inference from the rest ID format. Optional for old cards.
+        var restSetID: String? = nil
+        var restUndoneAt: Date? = nil
         var saveFailed: Bool = false
         // Optional so older publications still decode without inventing a retry target.
         var failedAction: ProofFailedAction? = nil

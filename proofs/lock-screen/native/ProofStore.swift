@@ -19,6 +19,8 @@ struct ProofSnapshot: Sendable {
     let sets: [ProofSetSnapshot]
     let displaySet: ProofSetSnapshot
     let restDeadline, restSkippedAt, restContinuedAt: TimeInterval?
+    let restSetID: String?
+    let restUndoneAt: TimeInterval?
     let restState: String
     let restRemainingSeconds: Int
 
@@ -36,6 +38,8 @@ struct ProofSnapshot: Sendable {
          "restDeadline": restDeadline.map { $0 as Any } ?? NSNull(),
          "restSkippedAt": restSkippedAt.map { $0 as Any } ?? NSNull(),
          "restContinuedAt": restContinuedAt.map { $0 as Any } ?? NSNull(),
+         "restSetID": restSetID.map { $0 as Any } ?? NSNull(),
+         "restUndoneAt": restUndoneAt.map { $0 as Any } ?? NSNull(),
          "awaitingContinue": awaitingContinue,
          "restState": restState, "restRemainingSeconds": restRemainingSeconds]
     }
@@ -55,9 +59,9 @@ struct ProofMigration: Decodable { let column, statement: String }
 struct ProofSQL: Decodable {
     let schema: String
     let migrations: [ProofMigration]
-    let schemaV2, importLegacy, migrationsV3, reset: [String]
+    let schemaV2, importLegacy, migrationsV3, migrationsV4, reset: [String]
     let startSession, startSets, readSession, readSets, readRest: String
-    let countCompleteRequest, complete, createRest, advanceRest, weight, reps, continueRest: String
+    let countCompleteRequest, complete, createRest, advanceRest, weight, reps, continueRest, undo, markUndone: String
 }
 
 final class ProofStore {
@@ -101,16 +105,25 @@ final class ProofStore {
             // Sample after obtaining the write lock, never from the archived card.
             let now = Date().timeIntervalSince1970
             var params = ["sessionID": sessionID, "setID": setID, "restID": restID,
-                          "now": String(now), "newRestID": setID + ":rest"]
+                          "now": String(now), "newRestID": UUID().uuidString]
+            // A new rest ID identifies each successful completion, including re-completion.
+            // The old rest ID remains the action guard; failed transactions publish neither.
             let before = try readInternal(now: now)
             var changed = false
             switch action {
             case .complete:
                 try run(sql.countCompleteRequest, params)
+                // Only this rest's undone draft may bypass acknowledgement at expiry.
+                // SQL still checks the saved deadline and original action IDs under the lock.
                 changed = try run(sql.complete, params) == 1
                 if changed {
-                    try run(sql.createRest, params)
+                    guard try run(sql.createRest, params) == 1 else { throw ProofError.storage }
                     guard try run(sql.advanceRest, params) == 1 else { throw ProofError.storage }
+                }
+            case .undo:
+                changed = try run(sql.undo, params) == 1
+                if changed {
+                    guard try run(sql.markUndone, params) == 1 else { throw ProofError.storage }
                 }
             case .continueRest, .skip:
                 // Legacy Skip intents also acknowledge their explicitly bound rest.
@@ -130,7 +143,11 @@ final class ProofStore {
                       before?.sessionID == sessionID, before?.setID == setID,
                       before?.restID == restID, before?.completed == false,
                       before?.awaitingContinue == true {
-                notice = "Tap Continue before the next set"
+                // Timeless instruction: a later tap checks the saved deadline again.
+                // Do not leave a stale "rest active" claim on the card at zero.
+                notice = before?.restUndoneAt != nil && before?.restSetID == setID
+                    ? "Complete at zero or Continue"
+                    : "Tap Continue before the next set"
             } else {
                 notice = "Old or inactive action ignored"
             }
@@ -178,6 +195,7 @@ final class ProofStore {
             throw ProofError.storage
         }
         var deadline: TimeInterval?, skipped: TimeInterval?, continued: TimeInterval?
+        var restSetID: String?, undone: TimeInterval?
         var state = "not_started", remaining = 0
         try withStatement(sql.readRest, params) { stmt in
             switch sqlite3_step(stmt) {
@@ -187,13 +205,15 @@ final class ProofStore {
                 state = try text(stmt, 2)
                 remaining = Int(ceil(sqlite3_column_double(stmt, 3)))
                 continued = sqlite3_column_type(stmt, 4) == SQLITE_NULL ? nil : sqlite3_column_double(stmt, 4)
+                restSetID = try text(stmt, 5)
+                undone = sqlite3_column_type(stmt, 6) == SQLITE_NULL ? nil : sqlite3_column_double(stmt, 6)
             case SQLITE_DONE:
                 guard restID == "none" else { throw ProofError.storage }
             default: throw ProofError.storage
             }
         }
         return ProofSnapshot(sessionID: sessionID, restID: restID, sets: sets, displaySet: display,
-            restDeadline: deadline, restSkippedAt: skipped, restContinuedAt: continued, restState: state, restRemainingSeconds: remaining)
+            restDeadline: deadline, restSkippedAt: skipped, restContinuedAt: continued, restSetID: restSetID, restUndoneAt: undone, restState: state, restRemainingSeconds: remaining)
     }
 
     private func migrate() throws {
@@ -201,14 +221,14 @@ final class ProofStore {
             guard sqlite3_step(stmt) == SQLITE_ROW else { throw ProofError.storage }
             return Int(sqlite3_column_int(stmt, 0))
         }
-        guard version < 3 else { return }
+        guard version < 4 else { return }
         try transaction {
             // Recheck under the write lock to prevent a second legacy import.
             let lockedVersion: Int = try withStatement("PRAGMA user_version") { stmt in
                 guard sqlite3_step(stmt) == SQLITE_ROW else { throw ProofError.storage }
                 return Int(sqlite3_column_int(stmt, 0))
             }
-            guard lockedVersion < 3 else { return }
+            guard lockedVersion < 4 else { return }
             if lockedVersion < 2 {
                 let columns: Set<String> = try withStatement("PRAGMA table_info(proof_set)") { stmt in
                     var result = Set<String>()
@@ -225,8 +245,11 @@ final class ProofStore {
                 }
                 for statement in sql.schemaV2 + sql.importLegacy { try execute(statement) }
             }
-            for statement in sql.migrationsV3 { try execute(statement) }
-            try execute("PRAGMA user_version = 3")
+            if lockedVersion < 3 {
+                for statement in sql.migrationsV3 { try execute(statement) }
+            }
+            for statement in sql.migrationsV4 { try execute(statement) }
+            try execute("PRAGMA user_version = 4")
         }
     }
 

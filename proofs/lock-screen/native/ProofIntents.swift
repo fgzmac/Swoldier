@@ -86,6 +86,33 @@ struct ProofCompleteSet: LiveActivityIntent {
     }
 }
 
+struct ProofUndoSet: LiveActivityIntent {
+    static let title: LocalizedStringResource = "Undo proof set"
+    static var supportedModes: IntentModes { .background }
+    static var authenticationPolicy: IntentAuthenticationPolicy { .requiresLocalDeviceAuthentication }
+
+    @Parameter(title: "Session") var sessionID: String
+    @Parameter(title: "Set") var setID: String
+    @Parameter(title: "Rest", default: "none") var restID: String
+
+    init() {}
+    init(sessionID: String, setID: String, restID: String) {
+        self.sessionID = sessionID
+        self.setID = setID
+        self.restID = restID
+    }
+
+    func perform() async throws -> some IntentResult {
+        #if PROOF_WIDGET_EXTENSION
+        try rejectExtensionExecution()
+        #else
+        await ProofCoordinator.shared.apply(sessionID: sessionID, setID: setID,
+                                            restID: restID, action: .undo)
+        #endif
+        return .result()
+    }
+}
+
 struct ProofContinueRest: LiveActivityIntent {
     static let title: LocalizedStringResource = "Continue"
     static var supportedModes: IntentModes { .background }

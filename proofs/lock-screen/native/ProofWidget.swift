@@ -12,15 +12,27 @@ struct ProofWidget: Widget {
                 if context.state.saveFailed {
                     failure(context.state.failedAction)
                 } else if let setID = context.state.setID, let restID = context.state.restID {
-                    if showsRest(context), let deadline = context.state.restDeadline {
-                        if let savedSetID = context.state.savedRestSetID,
-                           restID == savedSetID + ":rest" {
+                    if showsUndoneDraft(context) {
+                        draft(context, setID: setID, restID: restID, duringUndoneRest: true)
+                    } else if showsRest(context), let deadline = context.state.restDeadline {
+                        if context.state.restUndoneAt != nil, context.state.restSetID != nil {
+                            Text("Set returned to draft")
+                                .font(.caption.weight(.semibold))
+                        } else if let savedSetID = context.state.savedRestSetID,
+                                  context.state.restSetID == savedSetID {
                             Text("✓ Set saved")
                                 .font(.caption.weight(.semibold))
                                 .accessibilityLabel("Set saved")
                         }
-                        HStack(spacing: 16) {
-                            countdown(deadline).font(.largeTitle.weight(.semibold))
+                        HStack(spacing: 8) {
+                            countdown(deadline).font(.title2.weight(.semibold))
+                            if let completedSetID = context.state.restSetID {
+                                Button(intent: ProofUndoSet(sessionID: context.attributes.sessionID,
+                                    setID: completedSetID, restID: restID)) {
+                                    actionLabel("Undo")
+                                }
+                                .accessibilityLabel("Undo the set for this rest")
+                            }
                             Button(intent: ProofContinueRest(sessionID: context.attributes.sessionID,
                                 setID: setID, restID: restID)) {
                                 actionLabel("Continue")
@@ -83,6 +95,10 @@ struct ProofWidget: Widget {
                     failureMessage("Complete request failed")
                     Button(intent: ProofCompleteSet(sessionID: failed.sessionID,
                         setID: failed.setID, restID: failed.restID)) { actionLabel("Retry Complete") }
+                case .undo:
+                    failureMessage("Undo failed — tap Retry Undo")
+                    Button(intent: ProofUndoSet(sessionID: failed.sessionID,
+                        setID: failed.setID, restID: failed.restID)) { actionLabel("Retry Undo") }
                 case .continueRest:
                     failureMessage("Continue failed — tap Continue to retry")
                     Button(intent: ProofContinueRest(sessionID: failed.sessionID,
@@ -112,20 +128,35 @@ struct ProofWidget: Widget {
     }
 
     private func showsRest(_ context: ActivityViewContext<ProofActivity>) -> Bool {
-        // No wall clock or isStale gate: zero stays on the rest card until Continue.
+        // No wall clock or isStale gate. Normal rest awaits Continue; committed
+        // Undo exposes the draft immediately while retaining this same countdown.
         // Old skipped content was already dismissed; foreground migration backfills it.
         context.state.restDeadline != nil && context.state.restContinuedAt == nil && context.state.restSkippedAt == nil
     }
 
-    private func draft(_ context: ActivityViewContext<ProofActivity>, setID: String, restID: String) -> some View {
+    private func showsUndoneDraft(_ context: ActivityViewContext<ProofActivity>) -> Bool {
+        showsRest(context) && !context.state.completed && context.state.restUndoneAt != nil
+            && context.state.setID != nil && context.state.restSetID == context.state.setID
+    }
+
+    private func draft(_ context: ActivityViewContext<ProofActivity>, setID: String, restID: String, duringUndoneRest: Bool = false) -> some View {
         VStack(spacing: 4) {
             HStack {
-                Text("Set \(context.state.setNumber ?? 1)/3 · \(context.state.recordCount ?? 0) saved")
+                Text(duringUndoneRest
+                     ? "Set \(context.state.setNumber ?? 1) returned to draft"
+                     : "Set \(context.state.setNumber ?? 1)/3 · \(context.state.recordCount ?? 0) saved")
                     .font(.caption.weight(.semibold))
                 Spacer(minLength: 4)
-                if let notice = context.state.notice {
+                if duringUndoneRest, let deadline = context.state.restDeadline {
+                    countdown(deadline).font(.headline)
+                } else if let notice = context.state.notice {
                     Text(notice).font(.caption)
                 }
+            }
+            if duringUndoneRest {
+                // Always actionable: storage decides at execution, not on a zero redraw.
+                Text(context.state.notice ?? "Complete at zero or Continue")
+                    .font(.caption2)
             }
             HStack(spacing: 6) {
                 Button(intent: ProofAdjustWeight(sessionID: context.attributes.sessionID,
@@ -140,8 +171,15 @@ struct ProofWidget: Widget {
                 Button(intent: ProofAdjustReps(sessionID: context.attributes.sessionID,
                     setID: setID, restID: restID, delta: 1)) { adjustment("+", "Increase reps by one") }
             }
-            Button(intent: ProofCompleteSet(sessionID: context.attributes.sessionID,
-                setID: setID, restID: restID)) { actionLabel("Complete") }
+            HStack(spacing: 8) {
+                Button(intent: ProofCompleteSet(sessionID: context.attributes.sessionID,
+                    setID: setID, restID: restID)) { actionLabel("Complete") }
+                if duringUndoneRest {
+                    Button(intent: ProofContinueRest(sessionID: context.attributes.sessionID,
+                        setID: setID, restID: restID)) { actionLabel("Continue") }
+                        .accessibilityHint("Ends rest early before zero; preserves your edits")
+                }
+            }
         }
     }
 

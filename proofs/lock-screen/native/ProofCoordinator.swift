@@ -96,11 +96,13 @@ actor ProofCoordinator {
             restDeadline: snapshot.restDeadline.map { Date(timeIntervalSince1970: $0) },
             restSkippedAt: snapshot.restSkippedAt.map { Date(timeIntervalSince1970: $0) },
             restContinuedAt: snapshot.restContinuedAt.map { Date(timeIntervalSince1970: $0) },
-            // Both current completion and legacy import use setID + ":rest".
+            // Read the stored rest-to-set association for legacy and new completion IDs.
             // This snapshot is returned only after the store transaction commits.
             savedRestSetID: snapshot.sets.first(where: {
-                $0.completed && snapshot.restID == $0.setID + ":rest"
+                $0.completed && snapshot.restUndoneAt == nil && snapshot.restSetID == $0.setID
             })?.setID,
+            restSetID: snapshot.restSetID,
+            restUndoneAt: snapshot.restUndoneAt.map { Date(timeIntervalSince1970: $0) },
             setID: snapshot.setID, restID: snapshot.restID,
             setNumber: snapshot.displaySet.ordinal, recordCount: snapshot.recordCount, notice: notice
         ))

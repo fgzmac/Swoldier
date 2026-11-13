@@ -39,17 +39,18 @@ function transaction(db, fn, immediate = true) {
   catch (e) { db.exec('ROLLBACK'); throw e; }
 }
 function migrate(db) {
-  if (db.prepare('PRAGMA user_version').get().user_version >= 3) return;
+  if (db.prepare('PRAGMA user_version').get().user_version >= 4) return;
   transaction(db, () => {
     const version = db.prepare('PRAGMA user_version').get().user_version;
-    if (version >= 3) return;
+    if (version >= 4) return;
     if (version < 2) {
       const cols = new Set(db.prepare('PRAGMA table_info(proof_set)').all().map(r => r.name));
       for (const m of sql.migrations) if (!cols.has(m.column)) db.exec(m.statement);
       for (const text of [...sql.schemaV2, ...sql.importLegacy]) db.exec(text);
     }
-    for (const text of sql.migrationsV3) db.exec(text);
-    db.exec('PRAGMA user_version = 3');
+    if (version < 3) for (const text of sql.migrationsV3) db.exec(text);
+    for (const text of sql.migrationsV4) db.exec(text);
+    db.exec('PRAGMA user_version = 4');
   });
 }
 function open(path) {
@@ -73,7 +74,7 @@ function readInternal(db, now = 1000) {
     sets, recordCount: sets.filter(s => s.completed).length, plannedSetsRecorded: sets.every(s => s.completed),
     deadline: values[0] ?? null, skippedAt: values[1] ?? null,
     restState: values[2] ?? 'not_started', remaining: values[3] ?? 0,
-    continuedAt: values[4] ?? null, awaitingContinue: rest !== null && values[4] == null };
+    continuedAt: values[4] ?? null, restSetID: values[5] ?? null, undoneAt: values[6] ?? null, awaitingContinue: rest !== null && values[4] == null };
 }
 function start(db, sessionID = randomUUID()) {
   return transaction(db, () => {
@@ -83,18 +84,21 @@ function start(db, sessionID = randomUUID()) {
 }
 function act(db, ids, action, now = 1000, delta = 0) {
   return transaction(db, () => {
-    const p = { ...ids, now, delta, newRestID: ids.setID + ':rest' };
+    const p = { ...ids, now, delta, newRestID: randomUUID() };
     if (action === 'complete') {
       run(db, sql.countCompleteRequest, p);
       if (run(db, sql.complete, p) === 1) {
-        run(db, sql.createRest, p); assert.equal(run(db, sql.advanceRest, p), 1);
+        assert.equal(run(db, sql.createRest, p), 1); assert.equal(run(db, sql.advanceRest, p), 1);
       }
+    } else if (action === 'undo') {
+      if (run(db, sql.undo, p) === 1) assert.equal(run(db, sql.markUndone, p), 1);
     } else { run(db, sql[action === 'skip' ? 'continueRest' : action], p); }
     return readInternal(db, now);
   });
 }
 function reset(db) { transaction(db, () => sql.reset.forEach(q => db.exec(q))); }
 function ids(s) { return { sessionID: s.sessionID, setID: s.setID, restID: s.restID }; }
+function undoIDs(s) { return { ...ids(s), setID: s.restSetID }; }
 function current(s) { return s.sets.find(r => !r.completed) ?? s.sets.at(-1); }
 function fixture(t) {
   const dir = mkdtempSync(join(tmpdir(), 'swoldier-three-'));
@@ -115,7 +119,7 @@ function legacy(path, completed, rest = null, skipped = null) {
 
 if (!isMainThread) {
   const db = open(workerData.path);
-  try { act(db, workerData.ids, 'complete'); parentPort.postMessage('done'); }
+  try { act(db, workerData.ids, workerData.action ?? 'complete', workerData.now ?? 1000); parentPort.postMessage('done'); }
   finally { db.close(); }
 } else {
   test('three independent planned defaults and stable identities survive reopening/start', t => {
@@ -190,7 +194,7 @@ if (!isMainThread) {
     const { db, initial } = fixture(t); const previous=act(db,ids(initial),'complete');
     db.exec('CREATE TABLE unrelated(value TEXT); INSERT INTO unrelated VALUES(\'keep\')');
     reset(db);assert.equal(read(db),null);const fresh=start(db);
-    for(const action of ['complete','skip','continueRest','weight','reps'])act(db,ids(previous),action,1001,1);
+    for(const action of ['complete','skip','continueRest','undo','weight','reps'])act(db,ids(previous),action,1001,1);
     assert.deepEqual(read(db),fresh);assert.equal(db.prepare('SELECT value FROM unrelated').get().value,'keep');
     assert.equal(db.prepare('SELECT COUNT(*) AS n FROM proof_set').get().n,0);
   });
@@ -344,7 +348,7 @@ if (!isMainThread) {
       let s=read(db,1000);assert.equal(s.deadline,deadline);assert.equal(s.skippedAt,skipped);
       assert.equal(s.continuedAt,skipped);assert.equal(s.awaitingContinue,skipped==null);
       assert.deepEqual(db.prepare('SELECT * FROM proof_sets_v2 ORDER BY ordinal').all(),oldSets);
-      assert.equal(db.prepare('PRAGMA user_version').get().user_version,3);
+      assert.equal(db.prepare('PRAGMA user_version').get().user_version,4);
       migrate(db);assert.deepEqual(read(db,1000),s);
     });
   }
@@ -359,6 +363,238 @@ if (!isMainThread) {
     assert.equal(db.prepare('SELECT skipped_at FROM proof_rests_v2').get().skipped_at,1005);
     db.exec('DROP TRIGGER fail_ack');migrate(db);
     assert.equal(db.prepare('SELECT continued_at FROM proof_rests_v2').get().continued_at,1005);
+  });
+
+  for (const when of [1005,1020,1050]) test('Undo at '+when+' restores entered values without changing rest or other drafts', t => {
+    const {db,path,initial}=fixture(t);
+    act(db,ids(initial),'weight',999,5);act(db,ids(initial),'reps',999,1);
+    let saved=act(db,ids(initial),'complete',1000);
+    saved=act(db,ids(saved),'weight',1001,5); // Pre-existing later draft edit, preserved by Undo.
+    const target=undoIDs(saved),before=read(db,when);
+    const restored=act(db,target,'undo',when);
+    assert.equal(restored.recordCount,0);assert.equal(restored.setID,initial.setID);
+    assert.deepEqual(restored.sets[0],{...before.sets[0],completed:0});
+    assert.deepEqual(restored.sets.slice(1),before.sets.slice(1));
+    assert.deepEqual([restored.restID,restored.restSetID,restored.deadline,restored.skippedAt,restored.continuedAt,restored.restState,restored.remaining],
+      [before.restID,before.restSetID,before.deadline,before.skippedAt,before.continuedAt,before.restState,before.remaining]);
+    assert.equal(restored.undoneAt,when);assert.equal(restored.awaitingContinue,true);
+    const reopen=open(path);try {assert.deepEqual(read(reopen,when),restored);}finally{reopen.close();}
+    const duplicate=act(db,target,'undo',when+1);
+    assert.equal(duplicate.undoneAt,when);assert.equal(duplicate.deadline,restored.deadline);
+    assert.deepEqual(duplicate.sets,restored.sets);assert.equal(duplicate.continuedAt,null);
+    const oldContinue=act(db,ids(saved),'continueRest',when);assert.equal(oldContinue.awaitingContinue,true);
+    const continued=act(db,ids(restored),'continueRest',when);
+    assert.equal(continued.setID,initial.setID);assert.equal(continued.awaitingContinue,false);
+    assert.equal(continued.skippedAt,when < 1020 ? when:null);
+    assert.equal(continued.deadline,1020);assert.deepEqual(continued.sets,restored.sets);
+    const reopenAfter=open(path);try{assert.deepEqual(read(reopenAfter,when),continued);}finally{reopenAfter.close();}
+  });
+  test('re-completion gets a fresh rest ID; old Undo and Complete cannot affect it', t => {
+    const {db,initial}=fixture(t);
+    const first=act(db,ids(initial),'complete',1000),oldUndo=undoIDs(first);
+    let s=act(db,oldUndo,'undo',1001);
+    s=act(db,ids(s),'complete',1002);assert.equal(s.recordCount,0);assert.equal(s.deadline,1020);
+    s=act(db,ids(s),'continueRest',1021);
+    s=act(db,ids(s),'reps',1022,1);const recomplete=ids(s);
+    s=act(db,recomplete,'complete',1023);const second=s;
+    assert.notEqual(s.restID,first.restID);assert.equal(s.deadline,1043);
+    assert.equal(s.recordCount,1);assert.equal(s.undoneAt,null);assert.equal(s.continuedAt,null);
+    assert.deepEqual([s.sets[0].pounds,s.sets[0].reps,s.sets[0].planned_reps],[40,9,8]);
+    assert.deepEqual(act(db,oldUndo,'undo',1023),second);
+    assert.deepEqual(act(db,ids(first),'continueRest',1023),second);
+    s=act(db,recomplete,'complete',1024);
+    assert.equal(s.recordCount,1);assert.equal(s.deadline,1043);assert.equal(s.restID,second.restID);
+    assert.equal(s.sets[0].completion_attempts,second.sets[0].completion_attempts+1);
+    assert.equal(db.prepare('SELECT COUNT(*) AS n FROM proof_rests_v2').get().n,1);
+    assert.equal(act(db,undoIDs(second),'undo',1025).recordCount,0); // Only this new completion can now be undone.
+  });
+  test('Undo rejects other sessions/sets/rests and already acknowledged rest', t => {
+    const {db,initial}=fixture(t);const saved=act(db,ids(initial),'complete');const target=undoIDs(saved);
+    for(const wrong of [{...target,sessionID:'old'},{...target,restID:'old'},ids(saved)]) {
+      assert.deepEqual(act(db,wrong,'undo',1000),saved);
+    }
+    const dismissed=act(db,ids(saved),'continueRest',1000);
+    assert.deepEqual(act(db,target,'undo',1001),dismissed);
+    const next=act(db,ids(dismissed),'complete',1002);
+    assert.deepEqual(act(db,target,'undo',1002),next);
+  });
+  test('final-set Undo preserves earlier actuals and later returns the final draft, not finished state', t => {
+    const {db,initial}=fixture(t);let s=initial;
+    for(let n=0;n<3;n++) {
+      if(n) s=act(db,ids(s),'continueRest',1000+n*30);
+      s=act(db,ids(s),'complete',1000+n*30);
+    }
+    const saved=s,earlier=s.sets.slice(0,2);
+    s=act(db,undoIDs(saved),'undo',1090);
+    assert.equal(s.plannedSetsRecorded,false);assert.equal(s.recordCount,2);assert.equal(current(s).ordinal,3);
+    assert.equal(s.deadline,1080);assert.equal(s.awaitingContinue,true);assert.equal(s.remaining,0);
+    assert.deepEqual(s.sets.slice(0,2),earlier);assert.equal(s.sets.length,3);
+    s=act(db,ids(s),'continueRest',1091);assert.equal(s.plannedSetsRecorded,false);assert.equal(current(s).ordinal,3);
+    s=act(db,ids(s),'reps',1092,1);s=act(db,ids(s),'complete',1093);
+    assert.equal(s.recordCount,3);assert.equal(s.deadline,1113);assert.notEqual(s.restID,saved.restID);
+    assert.deepEqual(s.sets.slice(0,2),earlier);assert.equal(s.sets[2].reps,11);
+    assert.equal(s.sets.length,3);assert.equal('finished' in s,false);
+    assert.deepEqual(act(db,undoIDs(saved),'undo',1093),s);
+  });
+  test('Undo marker failure rolls the completed record back; exact retry remains safe', t => {
+    const {db,initial}=fixture(t);const saved=act(db,ids(initial),'complete');const target=undoIDs(saved);
+    db.exec("CREATE TRIGGER fail_undo BEFORE UPDATE OF undone_at ON proof_rests_v2 BEGIN SELECT RAISE(ABORT,'injected'); END");
+    assert.throws(()=>act(db,target,'undo',1003),/injected/);assert.deepEqual(read(db),saved);
+    db.exec('DROP TRIGGER fail_undo');const restored=act(db,target,'undo',1003);
+    assert.equal(restored.recordCount,0);assert.equal(restored.undoneAt,1003);assert.equal(restored.deadline,1020);
+    assert.equal(restored.sets[0].completion_attempts,1);
+  });
+  test('Undo COMMIT failure rolls back both writes before success; retry commits once', t => {
+    const {db,path,initial}=fixture(t);const saved=act(db,ids(initial),'complete');const target=undoIDs(saved);
+    const reader=open(path);
+    try {
+      reader.exec('BEGIN');reader.prepare('SELECT * FROM proof_sets_v2').all();db.exec('PRAGMA busy_timeout=10');
+      assert.throws(()=>act(db,target,'undo',1003),/locked/);reader.exec('ROLLBACK');
+      assert.deepEqual(read(db),saved);const undone=act(db,target,'undo',1004);
+      assert.equal(undone.recordCount,0);assert.equal(undone.undoneAt,1004);assert.equal(undone.deadline,1020);
+    } finally{reader.close();}
+  });
+  test('failed re-completion rest replacement preserves restored draft and acknowledged old deadline', t => {
+    const {db,initial}=fixture(t);let s=act(db,ids(initial),'complete');s=act(db,undoIDs(s),'undo',1001);
+    s=act(db,ids(s),'continueRest',1002);const before=s;
+    db.exec("CREATE TRIGGER fail_replace BEFORE UPDATE OF rest_id ON proof_rests_v2 BEGIN SELECT RAISE(ABORT,'injected'); END");
+    assert.throws(()=>act(db,ids(before),'complete',1003),/injected/);assert.deepEqual(read(db,1002),before);
+    db.exec('DROP TRIGGER fail_replace');s=act(db,ids(before),'complete',1004);
+    assert.equal(s.recordCount,1);assert.equal(s.deadline,1024);assert.notEqual(s.restID,before.restID);
+    assert.equal(s.sets[0].completion_attempts,before.sets[0].completion_attempts+1);
+  });
+  for(const [label,deadline,skipped,continued] of [
+    ['active',1020,null,null],['expired',980,null,null],['skipped',1020,990,990],['dismissed',980,null,990]
+  ]) test('v3 '+label+' migration adds Undo metadata without altering installed data', t => {
+    const dir=mkdtempSync(join(tmpdir(),'swoldier-v4-'));const path=join(dir,'proof.sqlite3');
+    const old=new DatabaseSync(path);old.exec(sql.schema);sql.schemaV2.forEach(q=>old.exec(q));sql.migrationsV3.forEach(q=>old.exec(q));
+    run(old,sql.startSession,{sessionID:'installed'});run(old,sql.startSets,{sessionID:'installed'});
+    old.exec("UPDATE proof_sets_v2 SET pounds=45,reps=9,completed=1,completion_attempts=6 WHERE ordinal=1; UPDATE proof_sets_v2 SET pounds=55,reps=7 WHERE ordinal=2");
+    old.prepare('INSERT INTO proof_rests_v2 VALUES(?,?,?,?,?,?)').run('installed','installed:set:1:rest','installed:set:1',deadline,skipped,continued);
+    old.exec("UPDATE proof_session_v2 SET active_rest_id='installed:set:1:rest'; PRAGMA user_version=3");
+    const oldSets=old.prepare('SELECT * FROM proof_sets_v2 ORDER BY ordinal').all();old.close();
+    const db=open(path);t.after(()=>{db.close();removeFixture(dir);});const s=read(db);
+    assert.equal(s.undoneAt,null);assert.equal(s.restSetID,'installed:set:1');assert.equal(s.restID,'installed:set:1:rest');
+    assert.deepEqual([s.deadline,s.skippedAt,s.continuedAt],[deadline,skipped,continued]);
+    assert.deepEqual(db.prepare('SELECT * FROM proof_sets_v2 ORDER BY ordinal').all(),oldSets);
+    assert.equal(db.prepare('PRAGMA user_version').get().user_version,4);migrate(db);assert.deepEqual(read(db),s);
+    const undone=act(db,undoIDs(s),'undo');
+    if(continued==null) {
+      assert.equal(undone.recordCount,0);assert.equal(undone.deadline,deadline);
+      let again=act(db,ids(undone),'continueRest');again=act(db,ids(again),'complete',1001);
+      assert.equal(again.recordCount,1);assert.notEqual(again.restID,s.restID);assert.equal(again.deadline,1021);
+    } else assert.deepEqual(undone,s);
+  });
+  test('v4 migration COMMIT failure leaves version and schema intact; retry succeeds', t => {
+    const dir=mkdtempSync(join(tmpdir(),'swoldier-v4-fail-'));const path=join(dir,'proof.sqlite3');
+    const db=new DatabaseSync(path);db.exec(sql.schema);sql.schemaV2.forEach(q=>db.exec(q));sql.migrationsV3.forEach(q=>db.exec(q));db.exec('PRAGMA user_version=3');
+    const reader=new DatabaseSync(path);t.after(()=>{reader.close();db.close();removeFixture(dir);});
+    reader.exec('BEGIN');reader.prepare('SELECT * FROM proof_rests_v2').all();db.exec('PRAGMA busy_timeout=10');
+    assert.throws(()=>migrate(db),/locked/);reader.exec('ROLLBACK');
+    assert.equal(db.prepare('PRAGMA user_version').get().user_version,3);
+    assert.equal(db.prepare('PRAGMA table_info(proof_rests_v2)').all().some(c=>c.name==='undone_at'),false);
+    migrate(db);assert.equal(db.prepare('PRAGMA user_version').get().user_version,4);
+    assert.equal(db.prepare('PRAGMA table_info(proof_rests_v2)').all().some(c=>c.name==='undone_at'),true);
+  });
+
+  test('overlapping Undo requests commit one restoration and no Complete counts', async t => {
+    const {db,path,initial}=fixture(t);const saved=act(db,ids(initial),'complete');
+    await Promise.all([1,2].map(() => new Promise((resolve,reject)=>{
+      const w=new Worker(__filename,{workerData:{path,ids:undoIDs(saved),action:'undo',now:1004}});
+      w.once('error',reject);w.once('exit',code=>code?reject(Error('Worker failed')):resolve());
+    })));
+    const restored=read(db,1004);assert.equal(restored.recordCount,0);assert.equal(restored.undoneAt,1004);
+    assert.equal(restored.deadline,1020);assert.equal(restored.continuedAt,null);
+    assert.equal(restored.sets[0].completion_attempts,1);assert.deepEqual(restored.sets.slice(1),saved.sets.slice(1));
+  });
+
+  test('undone rest edits persist without Continue and preserve rest, plans and later drafts', t => {
+    const {db,path,initial}=fixture(t);
+    let saved=act(db,ids(initial),'complete',1000);
+    saved=act(db,ids(saved),'weight',1001,5); // Retain an independently edited later draft.
+    const undone=act(db,undoIDs(saved),'undo',1002);
+    let edited=act(db,ids(undone),'weight',1003,5);
+    edited=act(db,ids(edited),'reps',1004,1);
+    assert.deepEqual(edited.sets[0],{...undone.sets[0],pounds:45,reps:9});
+    assert.deepEqual(edited.sets.slice(1),saved.sets.slice(1));
+    for(const k of ['restID','deadline','continuedAt','skippedAt','undoneAt','recordCount']) assert.equal(edited[k],undone[k]);
+    const reopened=open(path);
+    try {migrate(reopened);assert.deepEqual(read(reopened,1004),edited);}finally{reopened.close();}
+    const continued=act(db,ids(edited),'continueRest',1005);
+    assert.deepEqual(continued.sets,edited.sets);assert.equal(continued.deadline,1020);
+    assert.equal(continued.skippedAt,1005);assert.equal(continued.continuedAt,1005);
+    const savedAgain=act(db,ids(continued),'complete',1006);
+    assert.equal(savedAgain.recordCount,1);assert.equal(savedAgain.deadline,1026);
+    assert.deepEqual([savedAgain.sets[0].pounds,savedAgain.sets[0].reps,savedAgain.sets[0].planned_pounds,savedAgain.sets[0].planned_reps],[45,9,40,8]);
+  });
+  for(const when of [1019.999,1020,1020.001]) test('undone Complete checks saved deadline at '+when+' without Continue', t => {
+    const {db,initial}=fixture(t);
+    const saved=act(db,ids(initial),'complete',1000);
+    let draft=act(db,undoIDs(saved),'undo',1001);
+    draft=act(db,ids(draft),'reps',1002,1);
+    const result=act(db,ids(draft),'complete',when);
+    assert.equal(result.sets[0].completion_attempts,2);
+    assert.deepEqual(result.sets.slice(1),draft.sets.slice(1));
+    if(when<1020) {
+      assert.equal(result.recordCount,0);assert.equal(result.restID,draft.restID);
+      assert.equal(result.deadline,1020);assert.equal(result.continuedAt,null);
+      assert.equal(result.undoneAt,1001);assert.equal(result.sets[0].reps,9);
+    } else {
+      assert.equal(result.recordCount,1);assert.notEqual(result.restID,draft.restID);
+      assert.equal(result.deadline,when+20);assert.equal(result.continuedAt,null);
+      assert.equal(result.skippedAt,null);assert.equal(result.undoneAt,null);
+      assert.deepEqual([result.sets[0].pounds,result.sets[0].reps,result.sets[0].planned_reps],[40,9,8]);
+      assert.equal(db.prepare('SELECT COUNT(*) AS n FROM proof_rests_v2').get().n,1);
+    }
+  });
+  test('expired undone draft survives reopening; old exact actions cannot affect its re-completion', t => {
+    const {db,path,initial}=fixture(t);const first=act(db,ids(initial),'complete',1000);
+    let draft=act(db,undoIDs(first),'undo',1001);draft=act(db,ids(draft),'weight',1002,5);
+    const original=ids(draft),reopen=open(path);let second;
+    try {
+      const restored=read(reopen,1030);assert.equal(restored.continuedAt,null);assert.equal(restored.deadline,1020);
+      assert.deepEqual(restored.sets,draft.sets);
+      second=act(reopen,original,'complete',1030);
+    }finally{reopen.close();}
+    for(const action of ['undo','continueRest','skip','weight','reps']) {
+      assert.deepEqual(act(db,original,action,1030,1),second);
+    }
+    const repeated=act(db,original,'complete',1030);
+    assert.deepEqual(repeated,{...second,sets:second.sets.map((r,i)=>i ? r : {...r,completion_attempts:r.completion_attempts+1})});
+    // Even after Undo of the newer completion, an older retry cannot save that draft.
+    const newerDraft=act(db,undoIDs(second),'undo',1031);
+    const oldRetry=act(db,original,'complete',1100);
+    assert.equal(oldRetry.recordCount,0);assert.equal(oldRetry.restID,newerDraft.restID);
+    assert.equal(oldRetry.deadline,1050);assert.equal(oldRetry.continuedAt,null);
+    assert.equal(oldRetry.sets[0].pounds,45);
+    assert.equal(act(db,ids(newerDraft),'complete',1100).recordCount,1);
+  });
+  test('final undone draft can be edited and re-completed after expiry without Continue', t => {
+    const {db,initial}=fixture(t);let s=initial;
+    for(let n=0;n<3;n++) {
+      if(n) s=act(db,ids(s),'continueRest',1000+n*30);
+      s=act(db,ids(s),'complete',1000+n*30);
+    }
+    const saved=s,earlier=s.sets.slice(0,2);
+    s=act(db,undoIDs(s),'undo',1070);s=act(db,ids(s),'reps',1071,1);
+    assert.equal(s.plannedSetsRecorded,false);assert.equal(s.continuedAt,null);assert.equal(s.deadline,1080);
+    s=act(db,ids(s),'complete',1080);
+    assert.equal(s.recordCount,3);assert.equal(s.sets.length,3);assert.equal(s.plannedSetsRecorded,true);
+    assert.deepEqual(s.sets.slice(0,2),earlier);
+    assert.deepEqual([s.sets[2].pounds,s.sets[2].reps,s.sets[2].planned_reps],[45,11,10]);
+    assert.equal(s.deadline,1100);assert.notEqual(s.restID,saved.restID);
+    assert.equal(s.awaitingContinue,true);assert.equal('finished' in s,false);
+  });
+  test('expired unacknowledged re-completion failure preserves draft for exact retry', t => {
+    const {db,initial}=fixture(t);let s=act(db,ids(initial),'complete');
+    s=act(db,undoIDs(s),'undo',1001);s=act(db,ids(s),'reps',1002,1);
+    const before=read(db,1020),target=ids(before);
+    db.exec("CREATE TRIGGER fail_recomplete BEFORE UPDATE OF rest_id ON proof_rests_v2 BEGIN SELECT RAISE(ABORT,'injected'); END");
+    assert.throws(()=>act(db,target,'complete',1020),/injected/);
+    assert.deepEqual(read(db,1020),before);
+    db.exec('DROP TRIGGER fail_recomplete');const retried=act(db,target,'complete',1021);
+    assert.equal(retried.recordCount,1);assert.equal(retried.sets[0].reps,9);
+    assert.equal(retried.sets[0].completion_attempts,2);assert.equal(retried.deadline,1041);
   });
 
 }

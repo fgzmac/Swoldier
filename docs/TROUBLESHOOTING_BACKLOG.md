@@ -27,6 +27,18 @@ Fresh-fixture update — 2026-11-12: a separate reset/default-value trial on the
 
 Publication / visual-feedback update — 2026-11-12: Continue checkpoint published at [92da1c915ff702941fcc8b00003dd3f0caf2933e](https://github.com/fgzmac/Swoldier/commit/92da1c915ff702941fcc8b00003dd3f0caf2933e). The saved-confirmation/failure-label patch subsequently compiled/signed as build 33cfa887; bounded upgrade preservation and fresh Set 1 confirmation through zero/Continue/reopen now Passed — user-reported. Screenshot-supported preservation (as described) is separate from reported interactions. Failure/retry, duplicate/stale actions, accessibility and broader recovery remain Not run. It changes neither automatic reveal nor countdown timing and closes neither issue. See the [current handoff](HANDOFF.md).
 
+Undo preparation — 2026-11-12: baseline 3f0874507b2fb5e713b09226c04dddea101d2e11 is published. Local Undo adds a second rest action beside Continue, preserving the original deadline and acknowledgement until Continue. Fresh completion/rest identity guards old Undo; 44 SQL-wrapper tests Passed, native/device checks Not run. This changes neither countdown rendering nor automatic expiry behavior and closes neither issue. The adopted Add Set copy-last-completed rule is not implemented. [Current handoff](HANDOFF.md).
+
+Undo build update — 2026-11-12: review found no blocker; one [Undo preview / installation page](https://expo.dev/accounts/fgzmacaraeg/projects/swoldier-lock-screen-proof/builds/b035cb35-659a-4782-a7b7-3e5d0125be89) compiled/signed successfully. Installation, phone migration, Undo actions, exact retries and layout remain Not run. No source correction or countdown/reveal fix was made during review. TS-001/TS-002 remain open and Add Set unimplemented.
+
+## Undo refinement update — 2026-11-13
+
+Immediate editing after committed Undo is prepared locally; normal rest retains Continue. Its Complete action checks the saved deadline rather than waiting for an automatic card redraw. This does not fix delayed automatic reveal or countdown pauses/jumps. Both issues remain open/deferred. Earlier final-set/active-rest Undo and corrected re-completion Passed — user-reported; new immediate-edit device trials Not run. Add Set unimplemented. [Current handoff](HANDOFF.md).
+
+Immediate-edit build review — 2026-11-13: no blocker/source correction. One [immediate-edit Undo preview / installation page](https://expo.dev/accounts/fgzmacaraeg/projects/swoldier-lock-screen-proof/builds/74c497a5-308e-4f0d-bee7-53152648eed5) compiled/signed successfully. New phone preservation, layout, editing/Continue/expiry and failure/retry checks remain Not run. This closes neither TS-001 nor TS-002 and does not implement Add Set.
+
+Immediate-edit device update — 2026-11-13: the five guided steps on build 74c497a5 Passed — user-reported, covering displayed preservation, immediate editing with preserved rest, early rejection, edited Continue/re-completion, expiry completion without Continue/app opening, and readable/reachable controls with plans/other records unchanged. No new screenshots, exact values/counts or timestamps supplied. Failure/retry injection, deliberate stale/duplicate execution, accessibility and broader lifecycle remain Not run. This does not resolve countdown jumps or delayed automatic reveal; both issues stay open, and Add Set is unimplemented. [Evidence](../proofs/lock-screen/README.md#immediate-edit-device-results--2026-11-13).
+
 ## Issue index
 
 | ID | Issue | Status | Revisit trigger |

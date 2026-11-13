@@ -1,12 +1,86 @@
 # Current project handoff
 
+Updated 2026-11-13. Published baseline remains [3f0874507b2fb5e713b09226c04dddea101d2e11](https://github.com/fgzmac/Swoldier/commit/3f0874507b2fb5e713b09226c04dddea101d2e11); local main/HEAD rechecked. No remote query in this task. All 15 existing unstaged paths preserved; no staging/commit/push. **Immediate-edit Undo review passed without source correction.** Exactly one [immediate-edit Undo preview / installation page](https://expo.dev/accounts/fgzmacaraeg/projects/swoldier-lock-screen-proof/builds/74c497a5-308e-4f0d-bee7-53152648eed5) **FINISHED** at 2026-11-13T17:45:38.671Z (November 13 local). **Native compilation/signing Passed**: Xcode archive succeeded with zero errors and eight warnings; signed IPA exported. The focused upgrade/immediate-edit/Continue/expiry/control-layout sequence is now **Passed — user-reported**, recorded 2026-11-13; dedicated migration/decoding, failure/retry, stale/duplicate, accessibility and broader lifecycle checks remain **Not run**. Earlier Undo preview b035cb35 and its user-reported results remain separate below. No retry, staging, commit or push.
+
+<a id="next-task--review-undo-before-one-separately-authorized-device-build"></a>
+<a id="next-task--upgrade-and-test-undo-on-the-iphone"></a>
+
+<a id="next-task--review-the-immediate-edit-undo-refinement"></a>
+
+<a id="next-task--upgrade-and-test-immediate-edit-undo"></a>
+
+## Next task — publish the reviewed Undo checkpoint when authorized
+
+Publication review against baseline 3f0874507b2fb5e713b09226c04dddea101d2e11 found no blocker. Recheck the diff and remote state, then stage/commit/push only the 15 reviewed paths below when explicitly authorized. Suggested commit message: **Add Undo with immediate editing and preserved rest**. No publication action taken in this task; local HEAD remains baseline and all changes remain unstaged. Remote refs were not queried here.
+
+The five focused device-checklist steps for build **74c497a5-308e-4f0d-bee7-53152648eed5** are **Passed — user-reported**, confirmed 2026-11-13. This covers displayed data preservation across upgrade, immediate Undo editing with preserved rest, edits surviving early Complete rejection, edited early Continue followed by corrected completion/new rest, completion after zero without Continue or opening the app, and readable/reachable controls with plans/other records unchanged. No new screenshots, exact entered values, aggregate counts or timestamps were supplied; none were independently observed or inferred.
+
+Failure/retry injection, deliberate stale requests, duplicate execution, VoiceOver/larger text and broader lifecycle/migration/decoding checks remain **Not run**. This report does not establish that countdown jumps are fixed. TS-001 delayed automatic reveal and TS-002 countdown jumps remain open; Add Set remains adopted, unimplemented. The earlier b035cb35 final-set correction is separate; final-set completion without Continue on this newer build was not separately evidenced.
+
+**Publication checks:** full accumulated source/test/documentation diff reviewed; 51 production-SQL wrapper tests and TypeScript Passed. Wrappers do not execute Swift. All 15 upload inputs still match the successful build's source hashes. Markdown links/whitespace and historical-log/reflection preservation checked. No untracked files, credentials/signing/device identifiers, generated artifacts, dependencies, screenshots or private records found in the proposed diff. No source edits. Existing dependency lockfile is already tracked and unchanged, so it is not an additional proposed path.
+
+**Exact proposed files (15):**
+
+1. README.md
+2. docs/BUILD_LOG.md
+3. docs/HANDOFF.md
+4. docs/LOCK_SCREEN_FEASIBILITY.md
+5. docs/PROJECT.md
+6. docs/TROUBLESHOOTING_BACKLOG.md
+7. proofs/lock-screen/App.tsx
+8. proofs/lock-screen/README.md
+9. proofs/lock-screen/native/ProofActivity.swift
+10. proofs/lock-screen/native/ProofCoordinator.swift
+11. proofs/lock-screen/native/ProofIntents.swift
+12. proofs/lock-screen/native/ProofSQL.json
+13. proofs/lock-screen/native/ProofStore.swift
+14. proofs/lock-screen/native/ProofWidget.swift
+15. proofs/lock-screen/tests/persistence.test.cjs
+
+**Current build provenance:** baseline 3f0874507b2fb5e713b09226c04dddea101d2e11 plus accumulated uncommitted App.tsx and native ProofActivity.swift, ProofCoordinator.swift, ProofIntents.swift, ProofSQL.json, ProofStore.swift and ProofWidget.swift changes. Only ProofSQL.json, ProofStore.swift and ProofWidget.swift differ from the prior b035cb35 upload. A fresh isolated archive contained exactly 15 intended files including package-lock.json; all SHA-256 hashes matched local source. Dependencies, generated artifacts, signing/credential/device files, docs/tests and unrelated repository files excluded. Existing project and remote app/extension signing reused with frozen credentials; no new registration or signing changes. Noninteractive setup did not freshly validate profiles on Apple Servers. Free iOS usage was 10/15 before and 11/15 after, zero overage and zero estimated charges.
+
+**Current adopted behavior — 2026-11-13:** Successful committed Undo now immediately exposes its restored pounds/reps and adjustment controls alongside the original bounded countdown. Continue is not needed to edit. Changes preserve plans, other records, later drafts and the saved deadline. Complete stays tappable: native SQL rejects it before the deadline unless Continue explicitly ended rest early; at/after the saved deadline, only the matching undone draft can complete without acknowledgement. The instruction “Complete at zero or Continue” is timeless; there is no isStale, disabled-button clock gate, timer callback or promised exact redraw. Normal completed-set rest keeps confirmation/countdown/Undo/Continue until acknowledgement. Continue preserves edits; re-completion atomically saves corrected actuals and starts a fresh rest identity/deadline.
+
+**Safety and compatibility:** only the last acknowledgement predicate in Complete changed, allowing an unacknowledged rest only when undone_at is present and its set_id matches the target; the existing saved-deadline and active session/set/rest guards remain. Swift samples now after obtaining the write lock. No schema/content field change or new migration: existing v4 undone rests use the new presentation on normal republish/reopen, preserving all stored data; older migration/decoding paths stay unchanged. Normal unacknowledged rest still requires Continue after zero. Old/repeated Undo/Continue/edits and retries keep their original IDs; fresh UUID rest identity still protects same-set re-completion. Old Complete can count a received request for its addressed set but cannot mutate a newer completed record/rest. Committed snapshot publication and failed-action precedence are unchanged.
+
+**Earlier Undo evidence — Passed — user-reported, recorded 2026-11-13:** final-set Undo at zero; corrected re-completion at 45 lb × 11 with its plan still 45 lb × 10; and active-rest Undo preserving the draft/deadline. These reports concern the earlier Undo flow associated with build b035cb35-659a-4782-a7b7-3e5d0125be89 in this session, not the new immediate-edit refinement. No new screenshots or device instrumentation were independently inspected. Do not extend these results to upgrade preservation, duplicate/stale dispatch, exact failure/retry, force-quit, termination, accessibility or other unreported trials.
+
+**Local checks:** 51 production-SQL wrapper tests Passed (seven new targeted checks; existing early-Continue re-completion test adjusted for the superseded expiry rule), TypeScript Passed, eight regenerated native-file comparisons Passed, and Markdown links/whitespace/history checks Passed. SQL is executed by a separate JavaScript wrapper, not Swift. The review reran the 51 SQL-wrapper tests and TypeScript, verified eight generated-file matches and a fresh 15-file archive, and found no blocking issue or source correction. Exactly one [immediate-edit Undo preview / installation page](https://expo.dev/accounts/fgzmacaraeg/projects/swoldier-lock-screen-proof/builds/74c497a5-308e-4f0d-bee7-53152648eed5) **FINISHED** at 2026-11-13T17:45:38.671Z (November 13 local). **Native compilation/signing Passed**: Xcode archive succeeded with zero errors and eight warnings; signed IPA exported. The focused upgrade/immediate-edit/Continue/expiry/control-layout sequence is now **Passed — user-reported**, recorded 2026-11-13; dedicated migration/decoding, failure/retry, stale/duplicate, accessibility and broader lifecycle checks remain **Not run**.
+
+<a id="immediate-edit-phone-checklist--all-not-run"></a>
+
+## Immediate-edit phone checklist — scoped results and remaining trials
+
+The reported guided sequence is recorded above. Do not mark the broader final-set or deliberate edge-case steps passed without separate evidence.
+
+1. Before installing this preview, capture actuals/drafts/plans/counts and rest/deadline/acknowledgement; install without deletion/reset and compare after ordinary reopen.
+2. Fresh trial: Complete an edited Set 1, then Undo during active rest. Confirm values/adjustments appear immediately on the authenticated visible Lock Screen while the original countdown continues. Edit pounds/reps without Continue; inspect unchanged plan, later drafts, deadline and other records after reopen.
+3. Tap Complete before zero. Verify no completed record/new rest; the received-request counter may increment by existing design. Continue early, verify edits survive and skipped/acknowledged state is saved, then re-complete once with corrected actuals/new rest.
+4. Separate trial: Undo during rest, edit, and leave the card through zero without Continue or opening the app. Tap Complete using that same card; verify one corrected current record and a fresh deadline. No exact visual refresh at zero is required or promised.
+5. Undo final Set 3 at/after zero, edit and Complete without Continue. Verify three current actuals, unchanged plans/earlier records, normal final rest and no fourth set/automatic finish. Check reachable controls/clipping separately.
+6. Deliberate old-ID/duplicate/retry injection, migration/lifecycle and accessibility cases remain separate unrun trials. Physical taps do not establish intent counts. Record countdown jumps separately; both troubleshooting issues remain open.
+
+**Add Set — adopted, unimplemented:** copy the last completed set's pounds/reps for the same exercise to an editable today-only draft; routine count unchanged. No fourth set/control added. No-prior-completion behavior and production framework remain open. TS-001 delayed automatic reveal and TS-002 countdown jumps remain open/deferred.
+
+## Earlier Undo build provenance — 2026-11-12
+
+The following describes the previous source, not a build of this refinement. Its earlier Continue-before-edit and acknowledgement-at-expiry requirements are superseded for the matching undone draft only.
+
+**Build provenance:** baseline 3f0874507b2fb5e713b09226c04dddea101d2e11 plus the prepared local App.tsx and native ProofActivity.swift, ProofCoordinator.swift, ProofIntents.swift, ProofSQL.json, ProofStore.swift and ProofWidget.swift changes. All 15 allowlisted archive files (including package-lock.json) matched local SHA-256 hashes; unrelated repository files, tests/docs, dependencies, generated artifacts and sensitive/signing/device files excluded. Existing remote app/extension signing reused with frozen credentials, no signing change; noninteractive setup did not freshly validate profiles against Apple Servers. Final Xcode archive succeeded with zero errors (nine warnings); signed IPA exported. Free iOS allowance was 9/15 before and 10/15 after, zero overage and zero estimated charges. No retry, staging, commit or push.
+
+## Earlier saved-confirmation checkpoint evidence
+
+The following review/build evidence was recorded before Undo. Its publication task is complete at 3f0874507b2fb5e713b09226c04dddea101d2e11; former next-task instructions and source descriptions are historical, not the current next step.
+
 Updated 2026-11-12. **Published baseline:** [92da1c915ff702941fcc8b00003dd3f0caf2933e](https://github.com/fgzmac/Swoldier/commit/92da1c915ff702941fcc8b00003dd3f0caf2933e); local HEAD rechecked, remote main was verified in the earlier preparation task and was not queried again here. Existing ten unstaged paths preserved. Corrected retry review passed; this documentation/publication review made no source changes and found no publication blocker. Exactly one [saved-confirmation preview / installation page](https://expo.dev/accounts/fgzmacaraeg/projects/swoldier-lock-screen-proof/builds/33cfa887-8f9f-46cd-a5d8-95d88dd3e31f) **FINISHED** at 2026-11-13T05:28:37.744Z (November 12 local). **Native compilation/signing Passed**. Bounded upgrade preservation and fresh Set 1 confirmation/Continue/reopen now **Passed — user-reported**, with evidence types separated below. Failure/retry, duplicate/stale actions, VoiceOver, larger text and broader recovery remain **Not run**. Prior Continue passes remain user-reported for build 41621efa. TS-001/TS-002 stay open/deferred.
 
 **Adopted 2026-11-12 — Continue; native compilation/signing Passed; migrated-record and fresh-fixture device sequences Passed — user-reported, remaining checks unrun.** Show countdown and one button labeled exactly **Continue** on the rest card, plus the newly adopted compact confirmed-save/failure feedback described below. Before zero, Continue ends rest early and reveals the next existing draft. At/after zero, Continue reveals that draft without saving a set or restarting rest. Preserve prior draft edits, planned targets, completed records, and duplicate/stale-action guards; keep the authenticated Lock Screen visible. After the third rest, Continue reveals **Planned sets recorded**, with no fourth set or automatic exercise finish. Keep editing/Complete hidden on the rest card; do not adopt the earlier visible-controls recommendation.
 
 Continue supersedes automatic return as a first-version requirement. Prompt automatic reveal is deferred, not fixed or proven impossible. The implementation must not depend on delayed system staleness to make controls available. See [TROUBLESHOOTING_BACKLOG.md](TROUBLESHOOTING_BACKLOG.md): TS-001 tracks delayed reveal; TS-002 separately tracks countdown pauses/jumps. Future investigations in the supplied backlog are proposals, not work authorized by this documentation task.
 
-## Next task — publish the reviewed saved-confirmation checkpoint
+<a id="next-task--publish-the-reviewed-saved-confirmation-checkpoint"></a>
+
+## Earlier publication review — saved-confirmation checkpoint
 
 The user attributes the latest upgrade and fresh trial to build **33cfa887-8f9f-46cd-a5d8-95d88dd3e31f**. **Screenshot-supported preservation, as described by the user:** before/after actuals 40 × 8, 50 × 8, 45 × 10; plans; three records/requests; Expired/Dismissed rest; deadline and acknowledgement timestamps unchanged. Exact timestamps were not supplied. No new images were attached or independently inspected here; artifact identity is user-reported.
 

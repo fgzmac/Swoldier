@@ -20,6 +20,8 @@ type Snapshot = {
   restDeadline: number | null;
   restSkippedAt: number | null;
   restContinuedAt: number | null;
+  restSetID: string | null;
+  restUndoneAt: number | null;
   awaitingContinue: boolean;
   restState: 'not_started' | 'running' | 'expired' | 'skipped';
   restRemainingSeconds: number;
@@ -129,7 +131,7 @@ export default function App() {
     <SafeAreaView style={styles.screen}>
       <ScrollView contentContainerStyle={styles.content}>
         <Text accessibilityRole="header" style={styles.title}>Workout proof</Text>
-        <Text accessibilityRole="header">Continue proof — persisted rest acknowledgement</Text>
+        <Text accessibilityRole="header">Undo proof — preserve rest and entered values</Text>
         {proof ? (
           <>
             <Text>{saved
@@ -151,6 +153,7 @@ export default function App() {
               : 'Not started'}</Text>
             {saved && <Text>Rest screen: {saved.awaitingContinue ? 'Awaiting Continue' : 'Dismissed / no rest'}</Text>}
             {saved?.restContinuedAt != null && <Text>Continued at: {saved.restContinuedAt}</Text>}
+            {saved?.restUndoneAt != null && <Text>Set returned to draft at: {saved.restUndoneAt}</Text>}
             {saved?.restDeadline != null && <Text>Rest deadline: {saved.restDeadline}</Text>}
             <Button
               title={saved && (!saved.completed || saved.awaitingContinue) ? 'Show Live Activity' : 'Start three-set proof'}

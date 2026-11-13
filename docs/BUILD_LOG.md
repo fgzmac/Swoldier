@@ -4,6 +4,107 @@ Record a short entry after each working session. Newest entries go first. Write 
 
 **Planned:** agreed or proposed work. **Implemented:** code exists. **Verified:** a named check ran and passed.
 
+## 2026-11-13 — Record immediate-edit device passes and review Undo publication
+
+**Status** — Five focused guided steps for build 74c497a5-308e-4f0d-bee7-53152648eed5 **Passed — user-reported**. Full accumulated Undo publication review found no blocker; 15 paths proposed in HANDOFF. Documentation only; no source change, cloud upload/build, staging, commit or push.
+
+- Read AGENTS/current handoff/project/proof/log and inspected main/HEAD at baseline 3f0874507b2fb5e713b09226c04dddea101d2e11. Preserved all 15 unstaged paths and unrelated work; no untracked files or remote-ref query.
+- User explicitly confirms displayed preservation across upgrade; Undo immediately revealing editable values with rest preserved; edits surviving early Complete rejection without a new record/deadline restart; early Continue preserving edits followed by corrected completion/fresh rest; a separate Undo/edit trial completing after zero without Continue or app opening, saving one corrected record/fresh rest; and readable/reachable controls with plans/other records unchanged. Required interactions are reported in the authenticated Lock Screen checklist context.
+- No new screenshots, exact entered values, aggregate counts or timestamps were supplied. Do not invent them or describe these as independently observed or screenshot-supported results. Prior b035cb35 final-set correction remains separate. Final-set completion without Continue on the newer build, failure/retry injection, deliberate stale requests, duplicate execution, accessibility and broader lifecycle/migration/decoding remain Not run unless separately evidenced. Physical taps do not establish intent dispatch counts.
+- Reviewed full accumulated Undo diff against baseline: background intent, completion-specific rest UUID, atomic Undo/marker and re-completion, additive v4 migration, exact retries, committed confirmation, immediate-edit branch and saved-deadline gate, wrapper tests and documentation. No publication blocker or source correction. The app's Awaiting Continue readout describes persisted acknowledgement; it does not disable editing or native completion of an expired undone draft.
+- Reran 51 production-SQL wrapper tests and TypeScript: Passed. Wrappers execute production SQL with separate JavaScript transactions/migration/snapshot logic, not Swift/runtime execution. All 15 intended upload inputs retain the successful preview's SHA-256 hashes; no new native build. Markdown links/anchors, whitespace and baseline/prior log preservation Passed.
+- Proposed files are seven Markdown documents, App.tsx, six native source/resource files and the persistence test file, exactly as listed in HANDOFF. Reviewed contents contain no credentials, signing files, personal device identifiers, generated artifacts, dependencies, screenshots or private records. Existing lockfile is tracked and unchanged. AGENTS.md and learning reflections unchanged.
+- Add Set remains adopted/unimplemented; TS-001 delayed automatic reveal and TS-002 countdown jumps stay open. Reported readability/reachability is not broader accessibility coverage or a countdown-jump fix. Suggested commit: Add Undo with immediate editing and preserved rest.
+
+### What I learned — user-written
+
+### Next small task
+
+When explicitly authorized, recheck the working diff and remote state, then stage/commit/push only the 15 reviewed paths. Preserve evidence distinctions and remaining untested cases; do not build merely to publish unchanged source.
+
+---
+
+## 2026-11-13 — Review immediate-edit Undo and build one preview
+
+**Status** — Review passed without source correction. Exactly one [immediate-edit Undo preview / installation page](https://expo.dev/accounts/fgzmacaraeg/projects/swoldier-lock-screen-proof/builds/74c497a5-308e-4f0d-bee7-53152648eed5) **FINISHED** at 2026-11-13T17:45:38.671Z (November 13 local). **Native compilation/signing Passed**: Xcode archive succeeded with zero errors and eight warnings; signed IPA exported. Installation, upgrade preservation, runtime migration/decoding, layout and new immediate-edit device checks **Not run**. No retry, staging, commit, push, dependency change or App Store submission.
+
+- Read AGENTS/current handoff/project/proof/log. Rechecked main/HEAD at published baseline 3f0874507b2fb5e713b09226c04dddea101d2e11, tracking origin/main; preserved all 15 unstaged paths. No fresh remote-ref query. Earlier user-reported Undo outcomes retain their build/sequence scope.
+- Traced committed Undo through explicit rest-to-set identity to the restored draft, retaining original deadline/acknowledgement and entered values. Edits affect only that current draft's actual-entry values; plan/other records/rest identity/deadline remain. Continue preserves edits. Normal next-set rest still requires acknowledgement even after expiry; only its own undone draft gets the expiry exception.
+- Verified Complete remains an actionable button with no disabled/clock/isStale gate. SQL samples execution time after the write lock and checks the saved deadline; an early request is rejected unless Continue explicitly ended rest. At/after expiry the matching undone draft can complete without Continue or redraw. Re-completion saves exactly one current record and a fresh UUID rest/deadline atomically. Existing stale-ID guards and original-operation retries remain. Rejected/duplicate Complete still counts a received request for its addressed set by prior design; no newer actual/rest mutation follows.
+- Failure feedback still precedes normal/success layouts and binds the original action IDs; successful publication follows commit. No migration/content-schema change in this refinement. Compact shared draft controls plus countdown/header and Complete/Continue are reasonable for a device trial; actual fit/accessibility are not established by source review.
+- Checks rerun: 51 production-SQL wrapper tests and TypeScript Passed. The tests execute production SQL via separate JavaScript transaction/migration/snapshot logic, not Swift/App Intents/ActivityKit execution. Eight already-regenerated native source/resource copies matched unchanged current source. Local Markdown links/anchors and whitespace Passed; prior build entries/reflections and source bytes preserved.
+- Fresh isolated upload archive contained exactly 15 allowlisted source/configuration/lockfiles, with every SHA-256 matching local files. Excluded dependencies, generated artifacts, credential/signing/device files, tests/docs and unrelated repository files; targeted sensitive-pattern scan clear. Uploaded base plus App.tsx and native ProofActivity.swift, ProofCoordinator.swift, ProofIntents.swift, ProofSQL.json, ProofStore.swift and ProofWidget.swift. Only the last three differ from the b035cb35 upload. No application/test source change during this review.
+- Verified current Free allowance 10/15 iOS before submission and 11/15 after, zero overage and zero estimated charges. Submitted exactly once with existing Expo project/registration and frozen remote app/extension credentials. No credential change; noninteractive setup skipped fresh Apple Server profile validation. Final signed archive succeeded. No phone installation performed.
+- Refreshed current handoff/status and upgrade-first checklist. Add Set remains unimplemented; TS-001 delayed automatic reveal and TS-002 countdown jumps remain open. No production-framework choice or countdown fix claimed.
+
+### What I learned — user-written
+
+### Next small task
+
+Capture existing data, upgrade without deletion/reset, compare after reopen, then test immediate Undo editing, early Complete rejection, edited Continue and a separate expiry-without-Continue trial on the authenticated visible Lock Screen. Keep every new device result Not run until reported; record clipping/countdown jumps separately.
+
+---
+
+## 2026-11-13 — Prepare immediate editing after Undo
+
+**Status** — Adopted refinement implemented locally. 51 SQL-wrapper tests, TypeScript and native-file generation comparisons Passed. New native compilation/signing, installation, layout and device behavior **Not run**. No cloud upload/build, staging, commit or push.
+
+- Read AGENTS/current project/handoff/proof/log; checked main/HEAD at 3f0874507b2fb5e713b09226c04dddea101d2e11 and preserved all 15 existing unstaged paths. No remote-ref query. Historical build entries and personal reflections preserved.
+- **Earlier Undo evidence — Passed — user-reported, recorded 2026-11-13:** final-set Undo at zero; corrected re-completion at 45 lb × 11 with its plan still 45 lb × 10; and active-rest Undo preserving the draft/deadline. These reports concern the earlier Undo flow associated with build b035cb35-659a-4782-a7b7-3e5d0125be89 in this session, not the new immediate-edit refinement. No new screenshots or device instrumentation were independently inspected. Do not extend these results to upgrade preservation, duplicate/stale dispatch, exact failure/retry, force-quit, termination, accessibility or other unreported trials.
+- Added a committed-Undo draft branch before the normal rest layout, matching restSetID to current setID. It displays restored pounds/reps, adjustments, original bounded countdown and Complete/Continue immediately, including at zero. Normal completion confirmation/countdown/Undo/Continue and failure/retry precedence remain. Compact layout fit/accessibility need a phone.
+- Narrowed Complete's acknowledgement exception to the rest's own undone set. Existing SQLite transaction still checks saved deadline at execution after acquiring its write lock, plus active session/set/rest and current-draft guards. Before zero it rejects completion unless Continue ended rest early; at/after zero it can re-complete without Continue. Static instruction “Complete at zero or Continue” does not claim a timed UI update. No isStale, disabled-button clock gate, background callback or polling added.
+- Existing edit and Continue statements preserve entered edits/plans/other records/deadlines. Fresh UUID rest creation and corrected-record saving remain atomic. No schema, content field, migration, retry/intent, signing, dependency, identifier or framework change. Existing v4 metadata supports installed undone drafts; no reset required.
+- Checks: 51 production-SQL wrapper tests Passed, covering immediate editing/reopen, early/exact/late deadline boundaries, edited Continue, same-set new rest identity, stale actions against a newer completion/Undo, final-set correction, rollback and exact retry. One superseded expiry-block assertion was removed from the existing early-Continue trial; seven targeted cases added. Wrapper executes production SQL with separate JS transaction/migration/snapshot logic, not Swift. First npm invocation at repository root found no package.json and ran no tests; corrected proof-directory command passed. TypeScript Passed. Expo plugin configuration regenerated in an ignored local fixture; eight native source/resource copies matched. These are not native compilation or measured UI tests.
+- Local Markdown links/anchors, working-tree whitespace, prior-log/reflection preservation and source-scope checks Passed. Add Set remains unimplemented; TS-001 automatic-reveal delay and TS-002 countdown jumps remain open. No countdown/display cause or fix claimed.
+
+### What I learned — user-written
+
+### Next small task
+
+Review the matching-undone-set expiry gate and compact editable-rest layout before any separately authorized preview build. Then follow the upgrade-first immediate-edit/early-rejection/Continue/expiry-without-Continue/final-set checklist in the proof guide. Keep new device results Not run.
+
+---
+
+## 2026-11-12 — Review Undo and build one preview
+
+**Status** — Review passed without a source correction. Exactly one [Undo preview / installation page](https://expo.dev/accounts/fgzmacaraeg/projects/swoldier-lock-screen-proof/builds/b035cb35-659a-4782-a7b7-3e5d0125be89), build b035cb35-659a-4782-a7b7-3e5d0125be89, **FINISHED** at 2026-11-13T07:00:43.006Z (November 12 local). **Native compilation/signing Passed. Installation, phone migration/older-content decoding, layout, failure injection and device actions Not run.** No retry, staging, commit or push.
+
+- Read AGENTS/current handoff/project/proof and reviewed all prepared source/SQL/tests against local main baseline 3f0874507b2fb5e713b09226c04dddea101d2e11. Task began with 15 unstaged paths; preserved them all. Prior preparation verified remote main; no fresh remote-ref query in this review.
+- Traced atomic completed-flag/Undo-marker saving, preserved entered/planned values, later drafts/other records, unchanged original deadline/acknowledgement and no Undo request-count increment. Duplicate/stale Undo is guarded. Continue targets the restored draft; final Undo restores Set 3 instead of summary. Re-completion atomically saves a fresh UUID rest identity and new deadline. Old same-set requests cannot mutate the newer completion/rest. Existing stale Complete behavior still counts the received request for its addressed set; it cannot complete/restart the newer state.
+- Reviewed commit-before-success, exact original action/session/set/rest retry identities, success clearing failure, repeat failure retaining retry, optional Activity content fields and additive transactional v4 migration. Runtime Codable, App Intent dispatch and installed-data migration are not established by static review or compilation.
+- Windows checks Passed: 44 production-SQL wrapper tests and TypeScript. These use production SQL through a separate JS transaction/migration/snapshot wrapper, not Swift execution. Eight previously regenerated host/extension source copies still match current source. Fresh isolated upload archive contains exactly 15 intended source/configuration/lockfiles, each SHA-256 matching local; excludes docs/tests, dependencies, generated artifacts, credentials/signing/device identifiers and unrelated files.
+- Uploaded baseline plus seven changed inputs: App.tsx; native ProofActivity.swift, ProofCoordinator.swift, ProofIntents.swift, ProofSQL.json, ProofStore.swift and ProofWidget.swift. Remaining eight archive inputs match baseline. No source/test/dependency/identifier correction this turn. Local documentation/test changes are not uploaded by the isolated archive.
+- Verified Free allowance 9/15 iOS builds before submission and 10/15 after; zero overage and zero estimated charges. Submitted exactly once using existing Expo project/registration and frozen remote signing credentials. Noninteractive setup reused both targets' credentials without freshly validating profiles on Apple Servers; no credential change. Xcode archive succeeded with zero errors and nine warnings; IPA exported and signed. No device installation performed.
+- Updated current status/checklist and checked Markdown links, whitespace, source hashes and historical-log preservation. Earlier user-reported device evidence remains build-scoped. Add Set is still documentation only; TS-001 automatic-reveal delay and TS-002 countdown jumps remain open. No production-framework decision or App Store submission.
+
+### What I learned — user-written
+
+### Next small task
+
+Capture existing data, install the Undo preview over the app without deletion/reset, compare after reopen, then test Undo before/at zero, Continue to the restored draft, same-set re-completion and final-set restoration. Keep each device result Not run until reported; separate actual received requests from physical taps.
+
+---
+
+## 2026-11-12 — Prepare Undo with completion-specific rest identity
+
+**Status** — Undo implemented locally in the isolated proof. Windows checks Passed; Undo Swift/native compilation, signing, installation, actual phone migration, layout and device checks **Not run**. No cloud upload/build, staging, commit or push.
+
+- Read AGENTS/current project/handoff/proof/latest log. Local main and a successful fresh remote-ref query match published baseline 3f0874507b2fb5e713b09226c04dddea101d2e11; task began clean. Recorded completion of the prior publication without rewriting its historical log/reflections.
+- Identified that setID + ":rest" aliases re-completions and cannot protect against an old Undo. Explained the bounded solution before editing: fresh UUID rest identity on each successful completion, stable set identity and existing one-rest-row-per-set model retained. Re-completion atomically upserts only that set's rest with a fresh deadline/cleared metadata and advances active_rest_id. No broad redesign or attempt-history infrastructure.
+- Added background ProofUndoSet with explicit session/completed-set/rest IDs and exact Retry Undo. A guarded transaction restores completed=0 and saves undone_at only for the current unacknowledged rest. Commit precedes content publication; failures roll back both writes. Undo never changes entered values/plans/later drafts/unrelated actuals, completion-request counts, deadline, skipped_at or continued_at. Duplicate/stale/acknowledged Undo cannot mutate newer state.
+- Rest card keeps countdown and Undo/Continue through zero. Committed Undo shows Set returned to draft instead of Set saved; normal Continue reveals the restored draft, marking skipped only before expiry. Final Undo restores Set 3 rather than final summary. Re-completion saves one current completed record and starts normal new rest; no fourth set/automatic exercise finish. Compact timer/action row retains 44-point minimum button height; phone layout/accessibility remain unrun. Existing countdown format and normal rest selector unchanged.
+- Additive schema v4 adds nullable undone_at with transactional version change. Existing v3 records/IDs/deadlines/acknowledgements stay intact; old migration paths retained. Active/expired unacknowledged installed rest may be undone; skipped/acknowledged rest stays dismissed. Optional activity association/Undo fields support older payload shape without inventing action IDs; ordinary reopen reconciles old cards. Runtime decoding/migration not claimed tested. App readout identifies Undo and displays the persisted Undo timestamp.
+- Checks Passed: 44 production-SQL wrapper tests (29 retained plus 15 Undo/migration checks), TypeScript, eight exact regenerated host/extension native-file comparisons, local Markdown/whitespace and history/scope review. Tests cover before/at/after-zero, repeated/overlapping/stale Undo, preserved fields/counts, gating, reopen, final-set Undo, new-ID re-completion, failed marker/COMMIT/upsert and exact retry, installed v3 active/expired/skipped/dismissed migration, migration rollback and rerun. JS wrapper executes production SQL, not Swift/App Intents/ActivityKit/Codable/SwiftUI; configuration generation is not native compilation.
+- Recorded separate adopted Add Set rule: copy the last completed set's pounds/reps for the same exercise into an editable today-only draft; routine count unchanged. No Add Set code/control or fourth set added. No-prior-completion fallback left open. No dependency/signing/identifier/framework changes. TS-001 delayed automatic reveal and TS-002 countdown jumps stay open; prior device evidence remains build-scoped.
+
+### What I learned — user-written
+
+### Next small task
+
+Review Undo's completion identity, atomicity, migration and retry path before any separately authorized preview build. Then follow the upgrade-first Undo checklist in the proof guide; all new phone checks remain Not run.
+
+---
+
 ## 2026-11-12 — Record saved-confirmation device results and review publication
 
 **Status** — Bounded upgrade preservation and fresh Set 1 confirmation/Continue/reopen **Passed — user-reported** for build 33cfa887-8f9f-46cd-a5d8-95d88dd3e31f. Publication review found no blocker; ten paths proposed in HANDOFF. Documentation only; no source change, cloud build, staging, commit or push.
