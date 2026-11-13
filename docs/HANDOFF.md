@@ -1,10 +1,49 @@
 # Current project handoff
 
-Updated 2026-11-12. **Continue migrated-record sequence and separate fresh-fixture regression Passed — user-reported** for build 41621efa-1d34-4af1-8860-804b7eb01b5d. Native compilation/signing Passed earlier. Fresh actuals are 40 × 8, 50 × 8, 45 × 10, with three records/three requests and final Expired/Dismissed state. Next: publish the reviewed checkpoint when explicitly authorized. Duplicate/stale and broader recovery checks remain Not run. Automatic reveal remains deferred; countdown jumps remain open.
+Updated 2026-11-12. **Published baseline:** [92da1c915ff702941fcc8b00003dd3f0caf2933e](https://github.com/fgzmac/Swoldier/commit/92da1c915ff702941fcc8b00003dd3f0caf2933e); local HEAD rechecked, remote main was verified in the earlier preparation task and was not queried again here. Existing ten unstaged paths preserved. Corrected retry review passed; this documentation/publication review made no source changes and found no publication blocker. Exactly one [saved-confirmation preview / installation page](https://expo.dev/accounts/fgzmacaraeg/projects/swoldier-lock-screen-proof/builds/33cfa887-8f9f-46cd-a5d8-95d88dd3e31f) **FINISHED** at 2026-11-13T05:28:37.744Z (November 12 local). **Native compilation/signing Passed**. Bounded upgrade preservation and fresh Set 1 confirmation/Continue/reopen now **Passed — user-reported**, with evidence types separated below. Failure/retry, duplicate/stale actions, VoiceOver, larger text and broader recovery remain **Not run**. Prior Continue passes remain user-reported for build 41621efa. TS-001/TS-002 stay open/deferred.
 
-**Adopted 2026-11-12 — Continue; native compilation/signing Passed; migrated-record and fresh-fixture device sequences Passed — user-reported, remaining checks unrun.** Show only the countdown and one button labeled exactly **Continue** on the rest card. Before zero, Continue ends rest early and reveals the next existing draft. At/after zero, Continue reveals that draft without saving a set or restarting rest. Preserve prior draft edits, planned targets, completed records, and duplicate/stale-action guards; keep the authenticated Lock Screen visible. After the third rest, Continue reveals **Planned sets recorded**, with no fourth set or automatic exercise finish. Keep editing/Complete hidden on the rest card; do not adopt the earlier visible-controls recommendation.
+**Adopted 2026-11-12 — Continue; native compilation/signing Passed; migrated-record and fresh-fixture device sequences Passed — user-reported, remaining checks unrun.** Show countdown and one button labeled exactly **Continue** on the rest card, plus the newly adopted compact confirmed-save/failure feedback described below. Before zero, Continue ends rest early and reveals the next existing draft. At/after zero, Continue reveals that draft without saving a set or restarting rest. Preserve prior draft edits, planned targets, completed records, and duplicate/stale-action guards; keep the authenticated Lock Screen visible. After the third rest, Continue reveals **Planned sets recorded**, with no fourth set or automatic exercise finish. Keep editing/Complete hidden on the rest card; do not adopt the earlier visible-controls recommendation.
 
 Continue supersedes automatic return as a first-version requirement. Prompt automatic reveal is deferred, not fixed or proven impossible. The implementation must not depend on delayed system staleness to make controls available. See [TROUBLESHOOTING_BACKLOG.md](TROUBLESHOOTING_BACKLOG.md): TS-001 tracks delayed reveal; TS-002 separately tracks countdown pauses/jumps. Future investigations in the supplied backlog are proposals, not work authorized by this documentation task.
+
+## Next task — publish the reviewed saved-confirmation checkpoint
+
+The user attributes the latest upgrade and fresh trial to build **33cfa887-8f9f-46cd-a5d8-95d88dd3e31f**. **Screenshot-supported preservation, as described by the user:** before/after actuals 40 × 8, 50 × 8, 45 × 10; plans; three records/requests; Expired/Dismissed rest; deadline and acknowledgement timestamps unchanged. Exact timestamps were not supplied. No new images were attached or independently inspected here; artifact identity is user-reported.
+
+**Separate fresh trial after reset — Passed — user-reported:** Set 1 completed at 40 × 8; ✓ Set saved appeared promptly, persisted through 0:00 and was not clipped. Continue removed confirmation and revealed Set 2 at its planned 50 × 8 on the authenticated visible Lock Screen. User confirmed ordinary reopen showed one record/one request and Expired/Dismissed rest. This is one fresh completed set, not a new full three-set trial. [Detailed evidence and limits](../proofs/lock-screen/README.md#saved-confirmation-device-results--2026-11-12).
+
+**Publication review:** ten proposed paths below; no source changes in this task, no untracked files, and no credentials, signing/device files, generated artifacts, dependencies or private records found in the reviewed diff. All 15 source/configuration/lockfiles still match the successful build's inspected source hash manifest. Existing source/SQL and evidence distinctions reviewed; 29 SQL-wrapper tests, TypeScript, Markdown links and whitespace Passed. SQL wrappers are not Swift/runtime tests. Historical logs/reflections and unrelated work preserved. Nothing staged, committed or pushed; local HEAD remains 92da1c915ff702941fcc8b00003dd3f0caf2933e. Remote refs were not rechecked in this documentation task.
+
+**Next small task:** when explicitly authorized, recheck the working diff and remote state, then stage/commit/push only these ten reviewed paths. Suggested commit message: **Add saved-set confirmation and exact-action retries**. This is a bounded proof checkpoint, not a production-release or broad test-coverage claim. No new build is needed merely to publish the unchanged source.
+
+1. README.md
+2. docs/BUILD_LOG.md
+3. docs/HANDOFF.md
+4. docs/LOCK_SCREEN_FEASIBILITY.md
+5. docs/PROJECT.md
+6. docs/TROUBLESHOOTING_BACKLOG.md
+7. proofs/lock-screen/README.md
+8. proofs/lock-screen/native/ProofActivity.swift
+9. proofs/lock-screen/native/ProofCoordinator.swift
+10. proofs/lock-screen/native/ProofWidget.swift
+
+AGENTS.md, dependency lockfile, tests, storage/SQL, intent definitions and configuration are already tracked and unchanged; they are not additional staged paths for this checkpoint.
+
+**Corrected review passed:** each error-card retry uses the original failed operation and session/set/rest IDs; edits retain their delta, and legacy Skip retains its entry point. Complete cannot turn into Continue or target the next set. Continue's guarded update requires the matching current rest/set and no prior acknowledgement. Outdated Complete cannot complete a newer set or restart rest; its received-request counter can still increment for the addressed existing set by design. A successful store return publishes a newly constructed saved snapshot with saveFailed false and failedAction nil; another throw captures the request that actually failed. No automatic replay. Optional new payload fields do not make older serialized content require new keys; old failure content without retry metadata requests reopening rather than inventing a target. Source compatibility was reviewed and the code compiled; actual older-content decoding on the phone remains Not run.
+
+**Confirmation trace:** only a committed completed row matching the current rest supplies savedRestSetID, checked again in the widget. No tap or pending write produces success. Failure takes precedence over every normal layout, including the final summary; success remains through zero until stored Continue acknowledgement dismisses rest. Store, SQL/migration, deadlines, drafts/plans/actuals, action guards, intents and dependencies are unchanged. The only uploaded source differences from baseline are native/ProofActivity.swift, ProofCoordinator.swift and ProofWidget.swift; no source correction was needed in this review/build task.
+
+**Checks/build:** 29 production-SQL wrapper tests and TypeScript Passed. Wrappers execute production SQL with separate JS transaction/migration logic, not Swift or the retry view. Eight previously regenerated native files still match current source. Fresh isolated archive: exactly 15 allowlisted source/configuration/lockfiles, SHA-256 hashes match local files before and after upload, no credentials, signing/device files, dependencies, generated artifacts or unrelated files. Reused the existing Expo project/phone configuration and remote signing with --freeze-credentials; Apple-server revalidation was skipped by noninteractive CLI without Apple login, not claimed freshly performed. Xcode ARCHIVE SUCCEEDED, zero compiler errors, signed IPA exported; dependency/build warnings remain. Free account usage 8/15 iOS before, 9/15 after, zero overage and zero estimated charges. One submission, no retry or App Store submission; no staging/commit/push.
+
+### Remaining device checks — Not run
+
+- Failure injection and each retry path, including failed Complete/Continue/edits and older failure content with no retry metadata.
+- Duplicate/stale actions and received-request accounting; one request/one record does not test duplicates. Two physical taps do not prove two intents executed.
+- Early Continue confirmation dismissal and fresh final-set confirmation/final Continue on this build; do not infer them from earlier Continue build results or preserved pre-reset records.
+- VoiceOver, larger text and a broader layout/reachable-control sweep; the reported unclipped message is a limited presentation pass.
+- Force-quit, system termination, repeated republication, other migration/upgrade states and broader recovery. Ordinary reopen in this sequence does not cover them.
+
+Keep TS-001 automatic-reveal delay and TS-002 countdown jumps open. See the [partially completed checklist](../proofs/lock-screen/README.md#saved-confirmation-device-checklist--not-run).
 
 ## Historical evidence before Continue
 
@@ -104,15 +143,15 @@ The preceding evidence was a migrated-record sequence, **not the separate fresh 
 
 This result does not claim the proposed 40 × 9 / duplicate-Complete variant passed: the reported first set is 40 × 8 and the final request count is three. Duplicate/stale Continue, current-build duplicate Complete, force-quit, system termination, other migration cases, phone failure/retry, and dedicated layout/republication checks remain **Not run**. No additional reopen result is inferred; earlier reopen evidence remains attached to the migrated sequence.
 
-## Next task — publish the reviewed Continue checkpoint when authorized
+## Completed publication review — historical record
 
-**Recommendation only:** commit and normally push the reviewed three-set/Continue milestone in a separately authorized task, after rechecking Git state and any intervening changes. This task staged, committed, and pushed nothing. Suggested message: **Add three-set proof with persistent Continue rest controls**.
+**Publication completed:** all 17 reviewed files below were committed and normally pushed at [92da1c915ff702941fcc8b00003dd3f0caf2933e](https://github.com/fgzmac/Swoldier/commit/92da1c915ff702941fcc8b00003dd3f0caf2933e), message **Add three-set proof with persistent Continue rest controls**. Remote main matched HEAD and the tree was clean afterward; rechecked at this task start. The following review details describe that published checkpoint, not the new local feedback patch.
 
 Publication review: no blocking source or publication-content issue found. The full accumulated diff covers the three-set store/migration, identity guards, Continue acknowledgement, presentation, retained manual D1 diagnostics, tests, and related documentation. Production scope/framework remain unchanged. The 15 intended source/configuration/lockfile files still match the successful Continue upload byte-for-byte. The lockfile and configuration are already tracked and unchanged, so they need no new staging.
 
 Checks rerun on Windows: 29 production-SQL wrapper tests and TypeScript Passed. SQL tests use a separate JavaScript transaction/migration wrapper, not Swift execution. Markdown links/anchors and whitespace Passed. Candidate content/path review found no credentials, signing files, personal device identifiers, generated artifacts, personal screenshots, or private workout/scan exports. Fictional proof values and historical diagnostic timestamps are retained as evidence. Existing native compilation/signing is a prior build result, not rerun here.
 
-Exact proposed publication list (17 files; only the backlog is new/untracked):
+Published checkpoint file list (17 files; backlog was new in that commit):
 
 ```text
 AGENTS.md

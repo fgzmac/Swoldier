@@ -9,12 +9,18 @@ struct ProofWidget: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: ProofActivity.self) { context in
             VStack(spacing: 4) {
-                if let setID = context.state.setID, let restID = context.state.restID {
+                if context.state.saveFailed {
+                    failure(context.state.failedAction)
+                } else if let setID = context.state.setID, let restID = context.state.restID {
                     if showsRest(context), let deadline = context.state.restDeadline {
-                        // Only the bounded timer and Continue are shown during rest.
+                        if let savedSetID = context.state.savedRestSetID,
+                           restID == savedSetID + ":rest" {
+                            Text("✓ Set saved")
+                                .font(.caption.weight(.semibold))
+                                .accessibilityLabel("Set saved")
+                        }
                         HStack(spacing: 16) {
                             countdown(deadline).font(.largeTitle.weight(.semibold))
-                                .accessibilityHint(context.state.saveFailed ? "Save failed. Tap Continue to retry." : "")
                             Button(intent: ProofContinueRest(sessionID: context.attributes.sessionID,
                                 setID: setID, restID: restID)) {
                                 actionLabel("Continue")
@@ -37,7 +43,11 @@ struct ProofWidget: Widget {
         } dynamicIsland: { context in
             DynamicIsland {
                 DynamicIslandExpandedRegion(.center) {
-                    if showsRest(context), let deadline = context.state.restDeadline {
+                    if context.state.saveFailed {
+                        Text(context.state.failedAction == nil
+                             ? "Action failed — reopen app"
+                             : "Action failed — retry on Lock Screen")
+                    } else if showsRest(context), let deadline = context.state.restDeadline {
                         countdown(deadline)
                     } else {
                         Text(context.state.completed ? "Planned sets recorded"
@@ -45,17 +55,60 @@ struct ProofWidget: Widget {
                     }
                 }
             } compactLeading: {
-                Text(showsRest(context) ? "Rest" : "Set")
+                Text(context.state.saveFailed ? "Failed" : (showsRest(context) ? "Rest" : "Set"))
             } compactTrailing: {
-                if showsRest(context), let deadline = context.state.restDeadline {
+                if context.state.saveFailed {
+                    Text("!").accessibilityLabel("Action failed")
+                } else if showsRest(context), let deadline = context.state.restDeadline {
                     countdown(deadline)
                 } else { Text("\(context.state.setNumber ?? 1)/3") }
             } minimal: {
-                if showsRest(context), let deadline = context.state.restDeadline {
+                if context.state.saveFailed {
+                    Text("!").accessibilityLabel("Action failed")
+                } else if showsRest(context), let deadline = context.state.restDeadline {
                     countdown(deadline).font(.caption2)
                 } else { Text("\(context.state.setNumber ?? 1)/3") }
             }
         }
+    }
+
+    @ViewBuilder
+    private func failure(_ failed: ProofFailedAction?) -> some View {
+        // Failure replaces all normal layouts, including rest and the final summary.
+        // A failed duplicate request does not establish that the original set is unsaved.
+        VStack(spacing: 4) {
+            if let failed {
+                switch failed.action {
+                case .complete:
+                    failureMessage("Complete request failed")
+                    Button(intent: ProofCompleteSet(sessionID: failed.sessionID,
+                        setID: failed.setID, restID: failed.restID)) { actionLabel("Retry Complete") }
+                case .continueRest:
+                    failureMessage("Continue failed — tap Continue to retry")
+                    Button(intent: ProofContinueRest(sessionID: failed.sessionID,
+                        setID: failed.setID, restID: failed.restID)) { actionLabel("Continue") }
+                case .skip:
+                    failureMessage("Continue failed — tap Continue to retry")
+                    Button(intent: ProofSkipRest(sessionID: failed.sessionID,
+                        setID: failed.setID, restID: failed.restID)) { actionLabel("Continue") }
+                case .weight(let delta):
+                    failureMessage("Weight change failed")
+                    Button(intent: ProofAdjustWeight(sessionID: failed.sessionID,
+                        setID: failed.setID, restID: failed.restID, delta: delta)) { actionLabel("Retry change") }
+                case .reps(let delta):
+                    failureMessage("Rep change failed")
+                    Button(intent: ProofAdjustReps(sessionID: failed.sessionID,
+                        setID: failed.setID, restID: failed.restID, delta: delta)) { actionLabel("Retry change") }
+                }
+            } else {
+                failureMessage("Request failed — reopen app to check saved state")
+            }
+        }
+    }
+
+    private func failureMessage(_ message: String) -> some View {
+        Text(message).font(.caption.weight(.semibold))
+            .lineLimit(2).fixedSize(horizontal: false, vertical: true)
     }
 
     private func showsRest(_ context: ActivityViewContext<ProofActivity>) -> Bool {
@@ -70,9 +123,7 @@ struct ProofWidget: Widget {
                 Text("Set \(context.state.setNumber ?? 1)/3 · \(context.state.recordCount ?? 0) saved")
                     .font(.caption.weight(.semibold))
                 Spacer(minLength: 4)
-                if context.state.saveFailed {
-                    Text("Save failed — retry").font(.caption)
-                } else if let notice = context.state.notice {
+                if let notice = context.state.notice {
                     Text(notice).font(.caption)
                 }
             }

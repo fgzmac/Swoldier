@@ -4,6 +4,86 @@ Record a short entry after each working session. Newest entries go first. Write 
 
 **Planned:** agreed or proposed work. **Implemented:** code exists. **Verified:** a named check ran and passed.
 
+## 2026-11-12 — Record saved-confirmation device results and review publication
+
+**Status** — Bounded upgrade preservation and fresh Set 1 confirmation/Continue/reopen **Passed — user-reported** for build 33cfa887-8f9f-46cd-a5d8-95d88dd3e31f. Publication review found no blocker; ten paths proposed in HANDOFF. Documentation only; no source change, cloud build, staging, commit or push.
+
+- Read AGENTS/current handoff/project/latest log and reviewed the accumulated three Swift/seven Markdown changes against baseline 92da1c915ff702941fcc8b00003dd3f0caf2933e. Local main remains that commit; no untracked files. Existing work preserved; no fresh remote-ref check.
+- Screenshot-supported upgrade evidence, as described by the user: saved actuals 40 × 8, 50 × 8, 45 × 10; plans; three records/requests; Expired/Dismissed rest; deadline and acknowledgement timestamps unchanged. No screenshots were attached or independently inspected in this task. Exact timestamps were not supplied and are not invented. This is the completed/dismissed-rest upgrade case only.
+- After resetting, user completed Set 1 at 40 × 8. User confirmed prompt ✓ Set saved, remaining through 0:00 without clipping; Continue removed it and revealed Set 2 at 50 × 8 on the authenticated visible Lock Screen. User confirmed reopening showed one record/one request and Expired/Dismissed rest. These are reported interactions/app observations, not independent instrumentation. The preserved three records were before reset; this fresh trial completed one set, not all three.
+- Do not extend this pass to failure/retry, duplicate/stale actions, early-Continue confirmation, fresh final-rest confirmation, VoiceOver, larger text, isolated older-payload decoding or broader recovery/migration. One request/one record is not duplicate testing. Prior native compilation/signing was independently verified in the build task and was not rerun. Prior Continue build evidence remains separate. TS-001 deferred automatic reveal and TS-002 countdown jumps stay open.
+- Publication review traced committed-set/rest identity, exact failed-operation retry metadata and failure precedence. Storage, migration, deadlines, guards, intent definitions, dependencies and configuration remain unchanged. Source hashes for all 15 intended upload files still match the successful build's inspected manifest. Reviewed paths exclude credentials, signing/device files, generated artifacts, dependencies, screenshots and private records. Existing fictional proof evidence is retained.
+- Checks rerun: 29 production-SQL wrapper tests and TypeScript Passed; wrappers execute production SQL through separate JS transaction/migration logic, not Swift/runtime retry behavior. Local Markdown links/anchors and whitespace Passed. All source bytes and prior log/reflections preserved. No new native or phone tests independently executed.
+- Updated seven current status/evidence documents, preserving all historical build entries and personal reflections. Suggested future commit: Add saved-set confirmation and exact-action retries. No publication blocker found for this bounded proof checkpoint; unrun edge cases remain explicit limitations rather than claimed passes.
+
+### What I learned — user-written
+
+### Next small task
+
+When explicitly authorized, recheck the diff and remote state, then commit/push only the ten reviewed paths listed in HANDOFF. No new build is needed to publish unchanged source; keep the remaining device checks and both troubleshooting issues open.
+
+---
+
+## 2026-11-12 — Review corrected retries and build saved confirmation
+
+**Status** — Corrected source review Passed with no remaining blocking issue and no source edits. Exactly one [saved-confirmation preview / installation page](https://expo.dev/accounts/fgzmacaraeg/projects/swoldier-lock-screen-proof/builds/33cfa887-8f9f-46cd-a5d8-95d88dd3e31f) **FINISHED** at 2026-11-13T05:28:37.744Z (November 12 local). Native compilation/signing **Passed**; installation, runtime compatibility, failure injection, layout and device checks **Not run**.
+
+- Read AGENTS/current handoff/project/latest log/proof guidance and traced the three-source-file patch against baseline 92da1c915ff702941fcc8b00003dd3f0caf2933e. Existing ten unstaged paths preserved. Local HEAD remains the baseline; no remote-ref query, staging, commit or push.
+- All retry buttons invoke the captured action with its original session/set/rest IDs and delta where applicable; no conversion from Complete to Continue or inference of newer targets. Existing SQL guards reject outdated mutation targets. A duplicate/stale Complete can still count a received request for its addressed existing set, without saving a newer set or restarting rest. Continue cannot acknowledge another rest.
+- Successful transaction return occurs after COMMIT and constructs fresh activity content with failure flag/payload cleared; a further throw captures the request that failed again. New payload fields are optional for prior content decoding; an old failure without metadata asks to reopen rather than guessing a retry. Swift compilation now passes; real older-activity decoding and runtime failure recovery are not established by compilation.
+- Confirmation still requires a completed row matching the current rest in the committed snapshot, checked again at rendering. Failure overrides normal rest/draft/final content. Normal confirmation lasts through zero until stored acknowledgement. No changes to storage/migration, deadlines, records/drafts/plans, intent definitions, action guards, dependencies, identifiers or signing configuration.
+- Windows checks Passed: 29 production-SQL tests through a separate JS wrapper and TypeScript. Eight previously regenerated native source/resource copies still match current source; no fresh native project regeneration was needed because source was unchanged. The wrappers do not execute Swift, coordinator publication or SwiftUI rendering. Markdown links, whitespace and preservation checks passed.
+- Fresh directory-isolated EAS archive contains exactly 15 intended source/configuration/lockfiles; SHA-256 hashes all match local files and remained unchanged after upload. Allowlist/content review found no credentials, signing files, device IDs, dependencies, generated artifacts or unrelated files. Only ProofActivity.swift, ProofCoordinator.swift and ProofWidget.swift differ from the published baseline within that archive; a separate local hash manifest records the exact upload inputs.
+- Current Free allowance checked: 8/15 iOS before, 9/15 after; zero overage and zero estimated charges. Submitted once using existing project and frozen remote credentials. CLI did not revalidate profiles against Apple servers without Apple login; do not claim a fresh independent device/profile check. Xcode ARCHIVE SUCCEEDED with zero compiler errors and exported/signed IPA. Dependency/build warnings remain; no retry, paid-plan change or App Store submission.
+- Refreshed handoff and current status pointers; preserved all prior log entries and personal reflections. Installation/checklist emphasizes upgrade preservation, durable confirmation through zero, Continue dismissal, final flow, readable controls and physical-tap versus received-request evidence. Prior user-reported passes stay scoped to build 41621efa. TS-001 deferred automatic reveal and TS-002 countdown jumps remain open.
+
+### What I learned — user-written
+
+### Next small task
+
+Capture current phone data, install the saved-confirmation preview over the existing proof without deleting/resetting, and run the focused confirmation/Continue/layout checklist. Keep failure injection and other unrun cases separate.
+
+---
+
+## 2026-11-12 — Review saved confirmation; correct mismatched failure retry
+
+**Status** — Blocking feedback mismatch found by source review; narrow correction prepared. **No cloud build submitted**, following the explicit stop-on-blocker instruction. Windows checks Passed; corrected Swift/native compilation and all new device checks **Not run**.
+
+- Read AGENTS/current handoff/project/proof/log and reviewed all three changed source files against published baseline 92da1c915ff702941fcc8b00003dd3f0caf2933e. Local HEAD remains that baseline; ten existing unstaged paths were preserved. Remote main was verified in the prior task, not queried again here. No staging/commit/push.
+- The old generic saveFailed publication could follow any action. Its rest text always instructed Continue to retry, so a failed duplicate/stale Complete during displayed rest would instead acknowledge rest. This was established by tracing the catch and button intent, not by a device failure test. A previous final-summary branch could also conceal the failure.
+- Narrow source correction stays in ProofActivity, ProofCoordinator and ProofWidget: optional failedAction retains operation plus exact session/set/rest IDs and adjustment delta; Codable/Hashable are added to the existing action enum. Failure takes priority over all normal layouts and uses the corresponding existing intent. Failed Complete offers Retry Complete; failed Continue offers Continue; failed edits retry the original change. Legacy Skip retains its original entry point. Older content without retry metadata requests reopening to inspect saved state. Dynamic Island displays failure rather than a normal summary. No automatic replay.
+- Success remains tied to the completed row for that rest in a snapshot returned after COMMIT, with a second identity check in the widget. It survives zero until stored acknowledgement dismisses rest. Failure suppresses it. A failed duplicate request does not mean its earlier saved record was lost. Retrying a stale request remains guarded; a successfully received duplicate Complete can increment its request count but cannot add a record/restart rest. Successful publication or foreground reconciliation rebuilds from saved state.
+- Preserved store/SQL/migration, intents, plans/drafts/actuals, acknowledgement, deadlines, action guards, timer, final-set flow, dependencies and signing. Source changes add only failure/publication presentation metadata and recovery controls; no database change. No speculative countdown/automatic-reveal fix; TS-001/TS-002 remain open.
+- Checks rerun on Windows: 29 production-SQL tests through a separate JS transaction/migration wrapper, TypeScript, and isolated native configuration regeneration with eight matching host/extension source/resource copies. These do not execute Swift, its Codable synthesis, coordinator or SwiftUI. Source/diff review verifies exact retry parameters, commit ordering and unchanged timer/storage paths. Markdown links, whitespace and preservation checks passed. No native compile, signing, installation, phone decoding/layout, failure injection or device interaction test.
+- No quota check, fresh EAS archive, upload or build after the blocker. Updated current project/handoff/proof guidance; historical entries and personal learning reflections preserved. Existing saved-feedback work retained. All new device checklist items remain Not run; prior Continue reports remain scoped to build 41621efa.
+
+### What I learned — user-written
+
+### Next small task
+
+Review the corrected failure feedback before separately authorizing one preview build. Recheck allowance and isolated archive at that time; then test upgrade preservation, confirmation through zero/Continue, readable controls and actual received-request counts.
+
+---
+
+## 2026-11-12 — Prepare durable saved-set visual confirmation
+
+**Status** — Local presentation patch prepared. Windows checks Passed; new Swift/native compilation, signed build, installation and device behavior **Not run**. Earlier Continue phone results remain user-reported and do not pass this layout change.
+
+- Read AGENTS/current project/handoff/proof/latest log and traced Complete, storage commit, snapshot publication and widget selection. Task started clean on main at [92da1c915ff702941fcc8b00003dd3f0caf2933e](https://github.com/fgzmac/Swoldier/commit/92da1c915ff702941fcc8b00003dd3f0caf2933e); fresh read-only remote main matched. The previous 17-file checkpoint was committed/pushed normally. No publication action in this task.
+- Added optional savedRestSetID to Activity content, populated only from a completed row in the returned stored snapshot matching the current rest's setID + ":rest" identity (used by existing completion and legacy import). Snapshot returns after commit. Widget matches the confirmation to its displayed rest; no pending/tap/next-draft-completed inference. Older decoded content without the optional field does not guess success; ordinary saved-state republishing fills it.
+- Added compact **✓ Set saved** above countdown/Continue, lasting through zero until acknowledgement dismisses rest. Success has the accessible label Set saved. A saveFailed publication shows readable **Save failed — tap Continue to retry** instead, with up to two lines and the existing failure accessibility hint. Existing draft save-failure feedback stays intact. Values, adjustments and Complete remain hidden during rest. Control sizes, margins, countdown and final summary unchanged; fit/VoiceOver require device testing.
+- Preserved SQL, store/transactions, acknowledgement, deadlines, plans, actuals, migration, intents, duplicate/stale guards, reset, dependencies, identifiers and final-set flow. No timer, animation, haptic or wake change. No new infrastructure or troubleshooting claim; TS-001/TS-002 stay open.
+- Local checks Passed: 29 existing production-SQL tests through a separate JS wrapper, TypeScript, and configuration generation in a separate ignored fixture with eight exact host/extension native-source/resource comparisons. SQL tests do not execute Swift or the new confirmation mapping; generated-source inspection does not compile native code. Static diff/source trace checks commit-before-publication, identity and failure precedence. Markdown links and whitespace checked. No new native or phone test run.
+- Updated current publication status and visual requirement/checklist. Test plan captures preserved upgrade data, confirmation through zero, Continue dismissal/final flow, layout/accessibility, failure/retry when safely reproducible and accidental repeated taps. Compare received request counts, records and deadlines: two physical taps do not establish two executed intents. Historical entries and personal reflections preserved; no cloud upload/build, staging, commit or push.
+
+### What I learned — user-written
+
+### Next small task
+
+Review the prepared three-file visual patch before separately authorizing one preview build. Then run the focused phone checklist; keep new compilation and device outcomes Not run until observed.
+
+---
+
 ## 2026-11-12 — Record fresh Continue regression and review publication checkpoint
 
 **Status** — Fresh-fixture regression **Passed — user-reported** for build 41621efa-1d34-4af1-8860-804b7eb01b5d. Separate from the earlier migrated-record sequence. Accumulated checkpoint reviewed for a future authorized publication; no staging, commit or push in this task.

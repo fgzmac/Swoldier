@@ -72,7 +72,9 @@ actor ProofCoordinator {
             for activity in activities(sessionID) {
                 var lastDisplayed = activity.content.state
                 lastDisplayed.saveFailed = true
-                // Preserve the last committed display state; Continue remains retryable.
+                lastDisplayed.failedAction = ProofFailedAction(
+                    sessionID: sessionID, setID: setID, restID: restID, action: action)
+                // Keep the exact failed request; the view must not present old state as success.
                 await activity.update(publication(content(lastDisplayed)))
             }
         }
@@ -94,6 +96,11 @@ actor ProofCoordinator {
             restDeadline: snapshot.restDeadline.map { Date(timeIntervalSince1970: $0) },
             restSkippedAt: snapshot.restSkippedAt.map { Date(timeIntervalSince1970: $0) },
             restContinuedAt: snapshot.restContinuedAt.map { Date(timeIntervalSince1970: $0) },
+            // Both current completion and legacy import use setID + ":rest".
+            // This snapshot is returned only after the store transaction commits.
+            savedRestSetID: snapshot.sets.first(where: {
+                $0.completed && snapshot.restID == $0.setID + ":rest"
+            })?.setID,
             setID: snapshot.setID, restID: snapshot.restID,
             setNumber: snapshot.displaySet.ordinal, recordCount: snapshot.recordCount, notice: notice
         ))

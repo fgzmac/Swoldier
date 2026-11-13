@@ -10,7 +10,7 @@ Track unresolved problems without blocking unrelated progress. Deferred means un
 
 **Adopted by the user on 2026-11-12; implemented locally on 2026-11-12, native compilation/signing Passed; bounded migrated-record and separate fresh-fixture sequences Passed — user-reported, other checks pending.**
 
-- Keep the rest screen focused on the countdown and one button labeled exactly **Continue**.
+- Keep the rest screen focused on the countdown and one button labeled exactly **Continue**. The 2026-11-12 visual-feedback requirement adds compact durable **✓ Set saved** confirmation or readable failure/retry status; values/editing/Complete stay hidden.
 - Before zero, Continue ends rest early and reveals the next existing draft.
 - At or after zero, Continue reveals that draft without saving a set or restarting rest.
 - Preserve draft edits, planned targets, completed records, and duplicate/stale-action protections. Required taps must keep the authenticated Lock Screen visible.
@@ -24,6 +24,8 @@ Local implementation update — 2026-11-12: persisted continued_at separates ack
 Device update — 2026-11-12: the Continue build's migrated expired-rest sequence Passed — user-reported. User-described screenshots preserve the original actual, two drafts, plans, counts and exact deadline across upgrade; expired Continue preserves Expired and acknowledgement on reopen, early Continue yields Skipped, and final expired Continue yields Planned sets recorded with three actuals/three requests. Lock Screen reveal interactions are user-reported, not independently observed. See the [evidence table](../proofs/lock-screen/README.md#continue-device-results--migrated-record-sequence-2026-11-12). This was not a fresh three-set trial; repeated/stale Continue, other migration cases and lifecycle recovery remain Not run. Neither automatic-reveal delay nor countdown jumps is resolved by these results.
 
 Fresh-fixture update — 2026-11-12: a separate reset/default-value trial on the same Continue build Passed — user-reported. Actuals 40 × 8, 50 × 8, 45 × 10; final screenshot described as three records/three requests, Planned sets recorded, Expired/Dismissed with acknowledgement. Prompt Continue before/after zero stayed on the authenticated visible Lock Screen by report. Duplicate/stale Continue, force-quit, termination and other untested cases remain Not run. [Evidence and limits](../proofs/lock-screen/README.md#continue-fresh-fixture-regression--2026-11-12). This does not fix or close TS-001 or TS-002.
+
+Publication / visual-feedback update — 2026-11-12: Continue checkpoint published at [92da1c915ff702941fcc8b00003dd3f0caf2933e](https://github.com/fgzmac/Swoldier/commit/92da1c915ff702941fcc8b00003dd3f0caf2933e). The saved-confirmation/failure-label patch subsequently compiled/signed as build 33cfa887; bounded upgrade preservation and fresh Set 1 confirmation through zero/Continue/reopen now Passed — user-reported. Screenshot-supported preservation (as described) is separate from reported interactions. Failure/retry, duplicate/stale actions, accessibility and broader recovery remain Not run. It changes neither automatic reveal nor countdown timing and closes neither issue. See the [current handoff](HANDOFF.md).
 
 ## Issue index
 

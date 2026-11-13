@@ -1,9 +1,17 @@
 import ActivityKit
 import Foundation
 
-enum ProofAction: Sendable {
+enum ProofAction: Codable, Hashable, Sendable {
     case complete, skip, continueRest
     case weight(Int), reps(Int)
+}
+
+// Retry the failed request, never infer its target from a newer displayed draft/rest.
+struct ProofFailedAction: Codable, Hashable, Sendable {
+    let sessionID: String
+    let setID: String
+    let restID: String
+    let action: ProofAction
 }
 
 struct ProofActivity: ActivityAttributes {
@@ -15,7 +23,11 @@ struct ProofActivity: ActivityAttributes {
         var restSkippedAt: Date? = nil
         // Optional for old content; nil means not acknowledged.
         var restContinuedAt: Date? = nil
+        // Set confirmed completed in the stored snapshot for this rest; absent on older cards.
+        var savedRestSetID: String? = nil
         var saveFailed: Bool = false
+        // Optional so older publications still decode without inventing a retry target.
+        var failedAction: ProofFailedAction? = nil
         // Optional fields decode the installed one-set activity without inventing IDs.
         var setID: String? = nil
         var restID: String? = nil
