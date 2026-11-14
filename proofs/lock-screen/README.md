@@ -1,5 +1,85 @@
 # Swoldier Lock Screen proof
 
+## Local Undo-rest wording refinement — 2026-11-13
+
+**Publication review, 2026-11-13:** no blocker found against 593d39d; 71 SQL-wrapper tests and TypeScript re-run Passed. Current inputs compared with the inspected a6785cf2 archive: 14/15 hashes match; only native/ProofWidget.swift differs, solely in Undo-rest button/accessibility/instruction wording. No action/ID/retry/storage change. The patch remains unbuilt/device-unverified. [Exact proposed files and validation limits](../../docs/HANDOFF.md#publication-review--2026-11-13).
+
+**Adopted and prepared locally:** while editing the draft restored by Undo with its rest still displayed, label the existing completion action **Complete Set** and rest-dismissal action **End Rest**. Matching accessibility labels and the local deadline instruction use those names. Normal saved-set rest retains **Continue**; ordinary draft and exact failure/retry actions retain their existing labels and original operation/IDs.
+
+End Rest invokes the existing Continue intent: it dismisses/acknowledges rest (early rest remains skipped), preserves edits and does not save the draft. Complete Set keeps the existing native deadline/acknowledgement checks and starts fresh rest only after successful saving. No storage, migration, plan, actual, deadline, guard, retry or action identity change. No new timer or display behavior.
+
+Only ProofWidget.swift presentation changed. The two-button HStack, spacing and flexible-width/minimum-44-point-height labels remain; source inspection is not rendered-fit/accessibility evidence. The wording-only task passed TypeScript/documentation/whitespace checks without rerunning SQL; the subsequent publication review separately reran all 71 SQL-wrapper checks successfully. **New Swift compilation, rendered fit and device behavior: Not run.** Build a6785cf2 predates this wording and does not contain it. No upload/build/staging/commit/push; both troubleshooting issues remain open.
+
+**Later focused check — Not run:** in an Undo-rest editing state, verify both new labels are readable/reachable; Complete Set before expiry rejects saving, End Rest preserves the draft, and corrected completion starts fresh rest. Verify normal saved rest still says Continue. The local wording has passed source review; a separately authorized build is still required; do not use the prior preview as evidence for these labels.
+
+## Guided two-exercise device evidence — 2026-11-13
+
+Build **a6785cf2-13ea-4384-985d-065fc0051ea2** only. This records the user's supplied account of the guided sequence and screenshots; no new screenshot files were independently inspected in this documentation task. Screenshot-supported displayed state is distinct from user-reported interactions and from earlier automated SQL-wrapper/native compilation checks.
+
+| Evidence | Scoped result and basis |
+| --- | --- |
+| Upgrade comparison | Passed — screenshot-supported state, as supplied: records, draft, plans, counts and rest timestamps preserved; installed session remained one legacy exercise. No additional exact pre-upgrade values/timestamps are inferred. |
+| Fresh-fixture final choices | Passed — guided user report: after final Continue, Add Set appeared above Next Exercise. |
+| Add Set | Passed — supplied guided result: today-only 45 lb × 11 draft appeared, plans unchanged and saved records remained three. This does not establish duplicate execution protection on device. |
+| Added-set Undo | Passed — user-reported interaction: editing returned immediately while rest continued. |
+| Corrected added set | Screenshot-supported state: Set 4 saved at 45 lb × 12, four saved records, five Complete requests. The screenshot alone does not establish exact Undo/edit/Continue/expiry/re-completion timing or prove intentional duplicate execution. |
+| Exercise advancement | Passed — guided user report: Next Exercise loaded B at 15 lb × 12 on the visible Lock Screen; B progressed to 20 lb × 10, then showed Add Set above Finish Workout. |
+| Finish interaction | Passed — user-reported: Finish stayed on the authenticated visible Lock Screen. |
+| Finished stored-state display | Screenshot-supported: both exercises and workout finished. A actuals: 40 × 8, 50 × 8, 45 × 11, today-only 45 × 12. B actuals: 15 × 12, 20 × 10. Six records, seven Complete requests; final rest Skipped/Dismissed. Actuals are separate from the unchanged routine plans. |
+
+**Not device-tested by this evidence:** deliberate duplicate/stale/competing requests, exact failure/retry injection, accessibility/larger text, broader recovery/force-quit/system termination, other migration cases and independent old-content decoding. Do not infer B Add Set, repeated Add cycles, exact early-rejection/expiry timing for the added set, unchanged added-rest deadline, or post-finish reopen behavior unless separately reported. Request counters are received-request counts, not proof of a particular physical tap sequence.
+
+The later **Complete Set / End Rest** wording patch is **unbuilt and device-unverified**; this preview contains the earlier labels. Its new Swift compilation, rendered fit and device checks remain Not run. TS-001 delayed automatic reveal and TS-002 countdown jumps remain open/deferred; no fix follows from this sequence.
+
+## Two-exercise proof — prepared locally, 2026-11-13
+
+**Published baseline verified:** [593d39d](https://github.com/fgzmac/Swoldier/commit/593d39d834e0ad33dd375822fc2e2313e466c592); local/remote main matched in a successful fresh read-only query, starting working tree clean. This two-exercise extension is uncommitted. Review passed with no source correction. Exactly one [two-exercise preview / installation page](https://expo.dev/accounts/fgzmacaraeg/projects/swoldier-lock-screen-proof/builds/a6785cf2-13ea-4384-985d-065fc0051ea2) **FINISHED** at 2026-11-14T01:15:06.493Z (November 13 local). **Native compilation/signing Passed**: archive succeeded, zero errors/nine warnings, signed IPA exported. **Guided device results now recorded above:** supplied upgrade preservation and Add/Undo/Next/Finish sequence have bounded screenshot-supported/user-reported evidence. Untested migration/decoding, accessibility, recovery and deliberate action-safety trials remain Not run. The later wording patch is not in this build. Earlier Undo passes remain build-scoped/user-reported and do not validate these additions. Production framework remains open.
+
+### Adopted button timing and order
+
+- Completing the final current-exercise set keeps the existing saved confirmation, countdown, Undo and Continue, including at zero. No automatic advance or finish.
+- Only after Continue acknowledges that final rest, the normal Lock Screen card shows exactly two vertically stacked actions: **Add Set** first, then **Next Exercise**. For the final exercise, the lower action is **Finish Workout** instead. The ordinary success card has no third action; failure feedback still takes precedence with its exact retry.
+- Add Set appends one editable today-only draft, copying this exercise's most recently completed actual pounds/reps. No completed record, new rest or routine target is created. After this set completes and its rest is acknowledged, the same pair of choices returns.
+- Undo/immediate editing, stored-deadline rejection before zero, early Continue and re-completion after expiry without Continue apply to added sets too. Normal completed-set rest still awaits Continue. Added-set re-completion gets a fresh rest identity.
+- Next Exercise atomically marks only the current exercise finished and advances once, loading the next exercise's own existing planned draft. Finish Workout atomically finishes the final exercise/workout once and shows **Workout finished**, retaining every record. No sharing, analysis or new-workout flow added; existing deliberate fictional-data reset remains.
+
+### Fictional fixtures and installed-session compatibility
+
+| New/reset session fixture | Planned sets | Rest |
+| --- | --- | --- |
+| Fictional Exercise A | 40 lb × 8; 50 lb × 8; 45 lb × 10 | 20 seconds |
+| Fictional Exercise B | 15 lb × 12; 20 lb × 10 | 20 seconds |
+
+These names, values, 20-second rest and existing 5-lb/1-rep editing limits are proof fixtures, not production settings. Exercise A retains the earlier three targets. Added drafts have is_added=1 and null planned targets; planned rows remain unchanged. Most-recent completed actual means the last ordinal in this ordered proof: completion is sequential and Undo can target only the set associated with the current rest. This is not a generalized workout-history sorting policy.
+
+Schema **v5** adds active-exercise/finished metadata, an exercise table and an authoritative set table without the old three-set constraint. Migration transactionally copies all v4 rows and stable set IDs into that table, with exercise identity attached, retaining original values/plans/counts and all rest IDs/deadlines/acknowledgement/Undo metadata. The old v2 set table stays intact as a migration snapshot; runtime reads/writes use v5. Earlier v0–v3 migrations remain and run before v5. Version and schema roll back together on failure; rerunning is a no-op. Reset clears both current and retained fictional tables deliberately.
+
+**Installed sessions remain one exercise**, labeled Fictional Exercise A (legacy). Migration/start/reopen never append Exercise B or change existing targets. They use Add Set / Finish Workout after their final acknowledged rest, with no Next Exercise. Only a new/reset session seeds both exercises in one transaction. No deletion/reset is required to preserve/use an installed session. New Activity fields are optional; an old card without the metadata shows no invented transition actions until ordinary saved-state reconciliation. The supplied upgrade comparison supports preservation for that installed one-exercise session only; other migration cases and dedicated old-content decoding remain Not run.
+
+### Native safety and checks
+
+Set IDs remain attached to their original exercise; new action payloads retain exact session/set/rest identities through failures and retries. SQL validates the active unfinished exercise/workout, all current sets completed, the last completed set and its acknowledged current rest before Add/Next/Finish. Add creates a pending draft, making repeated Add/Next ineligible; completing it creates a fresh rest identity, so an old choice cannot be replayed later. Next clears the active rest pointer for the next exercise while retaining prior rest/history rows. Finish freezes further mutations. Existing counted Complete requests remain separate from saves; requests for a finished/previous exercise are rejected without changing its counters.
+
+Undo and its marker, completion/rest replacement, exercise finish/advance and final finish are transactional under SQLite's write lock. Success is published only after COMMIT. Failure keeps the original operation/IDs, including new Retry Add Set, Retry Next Exercise and Retry Finish Workout. Native SQL enforces eligibility even if an old button or competing intent executes; visible layout alone is never the guard. Existing timer rendering, acknowledgement and no-isStale expiry behavior remain.
+
+**Windows checks Passed:** 71 production-SQL wrapper tests (51 retained/adapted plus 20 two-exercise cases), TypeScript, iOS JavaScript/Hermes export (580 modules), eight regenerated native source/resource comparisons, local Markdown/whitespace checks. The wrappers use the actual shipped SQL but separate JavaScript migration/transaction/snapshot logic; they do **not** execute Swift, App Intents, ActivityKit or UIKit/SwiftUI. Configuration generation/export are not a native compile. Review re-ran all 71 SQL-wrapper tests and TypeScript; eight generated-file comparisons and a fresh isolated 15-file upload archive passed, every SHA-256 matching source at a6785cf2 submission time. Current ProofWidget.swift now differs by the later wording patch; the other 14 inputs still match. Source inputs were baseline 593d39d plus App.tsx and six native files: ProofActivity.swift, ProofCoordinator.swift, ProofIntents.swift, ProofSQL.json, ProofStore.swift and ProofWidget.swift. The archive included the lockfile and nested source, excluded docs/tests/dependencies/generated artifacts/private files, and was uploaded for the single authorized preview. Existing project and remote signing reused with frozen credentials; no fresh Apple-server profile validation in this noninteractive session. Free iOS usage 11/15 → 12/15, zero overage/$0 estimated charges. Identifiers, dependencies and production framework unchanged. No retry, staging, commit or push.
+
+### Focused upgrade and device checklist — scoped evidence above, remaining trials unrun
+
+This original checklist contains broader checks than the reported sequence. Only the evidence explicitly recorded above is passed; do not treat an entire numbered step as passed when only part was reported.
+
+1. Capture installed actuals/drafts/plans/counts/rest/deadline/acknowledgement before installing the linked preview. Install without deleting/resetting, reopen and compare. Confirm exactly one legacy exercise remains; reopening/Show Live Activity does not append B. Check pending/expired/undone migration states separately.
+2. After preserving the upgrade evidence, deliberately reset fictional data and Start. Confirm A's three targets and B's distinct two targets. Complete A's last set: normal confirmation/countdown/Undo/Continue must remain through zero. No Add/Next until Continue.
+3. Continue: verify exactly **Add Set** above **Next Exercise**, both reachable. Add once; confirm copied A actuals, editable today-only draft, unchanged plans/records/deadline. Rapid physical taps alone do not prove duplicate intent execution.
+4. Complete the added set, Undo during rest, edit immediately, verify unchanged deadline/other records, early Complete rejection and completion after expiry without Continue. Re-completion produces one current actual. After final Continue the two choices return. Try another Add cycle.
+5. Next Exercise: confirm B starts at 15 × 12, followed by its planned 20 × 10; A's records remain labeled A and A is finished. Reopen and verify persistence. Deliberate stale/retried or competing action injection needs separate tests.
+6. Complete B, acknowledge its final rest, and confirm Add Set above **Finish Workout**, never automatic finish. Add uses B's last actuals, not A's. Finally Finish Workout: verify simple finished card/app, saved records/plans retained and reopening remains finished.
+7. Throughout, required actions stay on the authenticated visible Lock Screen. Record clipping, accessibility and countdown jumps separately; TS-001 automatic-reveal delay and TS-002 countdown jumps remain open. Failure injection, old-content decoding, force-quit and system termination remain unrun until separately tested.
+
+## Earlier one-exercise checkpoint evidence
+
+The following records published one-exercise behavior and results. Earlier “Add Set unimplemented” and fixed-three-set statements belong to that checkpoint and are superseded by the current local scope above, not rewritten as new device passes.
+
 ## Immediate-edit device results — 2026-11-13
 
 The five focused device-checklist steps for build **74c497a5-308e-4f0d-bee7-53152648eed5** are **Passed — user-reported**, confirmed 2026-11-13. This covers displayed data preservation across upgrade, immediate Undo editing with preserved rest, edits surviving early Complete rejection, edited early Continue followed by corrected completion/new rest, completion after zero without Continue or opening the app, and readable/reachable controls with plans/other records unchanged. No new screenshots, exact entered values, aggregate counts or timestamps were supplied; none were independently observed or inferred.

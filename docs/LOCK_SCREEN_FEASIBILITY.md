@@ -1,5 +1,11 @@
 # Lock Screen feasibility and device proof
 
+## Current two-exercise proof — 2026-11-13
+
+Native background intents for Add Set, Next Exercise and Finish Workout reuse the existing implementation approach and exact retry identities. Final rest must be acknowledged before the two vertical choices; there is no new automatic-transition timing claim. 71 SQL-wrapper tests and Windows checks Passed; new native compilation/signing Passed in the single [two-exercise preview / installation page](https://expo.dev/accounts/fgzmacaraeg/projects/swoldier-lock-screen-proof/builds/a6785cf2-13ea-4384-985d-065fc0051ea2); the later guided upgrade and Add/Undo/Next/Finish sequence has scoped screenshot-supported/user-reported evidence. Supplied final state shows six exercise-linked records, seven Complete requests and finished markers; it does not prove exact action timing or deliberate duplicate handling. [Detailed evidence](../proofs/lock-screen/README.md#guided-two-exercise-device-evidence--2026-11-13). Deliberate stale/competing/retry, accessibility, broader recovery and other migration/decoding trials remain Not run. The later Complete Set / End Rest wording is unbuilt/device-unverified. Review found no source correction; a compiled build does not prove native action behavior. The earlier one-exercise results below do not establish these new controls. [Current scope and checklist](../proofs/lock-screen/README.md#two-exercise-proof--prepared-locally-2026-11-13). Both troubleshooting issues and production framework remain open.
+
+The earlier checkpoint descriptions below retain their original scope and evidence.
+
 ## Latest immediate-edit evidence — 2026-11-13
 
 The five focused device-checklist steps for build **74c497a5-308e-4f0d-bee7-53152648eed5** are **Passed — user-reported**, confirmed 2026-11-13. This covers displayed data preservation across upgrade, immediate Undo editing with preserved rest, edits surviving early Complete rejection, edited early Continue followed by corrected completion/new rest, completion after zero without Continue or opening the app, and readable/reachable controls with plans/other records unchanged. No new screenshots, exact entered values, aggregate counts or timestamps were supplied; none were independently observed or inferred.

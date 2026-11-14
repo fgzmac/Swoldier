@@ -11,6 +11,8 @@ struct ProofWidget: Widget {
             VStack(spacing: 4) {
                 if context.state.saveFailed {
                     failure(context.state.failedAction)
+                } else if context.state.workoutFinished == true {
+                    Text("Workout finished").font(.headline)
                 } else if let setID = context.state.setID, let restID = context.state.restID {
                     if showsUndoneDraft(context) {
                         draft(context, setID: setID, restID: restID, duringUndoneRest: true)
@@ -39,7 +41,20 @@ struct ProofWidget: Widget {
                             }
                         }
                     } else if context.state.completed {
-                        Text("Planned sets recorded").font(.headline)
+                        if context.state.canChooseNext == true, context.state.exerciseID != nil {
+                            // Deliberate order; no automatic advancement after final rest.
+                            Button(intent: ProofAddSet(sessionID: context.attributes.sessionID,
+                                setID: setID, restID: restID)) { actionLabel("Add Set") }
+                            if context.state.hasNextExercise == true {
+                                Button(intent: ProofNextExercise(sessionID: context.attributes.sessionID,
+                                    setID: setID, restID: restID)) { actionLabel("Next Exercise") }
+                            } else {
+                                Button(intent: ProofFinishWorkout(sessionID: context.attributes.sessionID,
+                                    setID: setID, restID: restID)) { actionLabel("Finish Workout") }
+                            }
+                        } else {
+                            Text("Planned sets recorded").font(.headline)
+                        }
                     } else {
                         draft(context, setID: setID, restID: restID)
                     }
@@ -59,6 +74,8 @@ struct ProofWidget: Widget {
                         Text(context.state.failedAction == nil
                              ? "Action failed — reopen app"
                              : "Action failed — retry on Lock Screen")
+                    } else if context.state.workoutFinished == true {
+                        Text("Workout finished")
                     } else if showsRest(context), let deadline = context.state.restDeadline {
                         countdown(deadline)
                     } else {
@@ -67,19 +84,19 @@ struct ProofWidget: Widget {
                     }
                 }
             } compactLeading: {
-                Text(context.state.saveFailed ? "Failed" : (showsRest(context) ? "Rest" : "Set"))
+                Text(context.state.saveFailed ? "Failed" : (context.state.workoutFinished == true ? "Done" : (showsRest(context) ? "Rest" : "Set")))
             } compactTrailing: {
                 if context.state.saveFailed {
                     Text("!").accessibilityLabel("Action failed")
                 } else if showsRest(context), let deadline = context.state.restDeadline {
                     countdown(deadline)
-                } else { Text("\(context.state.setNumber ?? 1)/3") }
+                } else { Text(context.state.workoutFinished == true ? "✓" : "\(context.state.setNumber ?? 1)/\(context.state.setCount ?? 3)") }
             } minimal: {
                 if context.state.saveFailed {
                     Text("!").accessibilityLabel("Action failed")
                 } else if showsRest(context), let deadline = context.state.restDeadline {
                     countdown(deadline).font(.caption2)
-                } else { Text("\(context.state.setNumber ?? 1)/3") }
+                } else { Text(context.state.workoutFinished == true ? "✓" : "\(context.state.setNumber ?? 1)/\(context.state.setCount ?? 3)") }
             }
         }
     }
@@ -95,6 +112,18 @@ struct ProofWidget: Widget {
                     failureMessage("Complete request failed")
                     Button(intent: ProofCompleteSet(sessionID: failed.sessionID,
                         setID: failed.setID, restID: failed.restID)) { actionLabel("Retry Complete") }
+                case .addSet:
+                    failureMessage("Add Set failed")
+                    Button(intent: ProofAddSet(sessionID: failed.sessionID,
+                        setID: failed.setID, restID: failed.restID)) { actionLabel("Retry Add Set") }
+                case .nextExercise:
+                    failureMessage("Next Exercise failed")
+                    Button(intent: ProofNextExercise(sessionID: failed.sessionID,
+                        setID: failed.setID, restID: failed.restID)) { actionLabel("Retry Next Exercise") }
+                case .finishWorkout:
+                    failureMessage("Finish Workout failed")
+                    Button(intent: ProofFinishWorkout(sessionID: failed.sessionID,
+                        setID: failed.setID, restID: failed.restID)) { actionLabel("Retry Finish Workout") }
                 case .undo:
                     failureMessage("Undo failed — tap Retry Undo")
                     Button(intent: ProofUndoSet(sessionID: failed.sessionID,
@@ -144,7 +173,7 @@ struct ProofWidget: Widget {
             HStack {
                 Text(duringUndoneRest
                      ? "Set \(context.state.setNumber ?? 1) returned to draft"
-                     : "Set \(context.state.setNumber ?? 1)/3 · \(context.state.recordCount ?? 0) saved")
+                     : "Ex \(context.state.exerciseNumber ?? 1) · Set \(context.state.setNumber ?? 1)/\(context.state.setCount ?? 3)")
                     .font(.caption.weight(.semibold))
                 Spacer(minLength: 4)
                 if duringUndoneRest, let deadline = context.state.restDeadline {
@@ -155,7 +184,9 @@ struct ProofWidget: Widget {
             }
             if duringUndoneRest {
                 // Always actionable: storage decides at execution, not on a zero redraw.
-                Text(context.state.notice ?? "Complete at zero or Continue")
+                let instruction = context.state.notice
+                Text(instruction == nil || instruction == "Complete at zero or Continue"
+                     ? "Complete Set at zero or End Rest" : instruction ?? "")
                     .font(.caption2)
             }
             HStack(spacing: 6) {
@@ -173,11 +204,15 @@ struct ProofWidget: Widget {
             }
             HStack(spacing: 8) {
                 Button(intent: ProofCompleteSet(sessionID: context.attributes.sessionID,
-                    setID: setID, restID: restID)) { actionLabel("Complete") }
+                    setID: setID, restID: restID)) {
+                    actionLabel(duringUndoneRest ? "Complete Set" : "Complete")
+                }
+                .accessibilityLabel(duringUndoneRest ? "Complete Set" : "Complete")
                 if duringUndoneRest {
                     Button(intent: ProofContinueRest(sessionID: context.attributes.sessionID,
-                        setID: setID, restID: restID)) { actionLabel("Continue") }
-                        .accessibilityHint("Ends rest early before zero; preserves your edits")
+                        setID: setID, restID: restID)) { actionLabel("End Rest") }
+                        .accessibilityLabel("End Rest")
+                        .accessibilityHint("Dismisses rest without saving the draft; preserves your edits")
                 }
             }
         }

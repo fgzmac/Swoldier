@@ -140,6 +140,87 @@ struct ProofContinueRest: LiveActivityIntent {
     }
 }
 
+struct ProofAddSet: LiveActivityIntent {
+    static let title: LocalizedStringResource = "Add Set"
+    static var supportedModes: IntentModes { .background }
+    static var authenticationPolicy: IntentAuthenticationPolicy { .requiresLocalDeviceAuthentication }
+
+    @Parameter(title: "Session") var sessionID: String
+    @Parameter(title: "Set") var setID: String
+    @Parameter(title: "Rest", default: "none") var restID: String
+
+    init() {}
+    init(sessionID: String, setID: String, restID: String) {
+        self.sessionID = sessionID
+        self.setID = setID
+        self.restID = restID
+    }
+
+    func perform() async throws -> some IntentResult {
+        #if PROOF_WIDGET_EXTENSION
+        try rejectExtensionExecution()
+        #else
+        await ProofCoordinator.shared.apply(sessionID: sessionID, setID: setID,
+                                            restID: restID, action: .addSet)
+        #endif
+        return .result()
+    }
+}
+
+struct ProofNextExercise: LiveActivityIntent {
+    static let title: LocalizedStringResource = "Next Exercise"
+    static var supportedModes: IntentModes { .background }
+    static var authenticationPolicy: IntentAuthenticationPolicy { .requiresLocalDeviceAuthentication }
+
+    @Parameter(title: "Session") var sessionID: String
+    @Parameter(title: "Set") var setID: String
+    @Parameter(title: "Rest", default: "none") var restID: String
+
+    init() {}
+    init(sessionID: String, setID: String, restID: String) {
+        self.sessionID = sessionID
+        self.setID = setID
+        self.restID = restID
+    }
+
+    func perform() async throws -> some IntentResult {
+        #if PROOF_WIDGET_EXTENSION
+        try rejectExtensionExecution()
+        #else
+        await ProofCoordinator.shared.apply(sessionID: sessionID, setID: setID,
+                                            restID: restID, action: .nextExercise)
+        #endif
+        return .result()
+    }
+}
+
+struct ProofFinishWorkout: LiveActivityIntent {
+    static let title: LocalizedStringResource = "Finish Workout"
+    static var supportedModes: IntentModes { .background }
+    static var authenticationPolicy: IntentAuthenticationPolicy { .requiresLocalDeviceAuthentication }
+
+    @Parameter(title: "Session") var sessionID: String
+    @Parameter(title: "Set") var setID: String
+    @Parameter(title: "Rest", default: "none") var restID: String
+
+    init() {}
+    init(sessionID: String, setID: String, restID: String) {
+        self.sessionID = sessionID
+        self.setID = setID
+        self.restID = restID
+    }
+
+    func perform() async throws -> some IntentResult {
+        #if PROOF_WIDGET_EXTENSION
+        try rejectExtensionExecution()
+        #else
+        await ProofCoordinator.shared.apply(sessionID: sessionID, setID: setID,
+                                            restID: restID, action: .finishWorkout)
+        #endif
+        return .result()
+    }
+}
+
 // Retained for already-archived cards; storage still validates all action IDs.
 struct ProofSkipRest: LiveActivityIntent {
     static let title: LocalizedStringResource = "Skip proof rest"

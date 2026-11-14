@@ -9,9 +9,19 @@ type Snapshot = {
   setNumber: number;
   plannedSetsRecorded: boolean;
   sets: {
-    setID: string; number: number; plannedPounds: number; plannedReps: number;
+    setID: string; number: number; plannedPounds: number | null; plannedReps: number | null; exerciseID: string; isAdded: boolean;
     pounds: number; reps: number; completed: boolean; completionAttempts: number;
   }[];
+  exerciseID: string;
+  exerciseName: string;
+  exerciseNumber: number;
+  exerciseCount: number;
+  setCount: number;
+  exercises: { exerciseID: string; name: string; number: number; finishedAt: number | null }[];
+  canChooseNext: boolean;
+  hasNextExercise: boolean;
+  workoutFinished: boolean;
+  finishedAt: number | null;
   pounds: number;
   reps: number;
   completed: boolean;
@@ -131,17 +141,20 @@ export default function App() {
     <SafeAreaView style={styles.screen}>
       <ScrollView contentContainerStyle={styles.content}>
         <Text accessibilityRole="header" style={styles.title}>Workout proof</Text>
-        <Text accessibilityRole="header">Undo proof — preserve rest and entered values</Text>
+        <Text accessibilityRole="header">Two-exercise proof — Add Set, Next Exercise, Finish Workout</Text>
         {proof ? (
           <>
             <Text>{saved
-              ? (saved.plannedSetsRecorded ? 'Planned sets recorded' :
-                'Current draft ' + saved.setNumber + '/3: ' + saved.pounds + ' lb × ' + saved.reps + ' reps')
+              ? (saved.workoutFinished ? 'Workout finished' : saved.plannedSetsRecorded ? 'Current exercise sets recorded' :
+                'Current draft ' + saved.setNumber + '/' + saved.setCount + ': ' + saved.pounds + ' lb × ' + saved.reps + ' reps')
               : 'No session started.'}</Text>
+            {saved && <Text>Current exercise: {saved.exerciseName} ({saved.exerciseNumber}/{saved.exerciseCount})</Text>}
+            {saved?.exercises.map(exercise => <Text key={exercise.exerciseID}>{exercise.name}: {exercise.finishedAt == null ? 'Not finished' : 'Finished'}</Text>)}
+            {saved?.finishedAt != null && <Text>Workout finished at: {saved.finishedAt}</Text>}
             {saved?.sets.map(set => (
               <View key={set.setID}>
-                <Text>Set {set.number}: {set.completed ? 'Saved' : 'Draft'} {set.pounds} lb × {set.reps}</Text>
-                <Text>Plan: {set.plannedPounds} lb × {set.plannedReps}</Text>
+                <Text>{saved.exercises.find(e => e.exerciseID === set.exerciseID)?.name} · Set {set.number}: {set.completed ? 'Saved' : 'Draft'} {set.pounds} lb × {set.reps}</Text>
+                <Text>{set.isAdded ? 'Today-only added set; no routine target' : `Plan: ${set.plannedPounds} lb × ${set.plannedReps}`}</Text>
               </View>
             ))}
             <Text>Saved records: {saved?.recordCount ?? 0}</Text>
@@ -156,9 +169,9 @@ export default function App() {
             {saved?.restUndoneAt != null && <Text>Set returned to draft at: {saved.restUndoneAt}</Text>}
             {saved?.restDeadline != null && <Text>Rest deadline: {saved.restDeadline}</Text>}
             <Button
-              title={saved && (!saved.completed || saved.awaitingContinue) ? 'Show Live Activity' : 'Start three-set proof'}
+              title={saved ? 'Show Live Activity' : 'Start two-exercise proof'}
               onPress={() => void act('start')}
-              disabled={busy || (saved?.completed === true && !saved.awaitingContinue)}
+              disabled={busy || saved?.workoutFinished === true}
             />
             <Button title="Reset proof data" disabled={busy || !saved} onPress={() => {
               Alert.alert('Reset fictional data?', 'This removes all fictional proof sets/rest, including migrated proof data, and ends its Live Activity.', [

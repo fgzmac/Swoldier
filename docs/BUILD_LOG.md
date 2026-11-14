@@ -4,6 +4,108 @@ Record a short entry after each working session. Newest entries go first. Write 
 
 **Planned:** agreed or proposed work. **Implemented:** code exists. **Verified:** a named check ran and passed.
 
+## 2026-11-13 — Review two-exercise and wording publication checkpoint
+
+**Status** — No publication blocker found; exactly 15 paths proposed in HANDOFF. Current wording remains unbuilt/device-unverified. No source edit, upload/build, staging, commit or push.
+
+- Read AGENTS/current handoff/project/latest log and inspected Git. Local main/HEAD is published baseline 593d39d834e0ad33dd375822fc2e2313e466c592 with upstream origin/main. All 15 accumulated unstaged paths preserved; no untracked or staged files. No remote-ref query in this review.
+- Reviewed complete baseline diff: two-exercise/current-exercise identity, additive v5 copying and legacy-session retention, Add/Next/Finish eligibility/atomic transitions, added-set Undo/edit/rest gating, stale/competing protections, exact retries, finished-history guards, app/card UI, SQL-wrapper changes and documentation. No source blocker or correction.
+- Rechecked all 15 current build inputs against the preserved inspected a6785cf2 archive and its original SHA-256 manifest: 14 exact matches, only native/ProofWidget.swift differs. No input additions/removals. Config/dependencies/lockfile unchanged. Docs/tests were excluded from the build archive and reviewed through their baseline diffs instead.
+- Exhaustive archive-to-current source difference: Undo-rest Complete → Complete Set, Continue → End Rest, corresponding accessibility labels/hint, and the matching local deadline instruction. Other notices remain intact. Button intent bindings/IDs, rest-selection/countdown, normal saved-rest Continue and failure/retry branches unchanged. Storage/deadlines/gating/guards match the built input exactly. Current hashes are not all equal to a6785cf2.
+- Re-ran 71 production-SQL wrapper tests and TypeScript: Passed. SQL wrappers execute shipped SQL through separate JavaScript transaction/migration/read code, not Swift/runtime execution. Markdown links and whitespace checked. No new native compilation, generated-project regeneration, layout rendering or device tests; the new label patch stays Not run for those checks.
+- Kept a6785cf2 screenshot-supported stored state separate from user-reported Lock Screen interactions and automated checks. No new evidence for duplicate/stale/competing device requests, failure injection/retries, accessibility, broader recovery or other migration states. TS-001 delayed automatic reveal and TS-002 countdown jumps remain open/deferred.
+- Reviewed all proposed contents and ignore rules, with credential/device-pattern checks. No credentials, signing files, device identifiers, private records/scans, screenshots, dependencies or generated artifacts found; fixture outcomes remain fictional test data. AGENTS.md and tracked dependency lockfile unchanged and outside the proposed 15-path delta. Historical log entries and personal reflections preserved.
+- Refreshed handoff with exact paths, archive differences, limits and suggested message: Add two-exercise proof and clarify Undo rest controls. This prepares a publication checkpoint; it does not claim the unbuilt wording passed native/device validation or authorize publication.
+
+### What I learned — user-written
+
+### Next small task
+
+When explicitly authorized, recheck Git/remote state and the 15 reviewed paths, inspect staged contents/whitespace, then commit and push normally. Keep any later build/device validation of the wording separately authorized and reported.
+
+---
+
+## 2026-11-13 — Record guided two-exercise device results
+
+**Status** — Documentation only. Guided results for build **a6785cf2-13ea-4384-985d-065fc0051ea2** recorded with screenshot-supported displayed state separated from **Passed — user-reported** interactions. Later Complete Set / End Rest wording remains unbuilt/device-unverified. No source change, cloud upload/build, staging, commit or push.
+
+- Read AGENTS/current handoff/project/latest log/proof guide and inspected Git. Local main/HEAD remains 593d39d834e0ad33dd375822fc2e2313e466c592; all 15 accumulated unstaged paths preserved. No remote-ref query. Evidence comes from the user's supplied sequence/screenshot descriptions; no new image files were independently inspected in this task.
+- Supplied before/after upgrade state preserved records, draft, plans, counts and rest timestamps; installed session remained one legacy exercise. This supports that comparison, not all migration/decoding states or broader recovery.
+- Fresh fixture showed Add Set above Next Exercise after final Continue. Add created a today-only 45 × 11 draft without changing plans or increasing three saved records. Added-set Undo immediately restored editing while rest continued — Passed, user-reported. Subsequent screenshot showed corrected Set 4 saved at 45 × 12, four records and five Complete requests; no exact interaction timing, deliberate duplicate execution or native dispatch sequence is inferred from that screenshot.
+- Next Exercise loaded B at 15 × 12 on the visible Lock Screen, then B progressed to 20 × 10 and Add Set above Finish Workout. Finish remained on the authenticated Lock Screen — Passed, user-reported. These interactions are separate from displayed final-state evidence.
+- Final screenshot-supported state: both exercises/workout finished. A actuals 40 × 8, 50 × 8, 45 × 11, today-only 45 × 12; B 15 × 12, 20 × 10. Six records, seven Complete requests, final rest Skipped/Dismissed. Plans remain separate from actuals; no additional timestamp or unreported count is invented.
+- Deliberate duplicate/stale/competing actions, failure retries, accessibility/larger text, force-quit/system termination and broader recovery remain Not run on device. Do not infer B Add, repeated Add cycles, exact added-set early/expiry gating, unchanged added-rest deadline or post-finish reopen. Prior automated SQL-wrapper/native compilation results are separate and were not rerun here.
+- Refreshed handoff/project/proof evidence and related current status. Next small task remains review of the local Complete Set / End Rest wording before a separately authorized build; this device report cannot validate those newer labels. TS-001 delayed automatic reveal and TS-002 countdown jumps remain open/deferred.
+- Documentation links and whitespace checked; prior log entries/reflections and all source changes preserved. Personal learning reflections remain untouched.
+
+### What I learned — user-written
+
+### Next small task
+
+Review the unbuilt wording patch, keeping the recorded a6785cf2 results separate. Only after separate build authorization and installation can the new labels, rendered fit and corresponding device behavior be tested.
+
+---
+
+## 2026-11-13 — Clarify Undo-rest completion and rest-dismissal labels
+
+**Status** — Bounded wording patch prepared locally. TypeScript, focused source/layout inspection, Markdown links and whitespace Passed. New native compilation, rendered fit, accessibility and device behavior **Not run**. No cloud upload/build, staging, commit or push.
+
+- Read AGENTS/current handoff/project/latest log and inspected Git: main/HEAD remains 593d39d834e0ad33dd375822fc2e2313e466c592, with all 15 accumulated unstaged paths preserved. No remote query or publication action.
+- Adopted labels in the Undo-rest draft state: **Complete Set** and **End Rest**. Updated their accessibility labels, the rest-dismissal hint and the displayed deadline instruction to match. Normal saved-set rest retains **Continue**; existing exact failure/retry labels and targets stay unchanged.
+- Only ProofWidget.swift presentation changed. End Rest still invokes ProofContinueRest with the original session/set/rest IDs, preserving edits without saving. Complete Set still invokes ProofCompleteSet with those IDs; storage enforces early rest rejection and commits actuals before fresh rest. No action, retry, storage, migration, draft, plan, completed-record, deadline or guard changes.
+- Source fit review: existing two flexible-width buttons, HStack spacing 8, minimum 44-point action height, line limit and minimum scaling remain. Longer wording requires rendered/device verification; no claim of fit or accessibility pass. TypeScript does not compile Swift. No SQL-wrapper rerun for this presentation-only change; the prior 71-test result belongs to the previous build review.
+- Updated proof guide, project decision and handoff with the local patch and focused later check. Successful preview a6785cf2 predates these labels; its compile/signing result cannot verify this source. Both TS-001 delayed automatic reveal and TS-002 countdown jumps remain open. Historical entries and personal reflections preserved.
+
+### What I learned — user-written
+
+### Next small task
+
+Review the wording diff before any separately authorized build. Later verify Undo-rest labels/fit, early Complete Set rejection, End Rest preserving edits, corrected saving/new rest, and normal saved-rest Continue. All device checks remain Not run.
+
+---
+
+## 2026-11-13 — Review two-exercise proof and build one preview
+
+**Status** — Review passed without source correction. Exactly one [two-exercise preview / installation page](https://expo.dev/accounts/fgzmacaraeg/projects/swoldier-lock-screen-proof/builds/a6785cf2-13ea-4384-985d-065fc0051ea2) **FINISHED** at 2026-11-14T01:15:06.493Z (November 13 local). Native compilation/signing **Passed**; installation, runtime migration/decoding, layout and new device checks **Not run**. No automatic retry, staging, commit or push.
+
+- Read AGENTS/current handoff/project/latest log and proof guide. Local main/HEAD 593d39d834e0ad33dd375822fc2e2313e466c592, upstream origin/main; preserved all 15 existing unstaged paths. Previous preparation freshly verified remote main; this review did not query it again. No unrelated work or learning reflections changed.
+- Reviewed final completion retaining Undo/Continue until acknowledgement, exactly two vertically stacked choices (Add above Next or Finish), copy-current-exercise actuals/no target mutation, added-set Undo/immediate editing/deadline guards and fresh-rest re-completion. No source correction or blocking issue found. Static compact-control review is not physical layout verification.
+- Traced native transaction paths: Add creates one draft and consumes eligibility; Next finishes/advances atomically; Finish freezes exercise/workout once. Original session/set/rest identities plus current unfinished exercise checks reject duplicate/stale/competing transitions. Retries carry the failed operation and original IDs; success publishes only after COMMIT. Prior exercise/finished history stays guarded. v5 copies installed rows while keeping original tables/rest metadata, preserves one-exercise sessions, and only seeds both fixtures on new/reset sessions.
+- Re-ran 71 production-SQL wrapper tests and TypeScript: Passed. Coverage includes Add copy/defaults/identity, final acknowledgement gate, added Undo/edit/re-completion, competing Add/Next/Finish orders, concurrent Add/Next delivery, transaction rollback/retry, final finish/reopen and v4 active/expired/skipped/undone migration/rerun. These execute shipped SQL through separate JavaScript wrappers, not Swift, App Intents or ActivityKit. Eight generated native file/resource comparisons Passed. The earlier JavaScript/Hermes export belongs to preparation and was not rerun in this review.
+- Fresh isolated archive: exactly 15 intended source/configuration/lockfile files, all SHA-256 hashes match local files. Required nested native/module/plugin files included; docs/tests/dependencies/generated files/signing/credentials/device identifiers/unrelated repository files excluded. Configuration, dependencies, identifiers and plugin unchanged from baseline. Uploaded baseline 593d39d plus accumulated local App.tsx and native ProofActivity.swift, ProofCoordinator.swift, ProofIntents.swift, ProofSQL.json, ProofStore.swift and ProofWidget.swift changes. No new source edits during review/build.
+- Verified account plan Free with iOS usage 11/15 before submission; submitted exactly one preview using proof-directory isolation and freeze-credentials. Existing Expo project, registered-device signing and app/extension credentials reused, no signing/registration changes. Noninteractive setup skipped fresh Apple-server profile validation. Final usage 12/15, zero overage and $0 estimated charges; no paid plan change.
+- Build logs: Archive Succeeded; successfully exported/signed IPA; zero errors and nine warnings. Visible warnings include generated AppDelegate iOS deprecations, duplicate library and toolchain search-path warnings; none blocked this build. No runtime correctness or device pass inferred from compilation. Native build is distinct evidence from the SQL-wrapper checks.
+- Updated current status and upgrade-first handoff/checklist. All new device outcomes remain Not run. Earlier Undo passes remain separately user-reported/build-scoped. TS-001 delayed automatic reveal and TS-002 countdown jumps remain open/deferred; production framework remains undecided. Historical log entries and personal reflections preserved.
+
+### What I learned — user-written
+
+### Next small task
+
+Capture installed data before upgrading without deletion/reset, compare on reopen and confirm one legacy exercise; only then reset deliberately for the two-exercise Add/Undo/Next/Finish checklist. Record required actions on the authenticated visible Lock Screen and layout separately from stored-state checks.
+
+---
+
+## 2026-11-13 — Prepare two-exercise proof with explicit Add/Next/Finish
+
+**Status** — Implemented locally; 71 production-SQL wrapper tests, TypeScript, iOS JavaScript export and eight generated-source comparisons Passed. Native compilation/signing, installation, phone migration, layout and new device checks **Not run**. No cloud upload/build, staging, commit or push.
+
+- Read AGENTS/current handoff/project/proof/backlog/latest log. Starting main/HEAD and successful fresh remote-main query matched 593d39d834e0ad33dd375822fc2e2313e466c592; working tree clean. Recorded prior Undo publication without rewriting historical log entries/reflections.
+- Explained the bounded schema change before editing: the old ordinal constraint capped sets at three. v5 adds exercise/session finish metadata and a new exercise-linked authoritative set table, transactionally copying installed rows and retaining the old table. All original set/rest IDs, actuals/plans/counts/deadlines/acknowledgements/Undo metadata preserved. Earlier migration paths retained; rollback/rerun checked. Installed sessions remain exactly one legacy exercise; Start cannot append B. Only new/reset sessions create A and B.
+- Retained Exercise A's targets; added clearly fictional B (15 × 12, 20 × 10), both 20-second rest. Added drafts have null planned targets and a today-only flag. Ordered completion/current-rest Undo makes the last ordinal the most recent actual for this proof. No production setting/framework choice.
+- Final completion keeps confirmation/countdown/Undo/Continue. Only acknowledgement exposes exactly two vertical actions: Add Set first, Next Exercise underneath, or Finish Workout for the final exercise. No automatic transition. Added drafts support immediate-edit Undo, original deadlines, early gate/Continue and expiry re-completion.
+- Native SQL gates Add/Next/Finish on original session/set/rest, current unfinished exercise, all sets completed, last set and final rest acknowledgement. Add creates one pending draft without a record/rest; Next atomically finishes/advances; final finish atomically freezes the workout. Previous exercise records keep identity and reject later mutations. Duplicate/stale/competing actions and exact retry payloads preserve protections; success publishes only after COMMIT. Optional Activity metadata allows old-content reconciliation without invented IDs/actions.
+- App inspection now displays exercise-linked plans/actuals, today-only labels and durable finish markers. Lock Screen has the adopted button order and simple finished state; no new sharing/analysis/workout flow. Existing reset is deliberate and limited to fictional proof data. Dependencies/signing/identifiers unchanged.
+- Checks Passed: 71 SQL-wrapper tests (51 retained/adapted, 20 new), TypeScript, local iOS/Hermes export (580 modules), eight generated host/extension native resource/source comparisons, local Markdown links and whitespace. Wrappers use production SQL through separate JavaScript migration/transaction/read logic, not Swift, App Intents or ActivityKit. Tests cover copy/defaults/identity, acknowledgement eligibility, duplicate and concurrent Add/Next, Add-vs-Next/Finish orders, added Undo/re-completion, finish/reopen, transaction failures/exact retry and v4 active/expired/skipped/undone preservation. Initial fixture assertions were corrected to target v5 runtime rows and compare full database rows rather than an abbreviated snapshot; final suite passed.
+- Updated current status/requirements, documented fixtures/legacy behavior and upgrade-first checklist; old results remain user-reported and build-scoped. Both TS-001 automatic-reveal delay and TS-002 countdown jumps remain open; no fix claimed. Personal reflections remain blank.
+
+### What I learned — user-written
+
+### Next small task
+
+Review the v5 copy/migration, atomic and competing Add/Next/Finish transitions, exact retries and compact two-button/added-set Undo layouts before any separately authorized preview build. Then upgrade without deleting/resetting to check legacy preservation before a deliberate fresh two-exercise fixture trial.
+
+---
+
 ## 2026-11-13 — Record immediate-edit device passes and review Undo publication
 
 **Status** — Five focused guided steps for build 74c497a5-308e-4f0d-bee7-53152648eed5 **Passed — user-reported**. Full accumulated Undo publication review found no blocker; 15 paths proposed in HANDOFF. Documentation only; no source change, cloud upload/build, staging, commit or push.

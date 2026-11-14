@@ -1,5 +1,75 @@
 # Current project handoff
 
+## Publication review — 2026-11-13
+
+**No publication blocker found.** Reviewed the complete accumulated diff against published baseline **593d39d834e0ad33dd375822fc2e2313e466c592**: two-exercise fixture/v5 migration, Add/Next/Finish transactions and guards, added-set Undo, exact retries, app/card presentation, tests and all documentation. No source edit during this review. Local main/HEAD still equals baseline, tracking origin/main; no fresh remote query. All 15 paths remain unstaged, with no untracked files or staged changes.
+
+**Next small task:** when explicitly authorized, recheck Git/remote and the reviewed scope, stage only the 15 paths below, inspect staged contents/whitespace, commit and push normally. Suggested commit message: **Add two-exercise proof and clarify Undo rest controls**. Publication review does not authorize a build or claim the later labels are native/device verified. A separate future build/device check is needed for the wording patch.
+
+**Archive comparison:** compared all 15 current build inputs with the preserved, inspected a6785cf2 archive and checked the archive against its recorded SHA-256 manifest. **14 match; exactly one differs: native/ProofWidget.swift.** Every difference in that file is presentation wording: Undo-rest Complete → Complete Set; Continue → End Rest; matching accessibility labels and rest-dismissal hint; the local default/known deadline instruction now reads “Complete Set at zero or End Rest.” Other notices are preserved. All Button intent bindings and session/set/rest IDs, normal saved-rest Continue, failure/retry branches, countdown, storage and guards are unchanged. No source additions/removals relative to that archive. Config, dependencies and package-lock.json match.
+
+Matching inputs: App.tsx, app.config.js, eas.json, index.js, modules/LockScreenProofModule.swift, native/ProofActivity.swift, native/ProofCoordinator.swift, native/ProofIntents.swift, native/ProofSQL.json, native/ProofStore.swift, package-lock.json, package.json, plugins/withLockScreenProof.js, tsconfig.json. The archive excludes docs/tests; their baseline diffs were reviewed separately. Historical statements that all hashes matched describe the earlier build submission, not current source.
+
+**Validation:** 71 production-SQL wrapper tests and TypeScript re-run Passed; Markdown links and whitespace Passed. Wrappers execute shipped SQL with separate JavaScript transaction/migration/read logic, not Swift, App Intents or ActivityKit. a6785cf2 compilation/signing and its limited screenshot-supported/user-reported sequence apply only to that archived source. Current wording patch remains **unbuilt and device-unverified**: new Swift compilation, rendered fit and accessibility Not run. Deliberate duplicate/stale/competing requests, failure retries and broader device recovery/migration cases remain unrun unless separately evidenced. Both TS-001 and TS-002 remain open/deferred.
+
+**Publication contents:** complete proposed diff and file contents reviewed, with credential/device-pattern checks; no credentials, signing files, device identifiers, private records/scans, screenshots, dependencies or generated artifacts found. Recorded values are fictional proof-test results. AGENTS.md unchanged; lockfile already tracked and unchanged, so neither is an additional proposed path. Historical build-log entries and learning reflections preserved. No upload/build/staging/commit/push.
+
+**Exact proposed files (15):**
+
+1. `README.md`
+2. `docs/BUILD_LOG.md`
+3. `docs/HANDOFF.md`
+4. `docs/LOCK_SCREEN_FEASIBILITY.md`
+5. `docs/PROJECT.md`
+6. `docs/TROUBLESHOOTING_BACKLOG.md`
+7. `proofs/lock-screen/App.tsx`
+8. `proofs/lock-screen/README.md`
+9. `proofs/lock-screen/native/ProofActivity.swift`
+10. `proofs/lock-screen/native/ProofCoordinator.swift`
+11. `proofs/lock-screen/native/ProofIntents.swift`
+12. `proofs/lock-screen/native/ProofSQL.json`
+13. `proofs/lock-screen/native/ProofStore.swift`
+14. `proofs/lock-screen/native/ProofWidget.swift`
+15. `proofs/lock-screen/tests/persistence.test.cjs`
+
+## Latest guided device results — 2026-11-13
+
+For build **a6785cf2-13ea-4384-985d-065fc0051ea2**, the supplied upgrade screenshots support preserved records/draft/plans/counts/rest timestamps and one legacy exercise. The fresh-fixture sequence supports Add Set above Next Exercise after Continue, a today-only 45 × 11 draft without changing plans or three saved records, and later B defaults 15 × 12 then 20 × 10 with Add Set above Finish Workout. Added-set Undo immediately restoring editing while rest continued and Finish staying on the authenticated Lock Screen are **Passed — user-reported**. Next loading B on the visible Lock Screen is also user-reported.
+
+The subsequent screenshot supports Set 4 saved at 45 × 12, four records/five requests; it does not establish exact interaction timing. The final screenshot supports both exercises/workout finished: A 40 × 8, 50 × 8, 45 × 11 and today-only 45 × 12; B 15 × 12, 20 × 10; six records/seven requests; final rest Skipped/Dismissed. Screenshot-supported state is recorded from the user's supplied summary, not independently inspected images in this task. [Detailed evidence and limits](../proofs/lock-screen/README.md#guided-two-exercise-device-evidence--2026-11-13).
+
+Deliberate duplicate/stale/competing actions, failure retries, accessibility and broader recovery remain **Not run on device**. Other migration cases, exact added-set gating/timing and post-finish reopen are not inferred. The **Complete Set / End Rest** wording patch below remains **unbuilt and device-unverified**. Both troubleshooting issues stay open. No new source/build/publication action.
+
+## Latest local wording patch — 2026-11-13
+
+Undo-rest editing now labels its two existing actions **Complete Set** and **End Rest**, with matching accessibility labels and local instruction text. Normal saved rest retains **Continue**. End Rest does not save the draft; Complete Set still checks the stored deadline and saves before creating fresh rest. Only ProofWidget.swift presentation changed; actions, IDs, exact retries, storage and guards unchanged. TypeScript, focused source-diff/layout inspection, Markdown and whitespace checks Passed. Rendered fit, new Swift compilation and device behavior **Not run**. No cloud upload/build/staging/commit/push.
+
+**Wording review completed:** publication review above confirms presentation-only changes. A separately authorized preview and phone check remain necessary for readable/reachable controls and the unchanged early-completion/rest-dismissal behavior. The successful a6785cf2 preview below predates this patch and contains the earlier labels. Its guided upgrade and exercise sequence now has the limited evidence above; the full checklist still contains unrun cases. [Current wording and focused checklist](../proofs/lock-screen/README.md#local-undo-rest-wording-refinement--2026-11-13). Both deferred troubleshooting issues remain open.
+
+Updated 2026-11-13. Local main/HEAD remains published baseline [593d39d](https://github.com/fgzmac/Swoldier/commit/593d39d834e0ad33dd375822fc2e2313e466c592), tracking origin/main. Prior preparation verified the remote; no fresh remote-ref query in this review. All 15 accumulated unstaged paths preserved. **Review passed with no source correction.** Exactly one [two-exercise preview / installation page](https://expo.dev/accounts/fgzmacaraeg/projects/swoldier-lock-screen-proof/builds/a6785cf2-13ea-4384-985d-065fc0051ea2) **FINISHED** at 2026-11-14T01:15:06.493Z (November 13 local). **Native compilation/signing Passed**: archive succeeded, zero errors/nine warnings, signed IPA exported. **Later guided results recorded above:** limited upgrade preservation and Add/Undo/Next/Finish evidence; broader migration/decoding, layout/accessibility, action-safety and recovery checks remain Not run. The wording patch postdates this build. No retry, staging, commit or push.
+
+## Original built-source checklist — retain for remaining trials
+
+The supplied guided upgrade/fresh-fixture sequence is now recorded above; it does not pass every original checklist item. Preserve that evidence, and keep unreported migration states, deliberate action-safety and recovery trials separate. The wording review is complete; next publication and any later preview require their own authorization. No further build is authorized by this handoff.
+
+**Adopted UI:** final completion retains confirmation/countdown/Undo/Continue; after Continue, show exactly two vertical actions: Add Set above Next Exercise, or above Finish Workout on the final exercise. Never advance/finish automatically. Added sets copy this exercise's last completed actual values, preserve plans, and support existing Undo/immediate editing and deadline guards.
+
+**Fixture:** new/reset sessions contain Fictional Exercise A (40 × 8, 50 × 8, 45 × 10) and Fictional Exercise B (15 × 12, 20 × 10); both use 20-second rest. Installed sessions stay a single legacy exercise, retaining every ID/value/plan/count/rest field; they offer Add Set / Finish Workout after final rest acknowledgement. No silent second exercise and no deletion/reset needed for upgrade preservation.
+
+**Storage:** v5 transactionally copies the old three-set table into a new authoritative table with exercise identity and today-only flags, preserving the original table; adds exercise/session finish metadata. Added drafts have no planned target. SQL validates session/set/rest and current exercise eligibility; fresh rest identities protect re-completion, an existing new draft consumes Add eligibility, and finish/advance commit atomically. Finished/previous exercise records cannot be mutated by stale actions. Optional Activity metadata preserves old-content shape; exact retries retain original identities. The supplied upgrade supports preservation for one installed legacy session; other migration cases and dedicated old-content decoding remain Not run.
+
+**Review/checks:** re-ran 71 production-SQL wrapper tests and TypeScript: Passed. The wrappers execute shipped SQL with separate JavaScript migration/transaction/snapshot logic, not Swift/runtime evidence. Inspected commit-before-publication, exact retry identities, final-rest choices, finished-history guards, added-set Undo, competing transitions and v5 copying; no blocker. At the a6785cf2 build review, eight generated source/resource files matched the then-current native inputs; Markdown/whitespace Passed. Earlier local JS/Hermes export remains a preparation result, not a rerun. The new EAS build separately establishes native compilation/signing, not migration or device behavior. Dependencies/identifiers unchanged; production framework open.
+
+**Build provenance/archive:** baseline 593d39d834e0ad33dd375822fc2e2313e466c592 plus the accumulated local App.tsx and native ProofActivity.swift, ProofCoordinator.swift, ProofIntents.swift, ProofSQL.json, ProofStore.swift and ProofWidget.swift changes. No source correction during review. A fresh isolated archive contained exactly 15 intended files, including nested Swift/SQL/plugin/module sources and package-lock.json; all SHA-256 hashes matched the local files at submission time. The later wording patch now makes ProofWidget.swift differ, as detailed in the publication review above. Docs/tests, dependencies, generated artifacts, credentials/signing/device files and unrelated files excluded. Existing Expo project and app/extension credentials reused with freeze-credentials; Apple-server profile validation was skipped because this noninteractive session was not authenticated to Apple. No registration or signing changes. Free iOS allowance: 11/15 before, 12/15 after; zero overage and $0 estimated charges. Exactly one submission.
+
+**Original device plan — only the explicitly reported subset above has evidence:** upgrade without deleting/resetting and compare one-exercise data first; then deliberately reset for the two-exercise fixture. Check final rest timing/order, Add copy and no-save/no-rest semantics, added-set Undo/edit/expiry/re-completion, durable A→B advance with B defaults, B Add/Finish, and reopen after finish. Inspect controls and preserve old records; deliberate duplicate/stale/retry/lifecycle trials remain separate. [Full implementation and checklist](../proofs/lock-screen/README.md#two-exercise-proof--prepared-locally-2026-11-13).
+
+Add Set is implemented locally in this bounded proof only. TS-001 delayed automatic reveal and TS-002 countdown jumps remain open; no timing/display fix claimed. Earlier Undo successes remain user-reported, scoped to build 74c497a5 and earlier sequences.
+
+## Published Undo handoff — historical context
+
+The following handoff was committed at 593d39d834e0ad33dd375822fc2e2313e466c592 and is preserved for evidence/history. Its former next-publication task is complete; new two-exercise work is described above.
+
 Updated 2026-11-13. Published baseline remains [3f0874507b2fb5e713b09226c04dddea101d2e11](https://github.com/fgzmac/Swoldier/commit/3f0874507b2fb5e713b09226c04dddea101d2e11); local main/HEAD rechecked. No remote query in this task. All 15 existing unstaged paths preserved; no staging/commit/push. **Immediate-edit Undo review passed without source correction.** Exactly one [immediate-edit Undo preview / installation page](https://expo.dev/accounts/fgzmacaraeg/projects/swoldier-lock-screen-proof/builds/74c497a5-308e-4f0d-bee7-53152648eed5) **FINISHED** at 2026-11-13T17:45:38.671Z (November 13 local). **Native compilation/signing Passed**: Xcode archive succeeded with zero errors and eight warnings; signed IPA exported. The focused upgrade/immediate-edit/Continue/expiry/control-layout sequence is now **Passed — user-reported**, recorded 2026-11-13; dedicated migration/decoding, failure/retry, stale/duplicate, accessibility and broader lifecycle checks remain **Not run**. Earlier Undo preview b035cb35 and its user-reported results remain separate below. No retry, staging, commit or push.
 
 <a id="next-task--review-undo-before-one-separately-authorized-device-build"></a>

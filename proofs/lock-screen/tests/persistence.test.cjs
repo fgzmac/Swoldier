@@ -7,6 +7,9 @@ const { DatabaseSync } = require('node:sqlite');
 const { test } = require('node:test');
 const { Worker, isMainThread, parentPort, workerData } = require('node:worker_threads');
 const sql = require('../native/ProofSQL.json');
+// Installed v2-v4 fixture writers, not the production creation path.
+const legacyStartSession = "INSERT INTO proof_session_v2 (slot,session_id) VALUES (1,:sessionID)";
+const legacyStartSets = "WITH fixture(n,p,r) AS (VALUES(1,40,8),(2,50,8),(3,45,10)) INSERT INTO proof_sets_v2(session_id,set_id,ordinal,planned_pounds,planned_reps,pounds,reps) SELECT :sessionID,:sessionID || ':set:' || n,n,p,r,p,r FROM fixture";
 
 function removeFixture(dir) {
   const target = realpathSync(dir);
@@ -39,18 +42,19 @@ function transaction(db, fn, immediate = true) {
   catch (e) { db.exec('ROLLBACK'); throw e; }
 }
 function migrate(db) {
-  if (db.prepare('PRAGMA user_version').get().user_version >= 4) return;
+  if (db.prepare('PRAGMA user_version').get().user_version >= 5) return;
   transaction(db, () => {
     const version = db.prepare('PRAGMA user_version').get().user_version;
-    if (version >= 4) return;
+    if (version >= 5) return;
     if (version < 2) {
       const cols = new Set(db.prepare('PRAGMA table_info(proof_set)').all().map(r => r.name));
       for (const m of sql.migrations) if (!cols.has(m.column)) db.exec(m.statement);
       for (const text of [...sql.schemaV2, ...sql.importLegacy]) db.exec(text);
     }
     if (version < 3) for (const text of sql.migrationsV3) db.exec(text);
-    for (const text of sql.migrationsV4) db.exec(text);
-    db.exec('PRAGMA user_version = 4');
+    if (version < 4) for (const text of sql.migrationsV4) db.exec(text);
+    for (const text of sql.migrationsV5) db.exec(text);
+    db.exec('PRAGMA user_version = 5');
   });
 }
 function open(path) {
@@ -65,31 +69,40 @@ function readInternal(db, now = 1000) {
   const session = all(db, sql.readSession)[0];
   if (!session) return null;
   const params = { sessionID: session.session_id, restID: session.active_rest_id, now };
-  const sets = all(db, sql.readSets, params);
+  const allSets = all(db, sql.readSets, params);
+  const sets = allSets.filter(s => s.exercise_id === session.active_exercise_id);
+  const exercises = all(db, sql.readExercises, params);
   const current = sets.find(s => !s.completed) ?? sets.at(-1);
   const rest = all(db, sql.readRest, params)[0] ?? null;
   // Positional projection deliberately follows Swift's separate snapshot mapping.
   const values = rest ? Object.values(rest) : [];
   return { sessionID: session.session_id, setID: current.set_id, restID: session.active_rest_id,
-    sets, recordCount: sets.filter(s => s.completed).length, plannedSetsRecorded: sets.every(s => s.completed),
+    sets, allSets, exercises, exerciseID:session.active_exercise_id, finishedAt:session.finished_at,
+    recordCount: allSets.filter(s => s.completed).length, plannedSetsRecorded: sets.every(s => s.completed),
     deadline: values[0] ?? null, skippedAt: values[1] ?? null,
     restState: values[2] ?? 'not_started', remaining: values[3] ?? 0,
     continuedAt: values[4] ?? null, restSetID: values[5] ?? null, undoneAt: values[6] ?? null, awaitingContinue: rest !== null && values[4] == null };
 }
 function start(db, sessionID = randomUUID()) {
   return transaction(db, () => {
-    run(db, sql.startSession, { sessionID }); run(db, sql.startSets, { sessionID });
+    if(run(db, sql.startSession, { sessionID })===1) {
+      run(db,sql.startExercises,{sessionID});run(db, sql.startSets, { sessionID });
+    }
     return readInternal(db);
   });
 }
 function act(db, ids, action, now = 1000, delta = 0) {
   return transaction(db, () => {
-    const p = { ...ids, now, delta, newRestID: randomUUID() };
+    const p = { ...ids, now, delta, newRestID: randomUUID(), newSetID: randomUUID() };
     if (action === 'complete') {
       run(db, sql.countCompleteRequest, p);
       if (run(db, sql.complete, p) === 1) {
         assert.equal(run(db, sql.createRest, p), 1); assert.equal(run(db, sql.advanceRest, p), 1);
       }
+    } else if(action==='nextExercise') {
+      if(run(db,sql.finishExercise,p)===1) assert.equal(run(db,sql.advanceExercise,p),1);
+    } else if(action==='finishWorkout') {
+      if(run(db,sql.finishLastExercise,p)===1) assert.equal(run(db,sql.finishWorkout,p),1);
     } else if (action === 'undo') {
       if (run(db, sql.undo, p) === 1) assert.equal(run(db, sql.markUndone, p), 1);
     } else { run(db, sql[action === 'skip' ? 'continueRest' : action], p); }
@@ -105,6 +118,14 @@ function fixture(t) {
   const path = join(dir, 'proof.sqlite3'); const db = open(path);
   t.after(() => { db.close(); removeFixture(dir); });
   return { db, path, dir, initial: start(db) };
+}
+function finishActive(db, state, now=2000) {
+  let s=state;
+  while(!s.plannedSetsRecorded) {
+    if(s.awaitingContinue) s=act(db,ids(s),'continueRest',now);
+    s=act(db,ids(s),'complete',now); now+=30;
+  }
+  return s;
 }
 function legacy(path, completed, rest = null, skipped = null) {
   const db = new DatabaseSync(path); db.exec(sql.schema);
@@ -208,7 +229,7 @@ if (!isMainThread) {
   test('failed commit rolls entire completion back before publication; retry succeeds', t => {
     const { db, path, initial } = fixture(t); const reader=open(path);
     try {
-      reader.exec('BEGIN');reader.prepare('SELECT * FROM proof_sets_v2').all();
+      reader.exec('BEGIN');reader.prepare('SELECT * FROM proof_sets_v5').all();
       db.exec('PRAGMA busy_timeout=10');assert.throws(()=>act(db,ids(initial),'complete'),/locked/);
       reader.exec('ROLLBACK');assert.deepEqual(read(db),initial);
       assert.equal(act(db,ids(initial),'complete').recordCount,1);
@@ -223,7 +244,7 @@ if (!isMainThread) {
   });
   test('fixture limits and invalid deltas cannot edit recorded sets or routine defaults', t => {
     const { db, initial } = fixture(t);const target=ids(initial);
-    db.prepare('UPDATE proof_sets_v2 SET pounds=198,reps=29 WHERE ordinal=1').run();
+    db.prepare('UPDATE proof_sets_v5 SET pounds=198,reps=29 WHERE set_id=?').run(target.setID);
     act(db,target,'weight',1000,5);act(db,target,'reps',1000,1);
     let s=act(db,target,'reps',1000,2);assert.deepEqual([current(s).pounds,current(s).reps],[200,30]);
     for(let n=0;n<45;n++)act(db,target,'weight',1000,-5);
@@ -339,7 +360,7 @@ if (!isMainThread) {
     test('installed v2 '+label+' migration preserves all rows; only skipped is acknowledged', t => {
       const dir=mkdtempSync(join(tmpdir(),'swoldier-v2-'));const path=join(dir,'proof.sqlite3');
       const old=new DatabaseSync(path);old.exec(sql.schema);sql.schemaV2.forEach(q=>old.exec(q));
-      run(old,sql.startSession,{sessionID:'installed'});run(old,sql.startSets,{sessionID:'installed'});
+      run(old,legacyStartSession,{sessionID:'installed'});run(old,legacyStartSets,{sessionID:'installed'});
       old.exec("UPDATE proof_sets_v2 SET pounds=41,reps=9,completed=1,completion_attempts=6 WHERE ordinal=1; UPDATE proof_sets_v2 SET pounds=55,reps=7 WHERE ordinal=2");
       old.prepare('INSERT INTO proof_rests_v2 VALUES(?,?,?,?,?)').run('installed','installed:set:1:rest','installed:set:1',deadline,skipped);
       old.exec("UPDATE proof_session_v2 SET active_rest_id='installed:set:1:rest'; PRAGMA user_version=2");
@@ -348,7 +369,7 @@ if (!isMainThread) {
       let s=read(db,1000);assert.equal(s.deadline,deadline);assert.equal(s.skippedAt,skipped);
       assert.equal(s.continuedAt,skipped);assert.equal(s.awaitingContinue,skipped==null);
       assert.deepEqual(db.prepare('SELECT * FROM proof_sets_v2 ORDER BY ordinal').all(),oldSets);
-      assert.equal(db.prepare('PRAGMA user_version').get().user_version,4);
+      assert.equal(db.prepare('PRAGMA user_version').get().user_version,5);
       migrate(db);assert.deepEqual(read(db,1000),s);
     });
   }
@@ -448,7 +469,7 @@ if (!isMainThread) {
     const {db,path,initial}=fixture(t);const saved=act(db,ids(initial),'complete');const target=undoIDs(saved);
     const reader=open(path);
     try {
-      reader.exec('BEGIN');reader.prepare('SELECT * FROM proof_sets_v2').all();db.exec('PRAGMA busy_timeout=10');
+      reader.exec('BEGIN');reader.prepare('SELECT * FROM proof_sets_v5').all();db.exec('PRAGMA busy_timeout=10');
       assert.throws(()=>act(db,target,'undo',1003),/locked/);reader.exec('ROLLBACK');
       assert.deepEqual(read(db),saved);const undone=act(db,target,'undo',1004);
       assert.equal(undone.recordCount,0);assert.equal(undone.undoneAt,1004);assert.equal(undone.deadline,1020);
@@ -468,7 +489,7 @@ if (!isMainThread) {
   ]) test('v3 '+label+' migration adds Undo metadata without altering installed data', t => {
     const dir=mkdtempSync(join(tmpdir(),'swoldier-v4-'));const path=join(dir,'proof.sqlite3');
     const old=new DatabaseSync(path);old.exec(sql.schema);sql.schemaV2.forEach(q=>old.exec(q));sql.migrationsV3.forEach(q=>old.exec(q));
-    run(old,sql.startSession,{sessionID:'installed'});run(old,sql.startSets,{sessionID:'installed'});
+    run(old,legacyStartSession,{sessionID:'installed'});run(old,legacyStartSets,{sessionID:'installed'});
     old.exec("UPDATE proof_sets_v2 SET pounds=45,reps=9,completed=1,completion_attempts=6 WHERE ordinal=1; UPDATE proof_sets_v2 SET pounds=55,reps=7 WHERE ordinal=2");
     old.prepare('INSERT INTO proof_rests_v2 VALUES(?,?,?,?,?,?)').run('installed','installed:set:1:rest','installed:set:1',deadline,skipped,continued);
     old.exec("UPDATE proof_session_v2 SET active_rest_id='installed:set:1:rest'; PRAGMA user_version=3");
@@ -477,7 +498,7 @@ if (!isMainThread) {
     assert.equal(s.undoneAt,null);assert.equal(s.restSetID,'installed:set:1');assert.equal(s.restID,'installed:set:1:rest');
     assert.deepEqual([s.deadline,s.skippedAt,s.continuedAt],[deadline,skipped,continued]);
     assert.deepEqual(db.prepare('SELECT * FROM proof_sets_v2 ORDER BY ordinal').all(),oldSets);
-    assert.equal(db.prepare('PRAGMA user_version').get().user_version,4);migrate(db);assert.deepEqual(read(db),s);
+    assert.equal(db.prepare('PRAGMA user_version').get().user_version,5);migrate(db);assert.deepEqual(read(db),s);
     const undone=act(db,undoIDs(s),'undo');
     if(continued==null) {
       assert.equal(undone.recordCount,0);assert.equal(undone.deadline,deadline);
@@ -493,7 +514,7 @@ if (!isMainThread) {
     assert.throws(()=>migrate(db),/locked/);reader.exec('ROLLBACK');
     assert.equal(db.prepare('PRAGMA user_version').get().user_version,3);
     assert.equal(db.prepare('PRAGMA table_info(proof_rests_v2)').all().some(c=>c.name==='undone_at'),false);
-    migrate(db);assert.equal(db.prepare('PRAGMA user_version').get().user_version,4);
+    migrate(db);assert.equal(db.prepare('PRAGMA user_version').get().user_version,5);
     assert.equal(db.prepare('PRAGMA table_info(proof_rests_v2)').all().some(c=>c.name==='undone_at'),true);
   });
 
@@ -560,7 +581,7 @@ if (!isMainThread) {
       assert.deepEqual(act(db,original,action,1030,1),second);
     }
     const repeated=act(db,original,'complete',1030);
-    assert.deepEqual(repeated,{...second,sets:second.sets.map((r,i)=>i ? r : {...r,completion_attempts:r.completion_attempts+1})});
+    assert.deepEqual(repeated,{...second,sets:second.sets.map((r,i)=>i ? r : {...r,completion_attempts:r.completion_attempts+1}),allSets:second.allSets.map((r,i)=>i ? r : {...r,completion_attempts:r.completion_attempts+1})});
     // Even after Undo of the newer completion, an older retry cannot save that draft.
     const newerDraft=act(db,undoIDs(second),'undo',1031);
     const oldRetry=act(db,original,'complete',1100);
@@ -595,6 +616,157 @@ if (!isMainThread) {
     db.exec('DROP TRIGGER fail_recomplete');const retried=act(db,target,'complete',1021);
     assert.equal(retried.recordCount,1);assert.equal(retried.sets[0].reps,9);
     assert.equal(retried.sets[0].completion_attempts,2);assert.equal(retried.deadline,1041);
+  });
+
+  test('fresh fixture has exactly two distinct exercises; ordinary start never appends',t=>{
+    const {db,path,initial}=fixture(t);
+    assert.equal(initial.exercises.length,2);assert.equal(initial.allSets.length,5);
+    const second=initial.allSets.filter(r=>r.exercise_id!==initial.exerciseID);
+    assert.deepEqual(second.map(r=>[r.pounds,r.reps]),[[15,12],[20,10]]);
+    assert.deepEqual(start(db),initial);const reopen=open(path);
+    try{assert.deepEqual(start(reopen),initial);}finally{reopen.close();}
+  });
+  test('all final actions require every set completed and final Continue, even after expiry',t=>{
+    const {db,initial}=fixture(t);
+    for(const action of ['addSet','nextExercise','finishWorkout'])assert.deepEqual(act(db,ids(initial),action,1000),initial);
+    const pending=finishActive(db,initial);const expired=read(db,2200);
+    for(const action of ['addSet','nextExercise','finishWorkout'])assert.deepEqual(act(db,ids(pending),action,2200),expired);
+    assert.equal(expired.finishedAt,null);assert.equal(expired.exercises[0].finished_at,null);
+    const ready=act(db,ids(pending),'continueRest',2200);
+    assert.deepEqual(act(db,ids(ready),'finishWorkout',2200),ready); // Exercise B still exists.
+    for(const bad of [{...ids(ready),sessionID:'old'},{...ids(ready),setID:initial.setID},{...ids(ready),restID:'none'}])
+      for(const action of ['addSet','nextExercise','finishWorkout'])assert.deepEqual(act(db,bad,action,2200),ready);
+  });
+  test('Add Set copies current exercise last actual values, not plans, without rest or completion',t=>{
+    const {db,initial}=fixture(t);let s=initial;
+    for(let n=0;n<2;n++){s=act(db,ids(s),'complete',2000+n*30);s=act(db,ids(s),'continueRest',2001+n*30);}
+    s=act(db,ids(s),'weight',2060,5);s=act(db,ids(s),'reps',2061,1);
+    s=act(db,ids(s),'complete',2062);s=act(db,ids(s),'continueRest',2063);const before=s,old=ids(s);
+    s=act(db,old,'addSet',2064);
+    assert.equal(s.sets.length,4);assert.equal(s.recordCount,3);assert.equal(s.finishedAt,null);
+    assert.deepEqual(s.sets.slice(0,3),before.sets);assert.deepEqual(s.allSets.filter(r=>r.exercise_id!==s.exerciseID),before.allSets.filter(r=>r.exercise_id!==s.exerciseID));
+    assert.deepEqual([current(s).pounds,current(s).reps,current(s).planned_pounds,current(s).planned_reps,current(s).completed,current(s).is_added,current(s).completion_attempts],[50,11,null,null,0,1,0]);
+    for(const k of ['restID','deadline','skippedAt','continuedAt'])assert.equal(s[k],before[k]);
+    for(const action of ['addSet','nextExercise','finishWorkout'])assert.deepEqual(act(db,old,action,2064),s);
+    s=act(db,ids(s),'complete',2065);assert.notEqual(s.restID,before.restID);
+    s=act(db,ids(s),'continueRest',2066);const secondReady=s;
+    assert.deepEqual(act(db,old,'addSet',2066),secondReady);
+    s=act(db,ids(s),'addSet',2067);assert.equal(s.sets.length,5);
+    assert.deepEqual([current(s).pounds,current(s).reps],[50,11]);assert.equal(s.sets.filter(r=>!r.is_added).length,3);
+  });
+  test('added draft Undo preserves values/deadline and can re-complete at expiry without Continue',t=>{
+    const {db,path,initial}=fixture(t);let s=finishActive(db,initial);
+    s=act(db,ids(s),'continueRest',2200);s=act(db,ids(s),'addSet',2201);s=act(db,ids(s),'reps',2202,1);
+    const draft=s;s=act(db,ids(s),'complete',2203);const saved=s,old=undoIDs(s);
+    s=act(db,old,'undo',2204);assert.equal(current(s).set_id,draft.setID);assert.equal(current(s).reps,11);
+    assert.equal(s.recordCount,3);assert.equal(s.deadline,2223);assert.equal(s.continuedAt,null);
+    s=act(db,ids(s),'complete',2205);assert.equal(s.recordCount,3);
+    s=act(db,ids(s),'weight',2206,5);const reopen=open(path);
+    try{assert.deepEqual(read(reopen,2206),s);}finally{reopen.close();}
+    s=act(db,ids(s),'complete',2223);assert.equal(s.recordCount,4);assert.notEqual(s.restID,saved.restID);
+    assert.deepEqual([s.sets[3].pounds,s.sets[3].reps,s.sets[3].is_added,s.sets[3].planned_reps],[50,11,1,null]);
+    assert.deepEqual(act(db,old,'undo',2223),s);assert.deepEqual(s.sets.slice(0,3),draft.sets.slice(0,3));
+  });
+  test('Next Exercise commits once, restores independent defaults and freezes previous exercise history',t=>{
+    const {db,path,initial}=fixture(t);let s=finishActive(db,initial);s=act(db,ids(s),'continueRest',2200);
+    const old=ids(s),records=s.sets;s=act(db,old,'nextExercise',2201);
+    assert.notEqual(s.exerciseID,initial.exerciseID);assert.equal(s.restID,'none');assert.equal(s.deadline,null);
+    assert.deepEqual([current(s).pounds,current(s).reps],[15,12]);assert.equal(s.exercises[0].finished_at,2201);
+    assert.deepEqual(s.allSets.filter(r=>r.exercise_id===initial.exerciseID),records);assert.equal(s.recordCount,3);
+    for(const action of ['nextExercise','addSet','finishWorkout','undo','complete','continueRest','weight','reps'])assert.deepEqual(act(db,old,action,2201,1),s);
+    const reopened=open(path);try{assert.deepEqual(read(reopened,2201),s);}finally{reopened.close();}
+    s=act(db,ids(s),'complete',2202);assert.equal(s.deadline,2222);
+    assert.deepEqual([current(s).pounds,current(s).reps],[20,10]);assert.equal(s.recordCount,4);
+  });
+  test('final exercise Add Set copies its own actuals and Finish Workout preserves all records once',t=>{
+    const {db,path,initial}=fixture(t);let s=finishActive(db,initial);s=act(db,ids(s),'continueRest',2200);s=act(db,ids(s),'nextExercise',2201);
+    s=finishActive(db,s,2300);assert.equal(s.recordCount,5);assert.equal(s.finishedAt,null);
+    const expired=read(db,2400);assert.deepEqual(act(db,ids(s),'finishWorkout',2400),expired);
+    s=act(db,ids(s),'continueRest',2400);assert.deepEqual(act(db,ids(s),'nextExercise',2400),s);
+    s=act(db,ids(s),'addSet',2401);assert.deepEqual([current(s).pounds,current(s).reps],[20,10]);
+    s=act(db,ids(s),'complete',2402);s=act(db,ids(s),'continueRest',2403);
+    const before=s,target=ids(s);s=act(db,target,'finishWorkout',2404);
+    assert.equal(s.finishedAt,2404);assert.equal(s.exercises[1].finished_at,2404);assert.equal(s.recordCount,6);
+    assert.deepEqual(s.allSets,before.allSets);assert.equal(s.deadline,before.deadline);
+    for(const action of ['finishWorkout','nextExercise','addSet','undo','complete','continueRest','weight','reps'])assert.deepEqual(act(db,target,action,2404,1),s);
+    const reopen=open(path);try{assert.deepEqual(read(reopen,2404),s);assert.deepEqual(start(reopen),s);}finally{reopen.close();}
+  });
+  for(const winner of ['addSet','nextExercise'])test('competing Add/Next: '+winner+' wins without a partial second transition',t=>{
+    const {db,initial}=fixture(t);let s=finishActive(db,initial);s=act(db,ids(s),'continueRest',2200);const target=ids(s);
+    const won=act(db,target,winner,2201);const lost=act(db,target,winner==='addSet'?'nextExercise':'addSet',2201);
+    assert.deepEqual(lost,won);
+  });
+  test('concurrent Add Set delivery creates just one draft',async t=>{
+    const {db,path,initial}=fixture(t);let s=finishActive(db,initial);s=act(db,ids(s),'continueRest',2200);
+    await Promise.all([1,2].map(()=>new Promise((resolve,reject)=>{
+      const w=new Worker(__filename,{workerData:{path,ids:ids(s),action:'addSet',now:2201}});
+      w.once('error',reject);w.once('exit',code=>code?reject(Error('Worker failed')):resolve());
+    })));
+    const result=read(db,2201);assert.equal(result.sets.length,4);assert.equal(result.recordCount,3);assert.equal(result.sets.filter(r=>!r.completed).length,1);
+  });
+  for(const action of ['nextExercise','finishWorkout'])test(action+' second-write failure rolls back exercise finish; exact retry succeeds',t=>{
+    const {db,initial}=fixture(t);let s=finishActive(db,initial);s=act(db,ids(s),'continueRest',2200);
+    if(action==='finishWorkout'){s=act(db,ids(s),'nextExercise',2201);s=finishActive(db,s,2300);s=act(db,ids(s),'continueRest',2400);}
+    const before=read(db,2500),target=ids(s),column=action==='nextExercise'?'active_exercise_id':'finished_at';
+    db.exec(`CREATE TRIGGER fail_transition BEFORE UPDATE OF ${column} ON proof_session_v2 BEGIN SELECT RAISE(ABORT,'injected'); END`);
+    assert.throws(()=>act(db,target,action,2500),/injected/);assert.deepEqual(read(db,2500),before);
+    db.exec('DROP TRIGGER fail_transition');const retry=act(db,target,action,2501);
+    assert.equal(retry.exercises.find(e=>e.exercise_id===before.exerciseID).finished_at,2501);
+  });
+  test('Add Set COMMIT failure exposes no draft and exact retry appends once',t=>{
+    const {db,path,initial}=fixture(t);let s=finishActive(db,initial);s=act(db,ids(s),'continueRest',2200);
+    const reader=open(path);try{
+      reader.exec('BEGIN');reader.prepare('SELECT * FROM proof_sets_v5').all();db.exec('PRAGMA busy_timeout=10');
+      assert.throws(()=>act(db,ids(s),'addSet',2201),/locked/);reader.exec('ROLLBACK');assert.deepEqual(read(db,2200),s);
+      const retry=act(db,ids(s),'addSet',2201);assert.equal(retry.sets.length,4);assert.equal(retry.recordCount,3);
+    }finally{reader.close();}
+  });
+  for(const [label,skipped,continued,undone] of [['active',null,null,null],['expired',null,null,null],['skipped',1001,1001,null],['undone',null,null,1001]])test('installed v4 '+label+' remains one exercise with exact records/rest, even after start',t=>{
+    const dir=mkdtempSync(join(tmpdir(),'swoldier-v5-')),path=join(dir,'proof.sqlite3');
+    const old=new DatabaseSync(path);old.exec(sql.schema);sql.schemaV2.forEach(q=>old.exec(q));sql.migrationsV3.forEach(q=>old.exec(q));sql.migrationsV4.forEach(q=>old.exec(q));
+    run(old,legacyStartSession,{sessionID:'installed'});run(old,legacyStartSets,{sessionID:'installed'});
+    old.exec(`UPDATE proof_sets_v2 SET pounds=55,reps=11,completed=${undone==null?1:0},completion_attempts=7 WHERE ordinal=1`);
+    old.prepare('INSERT INTO proof_rests_v2 VALUES(?,?,?,?,?,?,?)').run('installed','original-rest','installed:set:1',label==='expired'?980:1020,skipped,continued,undone);
+    old.exec("UPDATE proof_session_v2 SET active_rest_id='original-rest'; PRAGMA user_version=4");
+    const rows=old.prepare('SELECT * FROM proof_sets_v2 ORDER BY ordinal').all();old.close();
+    const db=open(path);t.after(()=>{db.close();removeFixture(dir);});let s=read(db,1000);
+    assert.equal(s.exercises.length,1);assert.equal(s.allSets.length,3);assert.equal(s.restID,'original-rest');
+    assert.deepEqual([s.deadline,s.skippedAt,s.continuedAt,s.undoneAt],[label==='expired'?980:1020,skipped,continued,undone]);
+    const copied=db.prepare('SELECT * FROM proof_sets_v5 ORDER BY ordinal').all();
+    for(let i=0;i<rows.length;i++)for(const [k,v] of Object.entries(rows[i]))assert.equal(copied[i][k],v);
+    assert.deepEqual(db.prepare('SELECT * FROM proof_sets_v2 ORDER BY ordinal').all(),rows);
+    assert.deepEqual(start(db),s);migrate(db);assert.deepEqual(read(db),s);
+    s=finishActive(db,s,2000);s=act(db,ids(s),'continueRest',2200);
+    assert.deepEqual(act(db,ids(s),'nextExercise',2200),s);assert.equal(act(db,ids(s),'finishWorkout',2201).finishedAt,2201);
+    reset(db);assert.equal(start(db).exercises.length,2);
+  });
+  test('v5 migration failure rolls back copied table and metadata; retry preserves v4 rows',t=>{
+    const dir=mkdtempSync(join(tmpdir(),'swoldier-v5-rollback-')),path=join(dir,'proof.sqlite3');const db=new DatabaseSync(path);
+    t.after(()=>{db.close();removeFixture(dir);});db.exec(sql.schema);sql.schemaV2.forEach(q=>db.exec(q));sql.migrationsV3.forEach(q=>db.exec(q));sql.migrationsV4.forEach(q=>db.exec(q));
+    run(db,legacyStartSession,{sessionID:'installed'});run(db,legacyStartSets,{sessionID:'installed'});
+    db.exec("PRAGMA user_version=4; CREATE TRIGGER fail_v5 BEFORE UPDATE ON proof_session_v2 BEGIN SELECT RAISE(ABORT,'injected'); END");
+    assert.throws(()=>migrate(db),/injected/);assert.equal(db.prepare('PRAGMA user_version').get().user_version,4);
+    assert.equal(db.prepare("SELECT COUNT(*) AS n FROM sqlite_master WHERE name='proof_sets_v5'").get().n,0);
+    assert.equal(db.prepare('PRAGMA table_info(proof_session_v2)').all().some(c=>c.name==='active_exercise_id'),false);
+    assert.equal(db.prepare('SELECT COUNT(*) AS n FROM proof_sets_v2').get().n,3);
+    db.exec('DROP TRIGGER fail_v5');migrate(db);assert.equal(read(db).exercises.length,1);
+  });
+
+  for(const winner of ['addSet','finishWorkout'])test('final Add/Finish competition: '+winner+' serializes safely',t=>{
+    const {db,initial}=fixture(t);let s=finishActive(db,initial);s=act(db,ids(s),'continueRest',2200);s=act(db,ids(s),'nextExercise',2201);
+    s=finishActive(db,s,2300);s=act(db,ids(s),'continueRest',2400);const target=ids(s);
+    const won=act(db,target,winner,2401);
+    assert.deepEqual(act(db,target,winner==='addSet'?'finishWorkout':'addSet',2401),won);
+  });
+  test('concurrent Next Exercise cannot skip or finish the next exercise',async t=>{
+    const {db,path,initial}=fixture(t);let s=finishActive(db,initial);s=act(db,ids(s),'continueRest',2200);
+    await Promise.all([1,2].map(()=>new Promise((resolve,reject)=>{
+      const w=new Worker(__filename,{workerData:{path,ids:ids(s),action:'nextExercise',now:2201}});
+      w.once('error',reject);w.once('exit',code=>code?reject(Error('Worker failed')):resolve());
+    })));
+    const result=read(db,2201);assert.equal(result.exerciseID,result.exercises[1].exercise_id);
+    assert.equal(result.exercises[0].finished_at,2201);assert.equal(result.exercises[1].finished_at,null);
+    assert.equal(result.finishedAt,null);assert.equal(result.recordCount,3);assert.deepEqual([current(result).pounds,current(result).reps],[15,12]);
   });
 
 }

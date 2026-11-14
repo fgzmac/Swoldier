@@ -1,5 +1,11 @@
 # Swoldier troubleshooting backlog
 
+## Two-exercise scope update — 2026-11-13
+
+Add Set/Next Exercise/Finish Workout are now prepared locally in the bounded two-exercise proof, with final-rest Continue before the two choices. Review passed without source correction; one preview compiled/signed successfully. The guided a6785cf2 upgrade and Add/Undo/Next/Finish sequence now has limited screenshot-supported/user-reported evidence. It does not test deliberate duplicate/stale/competing actions, retries, accessibility or broader recovery, and does not validate the later unbuilt Complete Set / End Rest wording. No countdown or automatic-reveal fix is established. Historical Add Set-unimplemented statements below describe earlier checkpoints. Countdown rendering and automatic-reveal behavior are unchanged; TS-001 and TS-002 remain open/deferred. [Current handoff](HANDOFF.md).
+
+The earlier checkpoint descriptions below retain their original scope and evidence.
+
 Updated: 2026-11-12 (America/Los_Angeles)
 
 Intended repository location: `docs/TROUBLESHOOTING_BACKLOG.md`.

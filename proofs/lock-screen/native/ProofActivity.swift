@@ -2,7 +2,7 @@ import ActivityKit
 import Foundation
 
 enum ProofAction: Codable, Hashable, Sendable {
-    case complete, skip, continueRest, undo
+    case complete, skip, continueRest, undo, addSet, nextExercise, finishWorkout
     case weight(Int), reps(Int)
 }
 
@@ -37,6 +37,14 @@ struct ProofActivity: ActivityAttributes {
         var setNumber: Int? = nil
         var recordCount: Int? = nil
         var notice: String? = nil
+        var exerciseID: String? = nil
+        var exerciseName: String? = nil
+        var exerciseNumber: Int? = nil
+        var exerciseCount: Int? = nil
+        var setCount: Int? = nil
+        var canChooseNext: Bool? = nil
+        var hasNextExercise: Bool? = nil
+        var workoutFinished: Bool? = nil
         // Temporary D1 metadata; optional so existing activity content still decodes.
         var diagnosticPublicationID: String? = nil
         var diagnosticPublicationTime: Date? = nil

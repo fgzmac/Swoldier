@@ -1,5 +1,11 @@
 # Workout App
 
+## Current two-exercise proof — 2026-11-13
+
+Undo milestone published at [593d39d](https://github.com/fgzmac/Swoldier/commit/593d39d834e0ad33dd375822fc2e2313e466c592). Local two-exercise Add Set/Next Exercise/Finish Workout proof is prepared; 71 SQL-wrapper tests, TypeScript, export and generated-source checks Passed. One [two-exercise preview / installation page](https://expo.dev/accounts/fgzmacaraeg/projects/swoldier-lock-screen-proof/builds/a6785cf2-13ea-4384-985d-065fc0051ea2) FINISHED; native compilation/signing Passed. The guided upgrade and Add/Undo/Next/Finish sequence now has scoped screenshot-supported and user-reported evidence; deliberate action-safety, retry, accessibility and broader recovery/migration trials remain Not run. The later Complete Set / End Rest wording patch is unbuilt and device-unverified. After final rest Continue, Add Set appears above Next Exercise (or Finish Workout). Installed sessions retain one exercise; new/reset sessions get both fictional fixtures. [Current handoff](docs/HANDOFF.md). Exactly one authorized preview submitted; no retry/staging/commit/push. TS-001/TS-002 remain open.
+
+The earlier checkpoint descriptions below retain their original scope and evidence.
+
 A documentation foundation and isolated Lock Screen proof for an iPhone-first workout tracker. **Workout App** is the ChatGPT project; [Swoldier](https://github.com/fgzmac/Swoldier) is the GitHub repository. The app's public name remains open.
 
 The goal is to make logging a workout quick: follow a routine, enter the sets you actually perform, change exercises when needed, and review progress over time. Your own BodySpec scans can become a later progress resource.

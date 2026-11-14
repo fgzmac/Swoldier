@@ -31,7 +31,7 @@ actor ProofCoordinator {
         guard let snapshot = try ProofStore().start() else { throw ProofError.storage }
         if let existing = activities(snapshot.sessionID).first {
             await existing.update(publication(content(snapshot)))
-        } else if !snapshot.completed || snapshot.awaitingContinue {
+        } else if !snapshot.workoutFinished {
             guard ActivityAuthorizationInfo().areActivitiesEnabled else { throw ProofError.activitiesDisabled }
             _ = try Activity.request(
                 attributes: ProofActivity(sessionID: snapshot.sessionID, setID: snapshot.setID),
@@ -104,7 +104,11 @@ actor ProofCoordinator {
             restSetID: snapshot.restSetID,
             restUndoneAt: snapshot.restUndoneAt.map { Date(timeIntervalSince1970: $0) },
             setID: snapshot.setID, restID: snapshot.restID,
-            setNumber: snapshot.displaySet.ordinal, recordCount: snapshot.recordCount, notice: notice
+            setNumber: snapshot.displaySet.ordinal, recordCount: snapshot.recordCount, notice: notice,
+            exerciseID: snapshot.currentExercise.exerciseID, exerciseName: snapshot.currentExercise.name,
+            exerciseNumber: snapshot.currentExercise.ordinal, exerciseCount: snapshot.exercises.count,
+            setCount: snapshot.currentSets.count, canChooseNext: snapshot.canChooseNext,
+            hasNextExercise: snapshot.hasNextExercise, workoutFinished: snapshot.workoutFinished
         ))
     }
 
