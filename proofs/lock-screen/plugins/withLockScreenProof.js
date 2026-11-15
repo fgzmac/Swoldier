@@ -4,7 +4,7 @@ const { IOSConfig, withPodfileProperties, withXcodeProject } = require('expo/con
 
 const minimumIOS = '26.0';
 const sharedSources = ['ProofActivity.swift', 'ProofIntents.swift'];
-const appSources = [...sharedSources, 'ProofStore.swift', 'ProofCoordinator.swift'];
+const appSources = [...sharedSources, 'ProofStore.swift', 'ProofCoordinator.swift', 'RoutineStore.swift'];
 const widgetSources = [...sharedSources, 'ProofWidget.swift'];
 const sqlResource = 'ProofSQL.json';
 const widgetPlist = `<?xml version="1.0" encoding="UTF-8"?>
@@ -44,7 +44,7 @@ function installFiles(project, nativeDir, iosDir, folder, files, targetUuid) {
   for (const filename of files) {
     fs.copyFileSync(path.join(nativeDir, filename), path.join(output, filename));
     const options = { project, groupName: folder, filepath: folder + '/' + filename, targetUuid };
-    if (filename === sqlResource) {
+    if (filename.endsWith('.json')) {
       xcode.addResourceFileToGroup({ ...options, isBuildFile: true });
     } else {
       xcode.addBuildSourceFileToGroup(options);
@@ -55,7 +55,7 @@ function installFiles(project, nativeDir, iosDir, folder, files, targetUuid) {
     if (!ref) throw new Error('Missing Xcode reference: ' + options.filepath);
     if (ref.explicitFileType === undefined || ref.explicitFileType === 'undefined') delete ref.explicitFileType;
     if (ref.fileEncoding === undefined || ref.fileEncoding === 'undefined') delete ref.fileEncoding;
-    if (filename === sqlResource) ref.lastKnownFileType = 'text.json';
+    if (filename.endsWith('.json')) ref.lastKnownFileType = 'text.json';
   }
 }
 
@@ -104,7 +104,7 @@ module.exports = function withLockScreenProof(config) {
       TARGETED_DEVICE_FAMILY: '1',
     });
 
-    installFiles(project, nativeDir, iosDir, 'ProofHost', [...appSources, sqlResource], host.uuid);
+    installFiles(project, nativeDir, iosDir, 'ProofHost', [...appSources, sqlResource, 'RoutineSQL.json'], host.uuid);
     installFiles(project, nativeDir, iosDir, targetName, widgetSources, targetUuid);
     fs.writeFileSync(path.join(iosDir, targetName, 'Info.plist'), widgetPlist);
     return mod;

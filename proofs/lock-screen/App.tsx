@@ -1,3 +1,5 @@
+import RoutineEditor from './RoutineEditor';
+import type { RoutineModule } from './RoutineEditor';
 import { requireOptionalNativeModule } from 'expo';
 import { useEffect, useRef, useState } from 'react';
 import { Alert, AppState, Button, Platform, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -37,7 +39,7 @@ type Snapshot = {
   restRemainingSeconds: number;
 };
 
-type ProofModule = {
+type ProofModule = RoutineModule & {
   start(): Promise<Snapshot>;
   read(): Promise<Snapshot | null>;
   reset(): Promise<void>;
@@ -61,6 +63,7 @@ function diagnosticTime(seconds: number | null) {
 const proof = Platform.OS === 'ios' ? requireOptionalNativeModule<ProofModule>('LockScreenProof') : null;
 
 export default function App() {
+  const [editingRoutines, setEditingRoutines] = useState(false);
   const [saved, setSaved] = useState<Snapshot | null>(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
@@ -137,10 +140,13 @@ export default function App() {
     }
   }
 
+  if (editingRoutines) return <SafeAreaView style={styles.screen}><RoutineEditor native={proof} close={() => setEditingRoutines(false)} /></SafeAreaView>;
+
   return (
     <SafeAreaView style={styles.screen}>
       <ScrollView contentContainerStyle={styles.content}>
         <Text accessibilityRole="header" style={styles.title}>Workout proof</Text>
+        <Button title="Routine editor" disabled={busy} onPress={() => setEditingRoutines(true)} />
         <Text accessibilityRole="header">Two-exercise proof — Add Set, Next Exercise, Finish Workout</Text>
         {proof ? (
           <>

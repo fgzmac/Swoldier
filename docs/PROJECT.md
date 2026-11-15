@@ -1,6 +1,6 @@
 # Workout App — project plan
 
-Last updated: **2026-11-13**
+Last updated: **2026-11-14**
 
 ## Goal and status
 
@@ -8,14 +8,32 @@ Build an iPhone-first workout tracker that makes it easy to log actual sets, ada
 
 | Area | Status |
 | --- | --- |
-| Current phase | Undo published at 593d39d834e0ad33dd375822fc2e2313e466c592 (fresh local/remote match). Two-exercise review passed without source correction; one [two-exercise preview / installation page](https://expo.dev/accounts/fgzmacaraeg/projects/swoldier-lock-screen-proof/builds/a6785cf2-13ea-4384-985d-065fc0051ea2) FINISHED. Native compilation/signing Passed (zero errors/nine warnings); 71 SQL-wrapper tests and TypeScript Passed. Guided upgrade/Add/Undo/Next/Finish sequence now has scoped screenshot-supported and user-reported evidence; deliberate action-safety, accessibility and broader recovery/migration checks remain Not run. Later Complete Set / End Rest wording is unbuilt/device-unverified; publication review passed with no blocker; next publish the reviewed 15-file checkpoint only when authorized. A separate later build/device check is still needed for the wording. TS-001/TS-002 open. |
+| Current phase | Published baseline 2245126dbec1a316c67621c6567db8420d233f6f; routine editor remains uncommitted. Preview 1a119269 native compilation/signing Passed; workout preservation screenshot-supported, named routine/optional-rest checks Passed — user-reported below. Publication review: no blocker, 89 TypeScript/SQL-wrapper tests and TypeScript Passed; all 19 inputs match the successful preview archive. Next: separately authorized publication of 16 reviewed paths. Start disconnected; framework open, wording device-unverified, TS-001/TS-002 open. |
 | Product notes | Adopted scope and planned checks recorded below. |
-| GitHub repository | [fgzmac/Swoldier](https://github.com/fgzmac/Swoldier), Undo checkpoint published at [593d39d](https://github.com/fgzmac/Swoldier/commit/593d39d834e0ad33dd375822fc2e2313e466c592); local/remote main freshly rechecked matching on 2026-11-13. |
+| GitHub repository | [fgzmac/Swoldier](https://github.com/fgzmac/Swoldier), published checkpoint [2245126](https://github.com/fgzmac/Swoldier/commit/2245126dbec1a316c67621c6567db8420d233f6f), local/remote main verified matching on 2026-11-13. |
 | Application code | Two fictional exercises, planned and today-only sets in the [Lock Screen proof](../proofs/lock-screen/README.md#current-three-set-proof--prepared-locally); production app not started. |
 | Development stack | Proposed options only; not selected. |
 | Local persistence | Native SQLite proof: prior 29 SQL-wrapper checks Passed (not Swift execution). Current migrated expired-rest sequence preserves supplied data/deadline and reported ordinary-reopen acknowledgement; other migration/lifecycle cases remain Not run. |
 | Lock Screen experience | Essential first-version requirement; Face ID allowed while Lock Screen remains visible. Current Continue reveal interactions Passed — user-reported for the migrated-record sequence below. Earlier named one-set/rest/compact passes remain build-scoped. No new broad layout or lifecycle pass; blackout cause unconfirmed. |
 | Earlier interactive screen | Illustrative mockup only. |
+
+## 2026-11-14 optional routine rest
+
+**Current result:** [Preview 1a119269](https://expo.dev/accounts/fgzmacaraeg/projects/swoldier-lock-screen-proof/builds/1a119269-ecca-4cce-962d-5bf4d7d10e9a) FINISHED; native compilation/signing Passed, zero errors/eight warnings. Exactly one build; last verified free iOS usage afterward was 14/15, one remaining, $0 overage (not freshly queried in publication review). Scoped device evidence is recorded below. Earlier source review found an initialization risk; the reviewed decoder-local correction now compiles without changing defaults/validation. No compiler failure of the original version was reproduced. [Current publication review](HANDOFF.md#routine-editor-publication-review--2026-11-14).
+
+**Adopted and implemented locally:** Track rest is optional per exercise within each routine. Require a valid duration only when enabled and preserve entered text through toggles/save/reopen; disabled entries have no active duration. Preserve legacy routines as tracking-enabled with their saved duration; no reset or automatic rewrite. New entries default on with no guessed duration as a provisional UI choice. Routine settings remain independent. 89 TypeScript/SQL-wrapper tests and TypeScript Passed again in publication review; earlier export and ten generated-copy checks remain applicable because source hashes are unchanged. Native compilation/signing Passed in 1a119269; reported device checks are limited below. This patch is not included in earlier e7194787.
+
+**Future workout behavior — adopted, not implemented:** disabled tracking creates no countdown or waiting requirement. Keep durable saved confirmation and an Undo opportunity before Continue advances; never auto-advance. Start remains disconnected from saved routines. Later independent workout snapshots must include the tracking choice and active duration, without treating remembered disabled text as a deadline.
+
+**Device evidence for 1a119269:** workout preservation is supported by supplied before/after screenshots, recorded from the user's evidence summary without independently re-inspecting images in this task. Routine preservation, tracking Off persistence, remembered **60-second** duration, blank accepted Off, blank rejected On without losing edits, On/0 persistence and routine independence are **Passed — user-reported**. Earlier missing-set observation remains inconclusive; subsequent blank-versus-zero tests passed, with no confirmed bug/fix. No broad native-validation, failure injection/conflict, lifecycle/recovery/migration, accessibility/layout or wording pass inferred; unreported cases remain Not run. Both troubleshooting issues stay open. [Current evidence checklist](../proofs/lock-screen/README.md#current-optional-rest-preview--2026-11-14).
+
+## 2026-11-13 adopted routine-editor direction
+
+Manual exercise names with reuse of previously entered identities now; prebuilt routines/templates later after core functionality. Local proof editor creates/names/saves/reopens/edits routines, reorders/removes membership, gives new entries three blank editable planned sets, allows planned-set add/remove and explicitly configures rest per routine-exercise. Stable exercise identities do not share routine settings. Removing membership does not delete identities/history. Blank pounds/reps differ from zero; no equipment-name guessing. RIR remains a required later logging task.
+
+Separate native routine storage preserves installed proof workout data and all current Lock Screen behavior. Save commits a revision-checked, ordered routine document; settings are independent per routine. This pass does not connect Start to saved routines. A later integration must durably snapshot routine revision, exercise identities/names, plans and rest into independent workout data; routine edits cannot rewrite active or completed workouts.
+
+[Provisional defaults/limits and device checklist](../proofs/lock-screen/README.md#routine-editor-proof--2026-11-13) are proof choices, not production requirements. Focused Unicode-name correction review Passed without further source changes; storage/schema/workout behavior unchanged. One [routine-editor preview](https://expo.dev/accounts/fgzmacaraeg/projects/swoldier-lock-screen-proof/builds/e7194787-c08c-47bb-89a7-e5ef547b26bd) FINISHED, native compilation/signing Passed. 84 tests Passed (production TypeScript and SQL wrappers, not Swift runtime), TypeScript/export, ten generated-file checks and 19 current upload-input hashes Passed. Installation/bridge/runtime validation/persistence/UI/device checks Not run. One authorized upload/build, no retry/staging/commit/push; free iOS usage 13/15, zero overage. Both troubleshooting issues remain open; Complete Set / End Rest labels compiled in this preview but remain device-unverified.
 
 ## 2026-11-13 adopted two-exercise proof
 

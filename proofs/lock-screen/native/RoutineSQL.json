@@ -1,0 +1,13 @@
+{
+  "schema": [
+    "CREATE TABLE IF NOT EXISTS routine_exercises (id TEXT PRIMARY KEY, name TEXT NOT NULL UNIQUE COLLATE NOCASE)",
+    "CREATE TABLE IF NOT EXISTS routine_plans (id TEXT PRIMARY KEY, revision INTEGER NOT NULL CHECK(revision > 0), name TEXT NOT NULL UNIQUE COLLATE NOCASE, document TEXT NOT NULL)"
+  ],
+  "exercises": "SELECT id,name FROM routine_exercises ORDER BY name COLLATE NOCASE,id",
+  "routines": "SELECT document FROM routine_plans ORDER BY name COLLATE NOCASE,id",
+  "exerciseByName": "SELECT id,name FROM routine_exercises WHERE name=:name COLLATE NOCASE",
+  "exerciseExists": "SELECT id FROM routine_exercises WHERE id=:id",
+  "insertExercise": "INSERT INTO routine_exercises (id,name) VALUES (:id,:name) ON CONFLICT(name) DO NOTHING",
+  "insertRoutine": "INSERT INTO routine_plans (id,revision,name,document) VALUES (:id,1,:name,:document)",
+  "updateRoutine": "UPDATE routine_plans SET revision=revision+1,name=:name,document=:document WHERE id=:id AND revision=CAST(:revision AS INTEGER)"
+}

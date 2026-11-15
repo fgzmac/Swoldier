@@ -1,5 +1,105 @@
 # Swoldier Lock Screen proof
 
+## Current optional-rest preview — 2026-11-14
+
+[Build and installation page](https://expo.dev/accounts/fgzmacaraeg/projects/swoldier-lock-screen-proof/builds/1a119269-ecca-4cce-962d-5bf4d7d10e9a): **1a119269-ecca-4cce-962d-5bf4d7d10e9a FINISHED**, November 14 at 3:21 PM America/Los_Angeles. Includes routine editing, optional Track rest and the reviewed decoder-local correction. **Native compilation/signing Passed**, zero errors/eight reported warnings; signed IPA exported. Warning output includes generated AppDelegate iOS deprecations, duplicate libc++ and a missing Metal-toolchain library path; Fastlane separately warns of future Ruby 3.3+ requirements. No source/dependency/signing edits to suppress warnings.
+
+Fresh isolated archive: 19 required files and matching hashes, both SQL resources included; no extra/sensitive/unrelated/generated files. Existing project/signing reused. Free iOS usage 13/15 before, **14/15 after; one remains, $0 overage**. One submission, no retry/staging/commit/push. Start remains disconnected from saved routines.
+
+**Device checklist results recorded 2026-11-14 for this build:**
+
+| Check | Evidence/result |
+| --- | --- |
+| Workout preservation across upgrade | Supported by supplied before/after screenshots, as described in the user's evidence summary; images not independently re-inspected in this task. |
+| Existing routine preservation | Passed — user-reported. |
+| Track rest Off → save/reopen | Passed — user-reported. |
+| Remembered duration restored on switching On | Passed — user-reported; **60 seconds**. |
+| Off with blank duration → save/reopen | Passed — user-reported. |
+| On with blank duration rejects without losing edits | Passed — user-reported. |
+| On with explicit 0 → save/reopen | Passed — user-reported; distinct from blank. |
+| Settings independent across routines | Passed — user-reported. |
+
+No other exact routine/workout values, counts or timestamps are inferred. Earlier missing-set observation remains inconclusive; subsequent blank-versus-zero tests passed, with **no confirmed bug or fix**. These passes are limited to the reported sequence, not all native validation or persistence paths.
+
+**Remaining device checks — Not run unless separately evidenced:** injected save/COMMIT failures and retry retention, deliberate stale/conflicting saves, malformed native payloads, force-quit/system termination and broader recovery/migration, accessibility/larger text, broad layout and Complete Set / End Rest wording. This report does not establish the other earlier editor checklist items (such as reorder/removal) passed. Both troubleshooting issues remain open/deferred.
+
+**Publication review:** all 19 current build-input hashes match this preview's preserved inspected archive and manifest; no source changes after the successful build. 89 TypeScript/SQL-wrapper checks and TypeScript re-ran successfully. Wrappers do not execute Swift or React/device UI. Start remains disconnected; disabled-rest workout behavior is still **unimplemented**, not established by editor tests. [Exact publication scope and next task](../../docs/HANDOFF.md#routine-editor-publication-review--2026-11-14). Preparation/review records below retain their historical scope; earlier compilation-pending/Not run statements describe those earlier tasks.
+
+## Optional rest tracking — 2026-11-14
+
+**Review checkpoint:** decoder-only initialization correction prepared. The `??` fallback now uses local `decodedRestSeconds`, avoiding capture of partially initialized self. Default enabled tracking and legacy duration/raw-text behavior are unchanged. This is a source-review finding, not a compiler-reproduced failure or verified native fix. 89 tests/TypeScript and supplemental JavaScript serialization checks Passed; ten generated copies match. Review the focused correction before any separately authorized native compile. No upload/build; optional-rest runtime/device checks remain Not run.
+
+**Local patch only, not in preview e7194787:** each routine exercise has a clearly labeled **Track rest** switch. Default on with blank duration is a provisional choice retaining the prior editor behavior. Duration is required only when on, using the existing whole-number 0–3600 limit; zero remains an explicit valid value. When off, the field is read-only and labeled remembered/not used. Toggle changes never clear it. Blank or invalid numeric text can be saved while off and restored exactly on re-enable; then it must be corrected before saving with tracking enabled. Other field validation and the 128 KiB payload bound still apply. No dependency changes; uses the existing [React Native 0.86 controlled Switch](https://reactnative.dev/docs/0.86/switch).
+
+**Storage/compatibility:** each routine entry adds `trackRest` and `restSecondsInput`. Input text is remembered separately from active `restSeconds` (integer when on; null/omitted when off), preventing an old entered value from becoming a disabled countdown. Native enabled validation checks text/duration agreement before commit. Missing flag defaults on for existing routine documents; missing input text derives from the saved numeric duration, including zero. Reading does not rewrite records or increment revisions; explicit save uses the existing atomic revision guard. Exercise identity, routine-specific settings, planned sets and workout history remain independent. No SQL schema migration/reset; older-app downgrade support is not claimed for newly saved documents.
+
+**Future workout behavior, adopted but not implemented:** no countdown or wait requirement when tracking is disabled. Still show durable saved confirmation and allow Undo before Continue advances. Keep Start disconnected now; future workout snapshots must copy this setting independently and ignore disabled remembered text for timing. Existing fictional workout/Lock Screen flow is unchanged.
+
+**Checks Passed:** 89 tests (71 workout SQL wrappers plus 18 routine/model checks), TypeScript, iOS JS/Hermes export and ten generated native-copy comparisons with host-only routine membership. Tests use production TypeScript and SQL with separate JS wrappers; legacy decode/runtime behavior in Swift is not executed. Only RoutineEditor.tsx, routineModel.ts and RoutineStore.swift build inputs differ from e7194787. No fresh archive/upload/build. New Swift compilation, installed routine decoding, native persistence, layout/accessibility and optional-rest device checks **Not run**.
+
+**Later focused checklist — Not run:** capture installed routines/workout data, upgrade without deleting/resetting, reopen old routines and confirm duration/tracking; enter 90 seconds, toggle off/save/reopen/on and confirm retention; repeat with blank/invalid text while off and verify enabled validation keeps edits; check zero separately; reuse the same exercise in a second routine with a different flag/duration and verify isolation and unchanged workout history. Review the patch before any separately authorized build.
+
+**Separate user report:** repeat blank-versus-zero test Passed — user-reported. No confirmed missing-set bug or fix inferred, and no exact values/counts/screenshots/build identifier supplied with this report. Both deferred troubleshooting issues remain open. The earlier compiled baseline below does not establish native/device success for this new patch.
+
+## Routine editor proof — 2026-11-13
+
+Published baseline: [2245126](https://github.com/fgzmac/Swoldier/commit/2245126dbec1a316c67621c6567db8420d233f6f), local/remote main verified matching at the earlier clean starting point. The two-exercise/wording milestone is published; earlier publication instructions below are historical. The routine editor remains local/uncommitted. **Native compilation/signing: Passed** in [preview e7194787](https://expo.dev/accounts/fgzmacaraeg/projects/swoldier-lock-screen-proof/builds/e7194787-c08c-47bb-89a7-e5ef547b26bd), completed 2026-11-14T04:13:48.100Z. **Installation, native runtime validation/persistence, keyboard/layout/accessibility and device behavior: Not run.** Complete Set / End Rest is compiled in this preview but device-unverified.
+
+### Adopted scope and separation
+
+Manually enter an exercise name or reuse a saved name; no catalog or equipment inference. Create/name/save/reopen/edit routines, move exercises up/down, remove routine membership, add/remove planned sets and edit pounds/reps, explicitly set rest seconds per exercise in that routine. New entries start with three independent blank planned sets, including when reusing an exercise. Prebuilt routines/templates are later, after core functionality. RIR remains a required later logging task; it is not implemented or dropped here. Production framework remains open.
+
+Open **Routine editor** from the existing app. Its Back button preserves the fictional workout flow; Start still uses the fixed fixture. The editor does not publish a Live Activity, start a workout or reset installed workout data. Routine edits stay unsaved until Save; leaving/switching with edits prompts to discard, and save failures retain the form. Unsaved routine edits are not automatically recovered after process termination. Saving an exercise name explicitly persists its reusable identity even if subsequent routine edits are discarded, as the form explains.
+
+### Durable data model
+
+- Native `RoutineStore.swift` opens a separate **RoutinePlans.sqlite3** in app Application Support. Existing **LockScreenProof.sqlite3**, its v5 migration, actuals, drafts, deadlines and action guards are untouched. Fictional-workout Reset does not clear routines.
+- `routine_exercises` stores stable UUID/name identities. Removing membership never deletes this row. No exercise-identity rename/delete feature added. Trimmed names reuse an existing identity under SQLite NOCASE (ASCII case folding; no broader Unicode equivalence promised).
+- `routine_plans` stores each routine UUID/revision/name and its ordered plan as one JSON document. Each routine owns its settings; selecting the same exercise in another routine copies no settings and links only its identity. Removing an entry or set changes this routine document only. Empty named routines can be saved.
+- Save validates natively, confirms referenced exercise identities, then inserts/replaces the entire document in one BEGIN IMMEDIATE/COMMIT transaction with synchronous FULL. Success returns only after COMMIT. Revision-checked updates reject stale edits instead of overwriting a newer routine. Unique routine names (SQLite NOCASE) avoid indistinguishable list choices. On a conflict, reopen the saved routine before retrying; no automatic merge.
+- Blank pounds/reps become optional native values (JSON null or omitted), distinct from explicit numeric zero. No pounds/reps are invented. Swift validates independently of the form; the TypeScript validation tests do not establish Swift execution.
+
+### Provisional validation choices — proof only
+
+| Field / boundary | Local choice |
+| --- | --- |
+| Routine/exercise name | Trim the ECMAScript whitespace/line-terminator set at edges; 1–80 Unicode code points/scalars in both validators; reject C0/C1 controls and malformed UTF-16. No normalization or broader Unicode name equivalence promised. |
+| Exercise membership | At most 30 entries; same identity once per routine for this editor. Reuse across routines allowed. |
+| Planned sets | New entry: 3 blank sets. Allow 1–20 sets per entry; added sets also blank. |
+| Pounds | Blank or 0–2000, up to two decimal places; decimal point input. |
+| Reps | Blank or whole number 0–1000. |
+| Rest | Track rest switch defaults on; no guessed duration. Required integer 0–3600 only when on. Off retains entered text but has no active duration. Zero stays distinct from blank. No name/equipment guessing. |
+| Save size | Native rejects payloads above 128 KiB; revision guards reject stale updates. |
+
+These are bounded input/safety choices, not adopted production training limits; the old fictional workout's 0–200 lb / 0–30 rep limits are not reused here. Final numeric limits, localization, repeated exercise membership and production defaults remain open. The editor uses labeled inputs and simple buttons with scrolling/keyboard insets, not a visual redesign.
+
+### Checks and limits
+
+**Current review result:** focused correction Passed without further source changes. One preview e7194787 FINISHED; native compilation/signing Passed, zero errors/eight warnings. The earlier stop-on-blocker review did not build; this later task separately authorized the one submission. Swift matches the model’s code-point limit, edge trimming and C0/C1 rejection; the model rejects malformed UTF-16. No schema/transaction or workout changes. Native runtime validation is still Not run.
+
+**Passed on Windows:** 84 tests: 71 existing workout SQL-wrapper regressions plus 13 routine checks; TypeScript; local iOS JS/Hermes export (582 modules); ten generated native source/resource comparisons and host-only routine target membership; Markdown links/whitespace. Tests exercise production `routineModel.ts` parsing/editing and `RoutineSQL.json` through a separate JS transaction wrapper. They cover save/reopen, ordering/set edits, blank/zero, shared-identity isolation, membership removal, stale revisions, write/COMMIT failure, explicit rest and a populated workout file remaining byte-for-byte unchanged. They **do not execute Swift**, the bridge, native validation, ActivityKit or device UI. Generated config/JS export are not native compilation.
+
+Fresh local archive inspection: 19 required paths, all SHA-256 hashes match local source; no extra files, secrets/private records, dependencies or generated artifacts. Free iOS allowance 12/15 before the one authorized preview, 13/15 after; two remain, zero overage/$0 estimated charges. No dependency change, retry, staging, commit or push. `.easignore` and the config plugin include the two new TS files and host-only native routine source/resource in the successful preview. Existing signing/identifiers unchanged; no enrollment/plan changes. TS-001 delayed automatic reveal and TS-002 countdown jumps remain open/deferred.
+
+### Focused later device checklist — all Not run
+
+1. Before a separately authorized upgrade, capture current workout actuals/drafts/plans/counts/rest metadata. Install without deleting/resetting, reopen and compare; existing workout/Lock Screen flow must still work.
+2. Create Routine A, manually save an exercise name. Confirm three blank planned sets and blank rest. Try saving without rest: validation must reject. Enter explicit rest, blank values and zero values, then save; close/reopen and compare.
+3. Add a second exercise, reorder, edit/add/remove planned sets, rename/save the routine, close/reopen and verify order and values. Remove one exercise; it must remain available for reuse.
+4. Create Routine B using the same exercise identity with different pounds/reps/rest. Edit A and reopen both; B must be unchanged. Workout actuals/drafts/rest/counts must also remain unchanged.
+5. Check blank versus explicit zero after reopen, unsaved-edit discard and readable invalid-input feedback without losing edits. Include a decomposed-accent/emoji name and an over-limit name. Device failure injection, conflict races, accessibility and broader lifecycle checks are unrun.
+6. In the fictional workout’s Undo editing state, verify Complete Set / End Rest labels and reachable controls; normal saved rest must still say Continue. Keep these wording checks separate from routine persistence.
+
+### Next bounded task
+
+Capture installed data and install the successful preview without deleting/resetting; compare after reopening, then follow the six device steps. Native runtime/bridge validation and all six device steps remain Not run. Do not connect Start to routines in this checkpoint. The subsequent integration should create an independent workout snapshot: copy routine revision, exercise identity/name, ordered plans and rest into new workout-owned rows in one durable start transaction. Keep editable drafts and completed actuals separate from copied plans. Never read live routine settings to mutate active/history records. Routine edits after Start must leave that snapshot and every completed record unchanged; blank/zero and RIR need explicit integration decisions/tests.
+
+Name-rule review references: [Swift strings, scalar views and grapheme clusters](https://docs.swift.org/swift-book/LanguageGuide/StringsAndCharacters.html) and [ECMAScript trim](https://262.ecma-international.org/index.html#sec-string.prototype.trim). These establish language differences, not execution of the patched Swift validator.
+
+Official references checked for existing APIs: [Expo AsyncFunction/module API](https://docs.expo.dev/modules/module-api/), [React Native 0.86 TextInput](https://reactnative.dev/docs/0.86/textinput), [ScrollView keyboard insets](https://reactnative.dev/docs/0.86/scrollview#automaticallyadjustkeyboardinsets), and [SQLite transactions](https://www.sqlite.org/lang_transaction.html). These establish API behavior, not a successful native/device test of this code.
+
+## Earlier published two-exercise and wording checkpoint
+
 ## Local Undo-rest wording refinement — 2026-11-13
 
 **Publication review, 2026-11-13:** no blocker found against 593d39d; 71 SQL-wrapper tests and TypeScript re-run Passed. Current inputs compared with the inspected a6785cf2 archive: 14/15 hashes match; only native/ProofWidget.swift differs, solely in Undo-rest button/accessibility/instruction wording. No action/ID/retry/storage change. The patch remains unbuilt/device-unverified. [Exact proposed files and validation limits](../../docs/HANDOFF.md#publication-review--2026-11-13).

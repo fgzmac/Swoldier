@@ -4,6 +4,147 @@ Record a short entry after each working session. Newest entries go first. Write 
 
 **Planned:** agreed or proposed work. **Implemented:** code exists. **Verified:** a named check ran and passed.
 
+## 2026-11-14 — Record optional-rest device results and review publication
+
+**Status** — Scoped results for build **1a119269-ecca-4cce-962d-5bf4d7d10e9a** recorded; no publication blocker found. Documentation only in this task. No source changes, upload/cloud build, staging, commit or push.
+
+- Read AGENTS/current handoff/project/proof/status documents and inspected the complete accumulated diff against published baseline 2245126dbec1a316c67621c6567db8420d233f6f, including five new files. Local main/HEAD remains that baseline, tracking origin/main; no fresh remote query. All 16 accumulated paths remain unstaged. Historical entries and user-written reflections preserved.
+- Workout preservation is supported by the supplied before/after screenshots, recorded from the user's evidence summary; images were not independently re-inspected in this task. Routine preservation, Track rest Off persistence, remembered 60-second duration, blank accepted Off, blank rejected On without losing edits, On/0 persistence and routine independence: Passed — user-reported. No additional exact values/counts/timestamps invented.
+- Earlier missing-set observation remains inconclusive; subsequent blank-versus-zero tests passed. No confirmed bug, cause or fix. Kept failure/retry injection, deliberate stale/conflicting saves/actions, malformed native payloads, broader migration/recovery/lifecycle, accessibility/larger text, broad layout and wording checks unrun unless separately evidenced. No broad native-runtime pass inferred.
+- Reviewed editor/model/native validation, stable exercise identity and independent settings, revision-checked atomic routine saves, separate routine database, bridge/plugin/resources, upload allowlist, tests and documentation. Start still calls the fictional workout without a routine. Future disabled-rest workout behavior remains adopted and unimplemented; production framework and required later RIR logging remain open work. TS-001 delayed automatic reveal and TS-002 countdown jumps remain open/deferred.
+- Re-ran 89 tests (71 workout SQL-wrapper regressions, 18 routine/model tests) and TypeScript successfully. Tests execute production TypeScript and shipped SQL through separate JavaScript transaction wrappers, not Swift/native runtime or React/device UI. No native compilation/device test ran in this review; existing preview compilation/signing Passed separately.
+- Compared every current build input with the preserved successful-preview archive and its recorded SHA-256 manifest: all 19 match, including package-lock.json and both SQL resources; no missing/extra archive files or changed source inputs. Earlier generated-native checks remain applicable to these same bytes. Reviewed all 16 proposed publication paths for credentials, signing/device identifiers, private data and generated/dependency artifacts; no findings in content/path review and targeted secret/device-ID scans. Existing build warnings remain recorded, not hidden or fixed.
+- Updated current status, build-scoped proof checklist and handoff with the exact 16-file publication list. Local Markdown links/anchors and working-tree/untracked whitespace checked. Suggested commit message: Add routine editor with optional rest tracking. No remote publication performed.
+
+### What I learned — user-written
+
+### Next small task
+
+When explicitly authorized, recheck Git/remote and the reviewed 16-path scope, inspect staged contents/whitespace, then commit and push this routine-editor checkpoint. Keep Start integration and all generated/audit files out of that publication.
+
+---
+
+## 2026-11-14 — Build one optional-rest and decoder-correction preview
+
+**Status** — Exactly one [preview](https://expo.dev/accounts/fgzmacaraeg/projects/swoldier-lock-screen-proof/builds/1a119269-ecca-4cce-962d-5bf4d7d10e9a) **FINISHED**; native compilation/signing Passed. Installation/native runtime/device checks **Not run**. No source changes, dependency changes, retry, staging, commit or push.
+
+- Read AGENTS/current handoff/project/latest log and checked Git. main/HEAD remains 2245126dbec1a316c67621c6567db8420d233f6f, upstream origin/main, with all 16 accumulated paths unstaged. The preceding read-only decoder review passed: local-only fallback avoids partially initialized self, defaults/order unchanged; six focused routine wrapper checks passed. That review did not edit the historical handoff, so its earlier correction-pending entry remained until this new result. No fresh remote query.
+- Verified fresh Free-plan allowance: 13/15 iOS before submission. Fresh isolated archive inspection passed: exactly 19 required paths, all hashes equal reviewed local source, both native SQL resources included; ten native files equal reviewed generated copies. Excluded secrets/signing/device identifiers/private records, dependencies, generated and unrelated files. Saved manifest/logs privately outside Git. No new blocker found; no unrelated tests repeated or source edits needed.
+- Submitted once with existing project, identifiers, phone and signing using frozen credentials. CLI skipped fresh Apple-server certificate/profile validation in non-interactive mode; signed export separately succeeded. EAS_NO_VCS keeps proof-directory isolation and omits a Git commit field. Recorded base 2245126 plus accumulated uncommitted editor source; only RoutineEditor.tsx, routineModel.ts and RoutineStore.swift differ from earlier build e7194787.
+- Build 1a119269-ecca-4cce-962d-5bf4d7d10e9a FINISHED at 2026-11-14T23:21:56.523Z (3:21 PM America/Los_Angeles). Archive succeeded and signed IPA exported, zero errors/eight reported warnings. Optional rest and decoder correction now compile; no runtime/device success inferred.
+- Warning output includes generated AppDelegate iOS 26 deprecations (OpenURLOptionsKey, UIWindow initialization, UIScreen.main), duplicate libc++ and missing Metal-toolchain Swift library search path. Fastlane also warns Ruby 3.2.11 support will require 3.3+. No changes made to hide warnings. A local warning-report script hit Windows console encoding; reran that read-only log report using UTF-8, not another build.
+- Post-build allowance: Free iOS 14/15, one remaining; zero overage builds and $0 estimated charges. No paid usage, automatic retry or account/signing changes.
+- Updated current status/handoff and five-step upgrade-first phone checklist. Existing routine/workout preservation, Off save/reopen, remembered On duration, disabled blank versus enabled invalid input, cross-routine isolation, native decoding/persistence/layout/accessibility remain Not run. Start remains disconnected. Prior blank-versus-zero report remains user-reported; no missing-set bug/fix inferred. Both troubleshooting issues, history and personal reflections preserved.
+
+### What I learned — user-written
+
+### Next small task
+
+Capture routine/workout data, upgrade without deleting/resetting and compare after reopening; then follow the five optional-rest checks in HANDOFF and report outcomes separately from compilation.
+
+---
+
+## 2026-11-14 — Review optional rest and prepare decoder initialization correction
+
+**Status** — Source-level Swift initialization blocker found; decoder-only correction prepared, native compilation pending. No upload/cloud build/staging/commit/push. Wrapper/TypeScript checks Passed; Swift/runtime/device checks **Not run**.
+
+- Read AGENTS/current handoff/project/latest log and inspected the editor, TypeScript model, bridge, Swift decoder/validation/transactions and SQL. main/HEAD remains 2245126dbec1a316c67621c6567db8420d233f6f, upstream origin/main, with all accumulated work preserved; no remote query or Git-setting changes.
+- Identified the new decoder fallback reading instance `restSeconds` on the right of `??` before every stored field was initialized. Swift's nil-coalescing operator takes an autoclosure, so this captures partially initialized self. Prepared a narrow local-variable correction: decode into `decodedRestSeconds`, assign the property and use the local in the fallback. No schema/default/validation/behavior change. This source-level compile-risk finding was not reproduced with Swift: swift/swiftc unavailable; no native build ran. [Swift operator implementation](https://github.com/swiftlang/swift/blob/main/stdlib/public/core/Optional.swift) and [initialization/autoclosure discussion on Swift Forums](https://forums.swift.org/t/constant-xxx-captured-by-a-closure-before-being-initialized/19902) informed the review.
+- No other blocker found in reviewed paths. Legacy missing flag defaults on; remembered text derives from original duration including zero, with no read-time document rewrite. Optional fields tolerate native nil omission. Disabled raw text is retained independently of active duration; enabled ASCII-integer validation agrees with TypeScript for generated payloads. Invalid input precedes writes; save failure leaves edits. Routine membership settings, stable identities, revision guards and workout isolation retained; Start remains disconnected.
+- Re-ran 89 TypeScript/SQL-wrapper tests and TypeScript successfully. Supplemental JS contract checks passed for null/omitted disabled duration, blank/zero/text retention, all 3,601 enabled integer values, invalid values and legacy defaults 0/90/3600. These execute TypeScript/SQL wrappers or simulate serialization shapes, not Swift/native validation or UI. No new mirror-implementation test claimed as production Swift evidence.
+- Regenerated ten native source/resource copies and verified hashes. Workout sources, bridge, SQL/config/dependencies remain byte-identical to the e7194787 build inputs; only the existing three optional-rest inputs differ from that build. The correction in this review changes only RoutineStore.swift. No JS export rerun needed for the Swift-only correction. Prior native compilation covers the earlier build only.
+- Stopped after preparing the correction and local checks; refreshed handoff/project/proof status. Existing repeated blank-versus-zero pass remains user-reported, without confirming or fixing a missing-set bug. Both troubleshooting issues stay open/deferred. Historical entries and personal learning reflections preserved.
+
+### What I learned — user-written
+
+### Next small task
+
+Review the decoder-local correction before any separately authorized native compilation; then use the upgrade-first optional-rest checklist. Keep all new runtime/device outcomes Not run until evidenced.
+
+---
+
+## 2026-11-14 — Make routine rest tracking optional
+
+**Status** — Implemented locally, unbuilt. 89 TypeScript/SQL-wrapper tests, TypeScript, local JS export and generated-source checks Passed. New Swift compilation/native decoding/persistence and optional-rest device checks **Not run**. No cloud upload/build, staging, commit or push.
+
+- Read AGENTS/current handoff/project/latest log, inspected Git and preserved the existing 16 accumulated paths. Local main/HEAD remains 2245126dbec1a316c67621c6567db8420d233f6f; no remote query or Git-setting changes.
+- Added a controlled, labeled Track rest switch per routine exercise. It changes only that entry's flag, preserving the duration text. Disabled duration is displayed read-only as remembered/not used; turning on restores editing. Duration required/validated only when on; other routine validation unchanged. New entries default on with blank duration as a provisional continuity choice. Existing raw text survives off/on and save/reopen, including invalid numeric text while off.
+- Added backward-compatible RoutineEntry JSON decoding: missing flag defaults on and missing remembered text derives from prior numeric duration. Disabled rest has no active numeric duration; enabled values require matching whole-number input within existing 0–3600 bounds. Reused the exact ECMAScript trimming helper without changing name rules. No SQL/table/workout migration or automatic reset/rewrite; identities, independent settings, atomic revision saves and failure edit retention preserved. Existing documents change only on explicit save; older-build downgrade compatibility is not claimed.
+- Recorded future disabled-rest workout flow: no countdown/wait gate, but durable saved confirmation and an Undo opportunity before Continue advances. Not implemented; Start remains fictional/disconnected, and later workout snapshots must copy the flag/duration independently.
+- Passed 89 tests: 71 existing workout wrappers, 18 routine/model checks (five added). Cover toggle/save/reopen with exact entered text, disabled blank/invalid input, enabled validation with edits/saved plan retained, zero, legacy documents, isolated settings/reorder/removal and stale revisions. Tests execute production TypeScript and SQL through JS wrappers, not Swift decoding or phone UI. TypeScript and iOS/Hermes export passed (582 modules).
+- Ten generated native source/resource copies match; routine Swift/JSON remain host-only. Exactly three build inputs differ from successful e7194787: RoutineEditor.tsx, routineModel.ts, native/RoutineStore.swift. Existing workout sources, SQL, configuration, signing and dependencies unchanged. Official React Native 0.86 Switch guidance checked; no package installation. No fresh archive or EAS action needed for this local task.
+- Recorded repeat blank-versus-zero as Passed — user-reported only; no confirmed earlier missing-set bug or fix inferred. No screenshots/exact values/counts/build identifier supplied with that report. Kept both deferred troubleshooting issues open, prior evidence/history intact and personal reflections blank. Refreshed current requirements, proof guide and review/device handoff.
+- Final checks: 135 local Markdown links/anchors Passed; working-tree and untracked-source whitespace Passed. Published historical log content/reflections preserved; all 16 accumulated paths remain unstaged.
+
+### What I learned — user-written
+
+### Next small task
+
+Review optional-rest validation, raw-text retention and legacy decoding before a separately authorized preview. Later, test an off/save/reopen/on cycle without resetting installed data.
+
+---
+
+## 2026-11-13 — Validate name correction and build one routine-editor preview
+
+**Status** — Focused review Passed without source changes. Exactly one [preview](https://expo.dev/accounts/fgzmacaraeg/projects/swoldier-lock-screen-proof/builds/e7194787-c08c-47bb-89a7-e5ef547b26bd) **FINISHED**; native compilation/signing Passed. Installation/native runtime/device checks **Not run**. No dependency upgrades, staging, commit, push or retry.
+
+- Read AGENTS/current handoff/project/latest log; main/HEAD 2245126dbec1a316c67621c6567db8420d233f6f, upstream origin/main. Preserved all 16 accumulated unstaged paths and both open issues; no fresh remote query.
+- Reviewed matching ECMAScript trim set, code-point/scalar counts, C0/C1 controls and malformed-surrogate rejection before bridge calls. Ordinary names, whitespace, emoji, combining sequences and boundary vectors passed TypeScript checks. Compared Swift source's 25 trim scalars against JavaScript trim for all 1,112,064 Unicode scalar values: no mismatch. This source-literal comparison is not Swift execution. Validation precedes writes; transaction/revision guards and form catch paths preserve saved plans/unsaved edits. No identity/schema/workout changes.
+- Passed 84 tests (71 workout SQL wrappers, 13 routine/model checks) and TypeScript. Production TypeScript and shipped SQL execute through separate JavaScript transaction wrappers, not Swift, bridge calls or rendered form. All 19 build inputs match the prior corrected archive, so prior ten generated-copy/target checks still apply. Actual build verified existing Foundation/scalar syntax compiles.
+- Fresh isolated archive: exactly 19 required files, all SHA-256 hashes equal local source; no unexpected paths/sensitive content found. Routine TS/native/SQL and lockfile included; credentials/signing/device identifiers/private records/dependencies/generated artifacts excluded. Manifest and working diff recorded outside Git. Seven changed/new inputs versus base: App.tsx, RoutineEditor.tsx, routineModel.ts, module bridge, RoutineStore.swift, RoutineSQL.json and config plugin; twelve unchanged. EAS_NO_VCS does not attach a commit, so base 2245126 plus local inputs explicitly recorded.
+- Free iOS allowance freshly queried: 12/15 before, 13/15 after; two remaining, zero overage/$0 estimated charges. Submitted once using existing project/identifiers/phone/signing with frozen credentials. CLI skipped fresh Apple-server validation in non-interactive mode; signed export separately succeeded. No plan/credential changes or retry.
+- Build e7194787-c08c-47bb-89a7-e5ef547b26bd FINISHED at 2026-11-14T04:13:48.100Z (November 13 local). SDK 57, Xcode 26.6; archive succeeded, zero errors/eight warnings, signed IPA exported. Decoded Brotli log response before inspection. Routine source and prior Complete Set / End Rest wording now compiled, not runtime/device verified.
+- Refreshed handoff/status and later upgrade/editor/wording checklist. Installation, native runtime validation/persistence, layout/accessibility, failure injection/conflicts and new phone checks remain Not run. Start remains fictional; production framework open. TS-001 delayed automatic reveal and TS-002 countdown jumps stay open/deferred. Historical entries and personal reflections preserved.
+
+### What I learned — user-written
+
+### Next small task
+
+Capture installed workout state, upgrade without deleting/resetting and compare; create/save/reopen a fictional routine and follow the six-step editor/wording checklist. Record runtime/device evidence separately from compilation.
+
+---
+
+## 2026-11-13 — Review routine editor; correct name-validation mismatch, withhold build
+
+**Status** — Blocking native/form validation discrepancy found; only a narrow correction prepared. No cloud upload/build, allowance consumption, dependencies, staging, commit or push. Swift/native and all new device checks **Not run**.
+
+- Read AGENTS/current handoff/project/latest log, inspected all routine source, SQL, form/bridge and plugin changes. Local main/HEAD 2245126dbec1a316c67621c6567db8420d233f6f, upstream origin/main; all accumulated work preserved and unstaged. No fresh remote query.
+- Found native Swift Character length/Foundation trim/control classes did not match TypeScript code-point/ECMAScript trim/C0–C1 rules. Example: 41 decomposed accented letters have 82 scalars but only 41 grapheme clusters. Updated only RoutineStore name validation and TypeScript malformed-surrogate rejection, with two targeted regression tests. Initial edit command had a Python parse error and wrote no files; applied the correction successfully afterward. No native runtime parity claim.
+- Reviewed optional blank/zero values, validation-before-write, atomic document/revision saves, failure retention in the form, stable exercise identity and per-routine settings, ordered membership/planned sets and separate workout database. Source inspection found no additional blocking issue in these paths. Saved plan arrays have positional set entries and no live workout links; Start stays fixture-only. Workout native sources, configuration/dependencies and Complete Set / End Rest plus normal Continue are unchanged from baseline.
+- Passed: 84 tests (71 workout SQL-wrapper regressions, 13 routine checks), TypeScript and iOS JS/Hermes export (582 modules). Tests use production TypeScript and shipped SQL with separate JS transaction logic; NOT Swift/native validation, bridge calls or rendered form interaction. Unicode regression cases and invalid edits preserving the saved document/model passed. Failure-retention UI review is static, not a device failure injection.
+- Regenerated config into an ignored fixture: ten source/resource copies match current bytes. RoutineStore is in host Sources and RoutineSQL in host Resources, excluded from widget; bridge method names agree with callers and inline modules configuration remains intact. No Swift compiler available in this environment; no successful native build inferred.
+- Fresh isolated EAS archive inspection succeeded locally: derived 19 expected files from current code/config/resource dependencies; all required files and package-lock.json match local SHA-256 hashes, no unexpected files. Four routine inputs extend the prior 15-file archive. Reviewed for secrets/signing/device identifiers/private records; dependencies/generated artifacts/docs/tests excluded. Audit manifest retained in a temporary directory outside Git.
+- Per stop-on-blocker instruction, did not submit a build after correcting the finding. Current free allowance not queried; no current availability asserted. No new build URL or installation link. Updated current status/handoff/proof guide with a later six-step checklist, all Not run. Both troubleshooting issues stay open, framework remains undecided, existing evidence limits/history/reflections preserved.
+
+### What I learned — user-written
+
+### Next small task
+
+Review the focused validation correction; only after that review passes and a fresh free-allowance/archive check, attempt one separately authorized preview. Do not connect saved routines to Start yet.
+
+---
+
+## 2026-11-13 — Prepare separate routine editor and durable plans
+
+**Status** — Implemented locally; 82 Windows tests, TypeScript, JS/Hermes export and generated-native configuration checks Passed. New Swift compilation, installation, native runtime validation/persistence, rendered form and device checks **Not run**. No EAS upload/build, dependencies, staging, commit or push.
+
+- Read AGENTS/current project/handoff/proof/latest log. Local main/HEAD and fresh remote-main query match published 2245126dbec1a316c67621c6567db8420d233f6f; starting tree clean, upstream origin/main. Recorded prior publication without rewriting historical logs/reflections.
+- Explained separate native routine storage before editing. Added simple foreground create/name/save/reopen/edit form, manual name/reuse, move/remove exercise membership, planned-set add/remove/value entry and explicit per-routine rest. New entries start with three blank sets; no inferred pounds/reps/equipment defaults. Prebuilt routines/templates remain later; RIR remains required later logging work and production framework stays open.
+- Added RoutinePlans.sqlite3 with stable exercise UUID registry and independent ordered routine plan documents. Save validates natively, checks referenced identities, and commits an insert/revision-checked update atomically before success. Removing membership preserves registry identities. Names are unique under SQLite NOCASE; new names persist independently of discarding unsaved routine edits. Blank optional fields remain distinct from zero. Existing workout database/migration/actions/deadlines/reset and fixture Start remain unchanged; no automatic reset or connection to saved routines.
+- Documented provisional choices: trimmed 1–80 character names, maximum 30 distinct exercise identities per routine, 1–20 planned sets, pounds blank or 0–2000 with two decimals, reps blank or integer 0–1000, explicitly required rest integer 0–3600 (zero means no rest), empty named routines permitted, native 128 KiB payload bound. These are proof choices, not production requirements. Unsaved edits are not autosaved; discard prompts and retained failure edits are explicit.
+- Existing inline module exposes three new routine methods. Config plugin places RoutineStore.swift and RoutineSQL.json only in the host app; no extension storage changes. Updated isolated future-upload allowlist for new TS/native files. Existing dependencies, signing/identifiers and Complete Set / End Rest widget source unchanged.
+- Tests Passed: 71 existing workout SQL-wrapper regressions plus 11 routine checks. New checks execute production TypeScript and SQL via separate JS transaction/native-validation wrappers, NOT Swift. Cover save/reopen, blank/zero, order/set edits, shared identity with isolated settings, removal preserving identity, names/validation, stale revision, injected write/COMMIT failure and unchanged populated workout-file bytes. Initial test wrapper mistook colons in SQL string literals for parameters; corrected parameter scanning before final pass. An initial file-write command used the wrong working-directory-relative path and created no files there; corrected it, then TypeScript passed.
+- TypeScript Passed; local iOS/Hermes export Passed (582 modules). Ten generated source/resource copies match final source; routine Swift/JSON are in the host Sources/Resources phases, excluded from extension. These checks do not compile Swift or verify the bridge/UI. Official Expo module, React Native 0.86 input/keyboard and SQLite transaction references recorded in the proof guide.
+- Updated current publication/status, requirements, provisional decisions, focused later device checklist and handoff. Planned later Start integration around independent workout snapshot copies, never live routine references that can rewrite active/history data. TS-001/TS-002 remain open; earlier wording still device-unverified. Historical entries and personal learning reflections preserved.
+
+### What I learned — user-written
+
+### Next small task
+
+Review the routine editor's native validation, revision/conflict handling and generated bridge/resource wiring before a separately authorized device proof. Keep Start disconnected; later design/test independent workout snapshots before integration.
+
+---
+
 ## 2026-11-13 — Review two-exercise and wording publication checkpoint
 
 **Status** — No publication blocker found; exactly 15 paths proposed in HANDOFF. Current wording remains unbuilt/device-unverified. No source edit, upload/build, staging, commit or push.

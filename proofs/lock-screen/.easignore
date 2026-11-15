@@ -21,3 +21,7 @@ native/*
 !plugins
 plugins/*
 !plugins/withLockScreenProof.js
+!RoutineEditor.tsx
+!routineModel.ts
+!native/RoutineStore.swift
+!native/RoutineSQL.json

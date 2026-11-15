@@ -1,5 +1,17 @@
 # Swoldier troubleshooting backlog
 
+## Optional-rest results — 2026-11-14
+
+Build 1a119269 now has supplied screenshot-supported workout preservation and scoped user-reported routine/optional-rest passes, including remembered 60 seconds and blank-versus-zero handling. [Evidence and unrun cases](../proofs/lock-screen/README.md#current-optional-rest-preview--2026-11-14). The earlier missing-set observation remains **inconclusive**; subsequent blank-versus-zero tests passed, with no confirmed bug or fix. These editor results do not resolve **TS-001 delayed automatic reveal** or **TS-002 countdown jumps**; both remain open/deferred. Start remains disconnected and disabled-rest workout behavior unimplemented. Earlier notes below describe their original checkpoints.
+
+## Routine-editor evidence note — 2026-11-14
+
+Repeat blank-versus-zero test: **Passed — user-reported**. The earlier missing-set report is not a confirmed bug or demonstrated fix; no cause inferred. No additional screenshots, exact values/counts or build identifier supplied in this task. Optional Track rest is a new local editor/storage change, unbuilt/device-unverified, and does not resolve TS-001 delayed automatic reveal or TS-002 countdown jumps. Both remain open/deferred.
+
+## Routine-editor scope — 2026-11-13
+
+Separate routine editing/storage is prepared locally without changing Lock Screen behavior. This does not resolve TS-001 automatic-reveal delay or TS-002 countdown jumps; both stay open/deferred. New editor/native/device checks remain scoped in the [handoff](HANDOFF.md). Prior wording remains device-unverified.
+
 ## Two-exercise scope update — 2026-11-13
 
 Add Set/Next Exercise/Finish Workout are now prepared locally in the bounded two-exercise proof, with final-rest Continue before the two choices. Review passed without source correction; one preview compiled/signed successfully. The guided a6785cf2 upgrade and Add/Undo/Next/Finish sequence now has limited screenshot-supported/user-reported evidence. It does not test deliberate duplicate/stale/competing actions, retries, accessibility or broader recovery, and does not validate the later unbuilt Complete Set / End Rest wording. No countdown or automatic-reveal fix is established. Historical Add Set-unimplemented statements below describe earlier checkpoints. Countdown rendering and automatic-reveal behavior are unchanged; TS-001 and TS-002 remain open/deferred. [Current handoff](HANDOFF.md).
