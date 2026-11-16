@@ -3,7 +3,8 @@ import Foundation
 
 enum ProofAction: Codable, Hashable, Sendable {
     case complete, skip, continueRest, undo, addSet, nextExercise, finishWorkout
-    case weight(Int), reps(Int)
+    case weight(Int), reps(Int), rir(Int)
+    case clearRIR
 }
 
 // Retry the failed request, never infer its target from a newer displayed draft/rest.
@@ -18,6 +19,8 @@ struct ProofActivity: ActivityAttributes {
     struct ContentState: Codable, Hashable {
         let pounds: Double?
         let reps: Int?
+        // Missing in older publications; absence means unrecorded, never zero.
+        var rir: Int? = nil
         let completed: Bool
         var restDeadline: Date? = nil
         var restStartedAt: Date? = nil

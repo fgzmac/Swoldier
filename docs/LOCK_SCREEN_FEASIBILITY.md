@@ -1,5 +1,9 @@
 # Lock Screen feasibility and device proof
 
+## RIR phone evidence — 2026-11-16
+
+Build 2614e927 has native compilation/signing and [bounded phone results](../proofs/lock-screen/README.md#rir-phone-results-and-current-checklist--2026-11-16): screenshot-supported shown short-name RIR layouts, draft/actual states and retained Undo timer; user-reported RIR adjustments/Clear, completion/Undo/re-completion and rest-mode behavior. The friendly unfinished-Start rejection also passed by report. Screenshot descriptions are supplied by the user, not independently inspected here. This does not establish fully locked operation, accessibility, long-name/larger-text fit, isolated older ActivityKit decoding, broader migration/history preservation or general lifecycle/concurrency guarantees. The dense row remains a risk for untested layouts. Both TS-001 automatic-reveal delay and TS-002 countdown jumps stay open/deferred; no new platform-timing guarantee or fix. Earlier build-scoped evidence below remains historical.
+
 ## Blank-value repeats and publication review — 2026-11-15
 
 c059edb9's bounded fresh-start pounds-minus, Complete/Undo/minus and direct blank-plus-after-Undo repeats **Passed — user-reported**, with screenshot-supported card/app states. Blank remained blank on minus; direct plus produced 5 lb × 1 while the blank plan and zero-record/one-request state remained. Fresh-start revision 17 had blank pounds/reps, zero records/requests and no rest. Initial blank → 0 remains **inconclusive / not reproduced**, not fixed; no adjustment correction was established. Prior reports below remain intact.

@@ -187,7 +187,7 @@ test('unknown exercise and duplicate routine name leave saved plans intact',t=>{
 });
 test('routine operations leave a populated installed workout database byte-for-byte unchanged',t=>{
   const {db,dir}=fixture(t);const path=join(dir,'LockScreenProof.sqlite3');const workout=new DatabaseSync(path);
-  workout.exec(workoutSQL.schema);[...workoutSQL.schemaV2,...workoutSQL.migrationsV3,...workoutSQL.migrationsV4,...workoutSQL.migrationsV5,...workoutSQL.migrationsV6].forEach(q=>workout.exec(q));
+  workout.exec(workoutSQL.schema);[...workoutSQL.schemaV2,...workoutSQL.migrationsV3,...workoutSQL.migrationsV4,...workoutSQL.migrationsV5,...workoutSQL.migrationsV6,...workoutSQL.migrationsV7].forEach(q=>workout.exec(q));
   const p={sessionID:'fixture',setID:'fixture:exercise:1:set:1',restID:'none',newRestID:'saved-rest',now:1000};
   for(const name of ['startSession','startExercises','startSets','registerFixture','countCompleteRequest','complete','createRest','advanceRest'])run(workout,workoutSQL[name],p);
   workout.close();const hash=()=>createHash('sha256').update(readFileSync(path)).digest('hex');const before=hash();

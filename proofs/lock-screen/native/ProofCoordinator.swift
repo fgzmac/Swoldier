@@ -110,7 +110,7 @@ actor ProofCoordinator {
 
     private func content(_ snapshot: ProofSnapshot, notice: String? = nil) -> ActivityContent<ProofActivity.ContentState> {
         content(ProofActivity.ContentState(
-            pounds: snapshot.displaySet.pounds, reps: snapshot.displaySet.reps, completed: snapshot.completed,
+            pounds: snapshot.displaySet.pounds, reps: snapshot.displaySet.reps, rir: snapshot.displaySet.rir, completed: snapshot.completed,
             restDeadline: snapshot.restDeadline.map { Date(timeIntervalSince1970: $0) },
             restStartedAt: snapshot.restStartedAt.map { Date(timeIntervalSince1970: $0) },
             awaitingContinue: snapshot.awaitingContinue,

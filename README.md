@@ -1,5 +1,9 @@
 # Workout App
 
+## Current checkpoint — 2026-11-16
+
+Published baseline remains [23e8cf2](https://github.com/fgzmac/Swoldier/commit/23e8cf2d3928bd3fc2ade9b8e6586e7e3cc82b25). The accumulated optional RIR patch compiled/signed in build 2614e927 and now has bounded screenshot-supported states and **Passed — user-reported** phone checks, including friendly unfinished-Start feedback. [Evidence and remaining checklist](proofs/lock-screen/README.md#rir-phone-results-and-current-checklist--2026-11-16). All 19 inputs match that build; publication review proposes 16 uncommitted paths. [Current handoff](docs/HANDOFF.md#rir-phone-evidence-and-publication-review--2026-11-16). Broader recovery/history/decoding/layout/accessibility and fully locked checks remain unrun. Initial blank → 0 is inconclusive/not reproduced; both troubleshooting issues stay open. No new build, spending or publication in this documentation review. Earlier dated sections below retain their historical scope.
+
 ## Blank-value repeats and publication review — 2026-11-15
 
 c059edb9's bounded fresh-start pounds-minus, Complete/Undo/minus and direct blank-plus-after-Undo repeats **Passed — user-reported**, with screenshot-supported card/app states. Blank remained blank on minus; direct plus produced 5 lb × 1 while the blank plan and zero-record/one-request state remained. Fresh-start revision 17 had blank pounds/reps, zero records/requests and no rest. Initial blank → 0 remains **inconclusive / not reproduced**, not fixed; no adjustment correction was established. Prior reports below remain intact.

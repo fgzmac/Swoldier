@@ -1,6 +1,44 @@
 # Workout App — project plan
 
-Last updated: **2026-11-15**
+Last updated: **2026-11-16**
+
+## RIR bounded phone results and publication review — 2026-11-16
+
+Build 2614e927 compiled/signed and now has [scoped phone evidence](../proofs/lock-screen/README.md#rir-phone-results-and-current-checklist--2026-11-16). User-described screenshots support displayed revision-17 upgrade state, blank RIR added to drafts, shown short-name layout fit, reopened RIR 2, distinct saved actuals including 0, retained RIR/timer on Undo, preserved draft after End Rest and missing-reps refusal without a record/rest. User-reported passes cover adjustments/Clear/bounds, optional blank completion, corrected Undo/re-completion, new/Add Set blank RIR, Off/zero/positive rest and friendly unfinished-workout Start rejection. Evidence remains distinct from automated checks and c059edb9's historical trials.
+
+No publication blocker found: all 19 inputs match the successful build manifest/archive; source/tests unchanged. [Exact 16 proposed paths and validation](HANDOFF.md#rir-phone-evidence-and-publication-review--2026-11-16). Broader recovery/concurrency, older-history/all-settings preservation, isolated older ActivityKit decoding, long names/larger text/all layouts, accessibility, fully locked interaction and deliberate failure/stale/duplicate trials remain Not run. Shown upgrade/layout states do not pass those cases. Original blank → 0 remains inconclusive/not reproduced; TS-001/TS-002 stay open. Production framework undecided. No new build/spending/publication in this review; last verified credit $43, usage overage $0. Earlier dated checkpoint statements below are historical.
+
+## RIR preview compiled; phone verification pending — 2026-11-16
+
+Exactly one authorized preview, [2614e927-835b-4180-a588-d326d043c282](https://expo.dev/accounts/fgzmacaraeg/projects/swoldier-lock-screen-proof/builds/2614e927-835b-4180-a588-d326d043c282), finished successfully. Native compilation/signing Passed for reviewed RIR, restored symbols and the existing Start-message correction. Source remains HEAD 23e8cf2 plus seven reviewed uncommitted build inputs; no new commit/push. Fresh archive hashes matched all 19 reviewed inputs. Starter is verified; this medium build consumed $2 included credit, leaving $43 and $0 additional usage charges. The user reports $19 subscription total including tax and no other purchases, within the $50 cap. [Build provenance, warnings and next task](HANDOFF.md#rir-preview-compiled-and-signed--2026-11-16).
+
+Installation, native/installed migration, older-content decoding, rendered fit, accessibility and device behavior remain **Not run**. Start-message wording is compiled but device-unverified. Dense RIR/context layout requires phone verification; original blank → 0 remains inconclusive/not reproduced, and TS-001/TS-002 stay open/deferred. Earlier dated unbuilt/exhausted-Free-plan statements below remain historical, superseded by this build and the verified Starter allowance.
+
+## RIR publication checkpoint reviewed — 2026-11-16
+
+No publication blocker found in the complete 14-file diff against 23e8cf2. Reviewed scope is RIR source/tests/documentation; restored symbols match baseline and the existing Start-message correction is not newly changed. All 19 preflight build-input hashes still match; unchanged source/test hashes support reusing the prior 122 passing wrapper/model tests, TypeScript/export and native-generation inspections. No source edits or new native/device validation. [Exact paths, preserved local evidence and next task](HANDOFF.md#rir-publication-review--2026-11-16).
+
+c059edb9's historical results remain separate from **unbuilt/device-unverified** RIR and Start-message changes. RIR native compilation, native/installed migration, older-content decoding, rendered fit, accessibility and device behavior remain **Not run**. Dense RIR/context row and both deferred troubleshooting issues remain documented/open; initial blank → 0 remains inconclusive/not reproduced. The ignored preflight evidence records exhausted free iOS allowance and $0 charges; no billing change/build authorized. Publication is pending separate authorization.
+
+## RIR symbol correction accepted in source review — 2026-11-16
+
+The 14 restored symbols across 13 lines match baseline 23e8cf2 exactly. Whole-file comparison with the saved pre-correction source confirms no other change: RIR additions, actions/IDs, retries, storage, timers, accessibility wording/meaning and layout modifiers are preserved. UTF-8/code-point and generated-widget equality checks passed. No further correction required; no unrelated suites repeated. [Focused review and remaining limits](HANDOFF.md#rir-symbol-restoration-review-passed--2026-11-16).
+
+The dense RIR/context row remains pending rendered verification. Native compilation/decoding, installed migration, device behavior and accessibility remain unverified, as does the published Start-message correction. Both troubleshooting issues remain open; original blank → 0 is inconclusive/not reproduced. No build authorization or paid usage; last verified free allowance exhausted.
+
+## RIR correction review checkpoint — 2026-11-16
+
+Review against 23e8cf2 found a blocking text-encoding regression in the prepared card source: existing checkmarks, minus symbols and feedback/separators were garbled. A narrow correction restores 14 symbols across 13 lines to their exact baseline text, without changing behavior. **Awaiting correction review; no build readiness claimed.** Nullable data/migration/action review found no additional blocker. 122 wrapper/model tests, TypeScript and ten fresh native-copy/target checks Passed; none establishes Swift compilation, old-content decoding, installed migration, rendered fit or accessibility. The dense context/RIR row remains a device-layout risk. [Review details and next task](HANDOFF.md#rir-review--encoding-correction-awaiting-review--2026-11-16).
+
+The Start-message correction remains unbuilt/device-unverified; initial blank → 0 remains inconclusive/not reproduced. Both troubleshooting issues stay open. No cloud activity or publication; last verified free allowance exhausted, no paid build authorized.
+
+## Adopted per-set RIR — 2026-11-16
+
+RIR means reps in reserve: estimated additional reps. Adopted actual-only optional whole numbers 0–10, blank distinct from explicit zero, first plus from blank 1, minus from blank unchanged, clamped adjustments and an explicit Clear action. Missing RIR does not block Complete; reps validation remains. Undo preserves RIR for correction; re-completion saves it. Every new planned/today-only set starts blank RIR, including Add Set; no routine targets, RPE conversion or recommendations.
+
+Implemented locally from verified published 23e8cf2: native nullable draft/record/bridge/activity fields, guarded background adjustments/clear and additive v7 migration. Existing completion/rest transactions and action identities stay intact. Compact three-row draft controls preserve existing button sizes; rendered fit is not established. 122 SQL/TypeScript-wrapper tests, TypeScript, JavaScript export and ten regenerated native-copy/target checks Passed; Swift compilation/runtime, native old-content decoding, installed migration and phone RIR behavior **Not run**. [Implementation and planned acceptance checks](../proofs/lock-screen/README.md#optional-rir-implementation--2026-11-16).
+
+Start-message correction remains unbuilt/device-unverified despite publication. Initial blank → 0 remains inconclusive/not reproduced; bounded c059edb9 evidence is preserved below. TS-001/TS-002 stay open, production framework undecided. Next: bounded RIR source/layout review; no build authorized and last verified allowance 15/15 used. Earlier dated sections retain their historical scope, including former “RIR later” statements.
 
 ## Blank-value repeats and publication review — 2026-11-15
 
@@ -14,9 +52,9 @@ Build an iPhone-first workout tracker that makes it easy to log actual sets, ada
 
 | Area | Status |
 | --- | --- |
-| Current phase | Saved-routine Start checkpoint reviewed against freshly verified published e985675; 19 paths proposed, no publication blocker found. c059edb9 bounded blank-minus/direct-plus repeats passed with user-reported actions and screenshot-supported states; original mismatch inconclusive/not reproduced, no fix claimed. Later Start-message correction unbuilt/device-unverified. Next: explicitly authorized publication. TS-001/TS-002 and framework remain open; last allowance 15/15. |
+| Current phase | RIR preview 2614e927 compiled/signed with scoped screenshot-supported states and user-reported phone passes. Publication review ready: 16 paths, uncommitted. Broader migration/recovery/decoding/layout/accessibility checks remain unrun; both troubleshooting issues open. |
 | Product notes | Adopted scope and planned checks recorded below. |
-| GitHub repository | [fgzmac/Swoldier](https://github.com/fgzmac/Swoldier), published checkpoint [e985675](https://github.com/fgzmac/Swoldier/commit/e9856759843deeb8005c2eb05204b5eef4d3d4ec), local/remote main verified matching on 2026-11-15. |
+| GitHub repository | [fgzmac/Swoldier](https://github.com/fgzmac/Swoldier), published [23e8cf2](https://github.com/fgzmac/Swoldier/commit/23e8cf2d3928bd3fc2ade9b8e6586e7e3cc82b25), local/remote main verified matching before work on 2026-11-16. |
 | Application code | Two fictional exercises, planned and today-only sets in the [Lock Screen proof](../proofs/lock-screen/README.md#current-three-set-proof--prepared-locally); production app not started. |
 | Development stack | Proposed options only; not selected. |
 | Local persistence | Native SQLite proof: prior 29 SQL-wrapper checks Passed (not Swift execution). Current migrated expired-rest sequence preserves supplied data/deadline and reported ordinary-reopen acknowledgement; other migration/lifecycle cases remain Not run. |

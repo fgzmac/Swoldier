@@ -1,5 +1,123 @@
 # Current project handoff
 
+## RIR phone evidence and publication review — 2026-11-16
+
+**No publication blocker found.** Reviewed the accumulated RIR diff against **23e8cf2d3928bd3fc2ade9b8e6586e7e3cc82b25**. Local main/HEAD remains that baseline tracking origin/main; index empty, no fresh remote query. All 19 build-input hashes match both the successful 2614e927 manifest and preserved archive. Application source/tests are unchanged from the reviewed version; no source edit in this task. Publication remains pending separate authorization.
+
+**Device evidence:** [full evidence and current checklist](../proofs/lock-screen/README.md#rir-phone-results-and-current-checklist--2026-11-16) for **2614e927-835b-4180-a588-d326d043c282** separates user-described screenshot states from **Passed — user-reported** interactions. Screenshots support displayed Editor Test B revision 17 upgrade preservation with blank RIR added to drafts, short-name layout fit, reopened draft RIR 2, distinct saved RIR including 0, positive-rest Undo retaining RIR/timer, and End Rest preserving Set 2 at 50 × 8 / RIR 2 with one record and Skipped/Dismissed rest. Missing-reps rejection retained Editor Test A revision 8 at 42.5 × blank / RIR 2, one request, zero records, no rest, with “Enter reps before Complete.” No screenshot was independently inspected in this documentation task.
+
+User reports bounds/blank/zero/Clear, optional completion, Undo/corrected re-completion, new/Add Set blank RIR and all three rest modes passed. Positive expiry permitted corrected completion/fresh rest; after End Rest, Set 2 completed with RIR 2, two records/fresh countdown. Friendly unfinished-Start wording passed without raw exception/path text, preserving the active workout. These build-scoped results supersede earlier unbuilt/device-unverified statements only for these checks; c059edb9's evidence remains separate.
+
+**Still Not run:** broader recovery/concurrency, deliberate stale/duplicate execution and failure/retry injection, older-history/all-routine-setting preservation, other migration states, isolated older ActivityKit decoding, long names/larger text/all sizes, accessibility and fully locked interaction. Dense RIR/context layout risk remains outside shown short-name layouts. Original blank → 0 remains inconclusive/not reproduced, with no fix claimed; TS-001 automatic-reveal delay and TS-002 countdown jumps remain open/deferred.
+
+**Publication checks:** complete source/test/documentation diff and proposed contents reviewed; no credentials, signing files, device identifiers, private workout/scan records, generated artifacts or unrelated files proposed. Symbol restoration matches baseline. Reused unchanged 122/122 SQL-wrapper/model tests, TypeScript/export and ten generated source/resource/target checks; wrappers do not execute Swift or ActivityKit. The successful build independently establishes compilation/signing; new phone reports establish only the bounded evidence above. Fresh local checks cover all 19 input/archive hashes, unchanged source/tests, historical preservation, sensitive-content review, Markdown links and whitespace. Ignored preflight/build logs, manifests and local review receipts stay excluded.
+
+**Exact proposed publication paths (16):**
+
+1. README.md
+2. docs/BUILD_LOG.md
+3. docs/HANDOFF.md
+4. docs/LOCK_SCREEN_FEASIBILITY.md
+5. docs/PROJECT.md
+6. docs/TROUBLESHOOTING_BACKLOG.md
+7. proofs/lock-screen/App.tsx
+8. proofs/lock-screen/README.md
+9. proofs/lock-screen/native/ProofActivity.swift
+10. proofs/lock-screen/native/ProofCoordinator.swift
+11. proofs/lock-screen/native/ProofIntents.swift
+12. proofs/lock-screen/native/ProofSQL.json
+13. proofs/lock-screen/native/ProofStore.swift
+14. proofs/lock-screen/native/ProofWidget.swift
+15. proofs/lock-screen/tests/persistence.test.cjs
+16. proofs/lock-screen/tests/routines.test.cjs
+
+**Suggested commit:** Add optional per-set RIR and record phone validation
+
+**Next small task:** if separately authorized, recheck these exact reviewed paths/hashes and local/remote main, stage only these 16 paths, inspect staged whitespace/content, then commit/push normally. No staging, commit or push now. No upload/build, dependency/billing change or new spending; last verified Starter credit $43 and $0 usage overage, subscription $19 total user-reported. Historical entries/reflections and both deferred issues are preserved.
+
+## RIR preview compiled and signed — 2026-11-16
+
+**One authorized build, successful:** [2614e927-835b-4180-a588-d326d043c282 — installation page](https://expo.dev/accounts/fgzmacaraeg/projects/swoldier-lock-screen-proof/builds/2614e927-835b-4180-a588-d326d043c282). EAS reports FINISHED; Xcode logs show ARCHIVE SUCCEEDED and Fastlane confirms the IPA was exported and signed. Preview/internal distribution, existing project and frozen signing credentials, Xcode 26.6 on the sdk-57 image; no retry. RIR, restored symbols and the existing Start-message correction are now **native-compiled**, but remain **device-unverified**. Earlier dated sections retain their historical unbuilt status.
+
+**Budget evidence:** live EAS queries verified Starter, $45 included credits before submission, and $0 usage overage. The user reported the total Starter payment including tax was $19, with no other purchases; the payment receipt itself was not independently inspected. After this one medium iOS build, EAS reports $2 credits used, **$43 remaining**, and **$0 additional usage charges/overage**. Reported testing-phase spending remains $19 of the $50 cap ($31 headroom); credits are separate from cash spending. No plan/billing change or additional purchase was made. The CLI's $19 recurring estimate is the next subscription estimate, not a second charge or independently verified receipt.
+
+**Exact source:** local HEAD remains **23e8cf2d3928bd3fc2ade9b8e6586e7e3cc82b25**, main tracking origin/main. No commit/push occurred and no fresh remote query was needed for this build. All 14 reviewed working paths and the full diff matched the preserved publication review before submission. All 19 fresh isolated archive inputs matched reviewed SHA-256 hashes; prior unchanged ten generated source/resource and target-membership checks remain applicable. The seven uncommitted build inputs were `App.tsx` and `native/ProofActivity.swift`, `ProofCoordinator.swift`, `ProofIntents.swift`, `ProofSQL.json`, `ProofStore.swift`, `ProofWidget.swift`. The Start-message correction was already in HEAD. Archive excludes documentation, tests, dependencies, generated native projects, credentials, signing/device files and unrelated/private files. Local manifests, billing evidence and logs remain ignored under `proofs/lock-screen/.expo/evidence/rir-build-1794853720960/`; nothing there is proposed for publication.
+
+**Warnings and limits:** Expo Doctor passed 20/21 checks; its current patch expectation is Expo ~57.0.33 versus locked 57.0.32. Build continued successfully without a dependency change. Logs also contain generated/dependency iOS deprecations, duplicate C++ library/missing Metal-toolchain search-path warnings, Hermes/bundle and build-script warnings, and a future Fastlane Ruby-version notice. No proof-source compiler error was found. These warnings were not repaired in this bounded build task. Reused unchanged 122 SQL-wrapper/model tests, TypeScript/export and native-generation inspection; wrappers do not execute Swift. Native compilation/signing now Passed; **installation, native/installed migration, older ActivityKit content decoding, rendered fit, accessibility and device behavior remain Not run**, including Start-message runtime wording. Dense RIR/context layout remains a phone-verification risk. Original blank → 0 remains inconclusive/not reproduced; TS-001 automatic-reveal delay and TS-002 countdown jumps stay open/deferred.
+
+**Next small task:** perform the [upgrade-first RIR phone checklist](../proofs/lock-screen/README.md#rir-phone-checklist--not-run), recording actual outcomes separately. Capture existing data before upgrading; install without deleting/resetting and compare. Check blank/0/1–10/Clear, persistence, optional RIR completion, missing-reps refusal, Undo/corrected re-completion, blank RIR on new/Add Set drafts, and reachable normal/Undo controls. Separately check the friendly unfinished-workout Start refusal. Do not mark any trial passed before evidence arrives. No source edits, dependency upgrades, staging, commit or push in this task; history/reflections preserved.
+
+## RIR publication review — 2026-11-16
+
+**No publication blocker found.** Reviewed the complete accumulated diff against published baseline **23e8cf2d3928bd3fc2ade9b8e6586e7e3cc82b25**. Local HEAD still matches that baseline on main tracking origin/main; no fresh remote query in this review. All 14 proposed paths remain unstaged, index empty, no unrelated untracked candidates. Source and tests were not edited in this review.
+
+**Scope and evidence:** only optional per-set RIR implementation, its tests and related documentation are proposed. The symbol restoration is already equal to baseline, so the final diff contains no unintended symbol substitutions. The Start-message correction is already published in the baseline, not a new source change here; it remains **unbuilt/device-unverified**. c059edb9's earlier compilation and bounded screenshot-supported/user-reported results do not validate either RIR or that message correction. For RIR, native compilation, native/installed migration, older ActivityKit decoding, rendered fit, accessibility and device behavior remain **Not run**. Dense RIR/context layout remains a rendered-verification risk. Initial blank → 0 stays inconclusive/not reproduced; TS-001 automatic-reveal delay and TS-002 countdown jumps remain open/deferred.
+
+**Validation reused and checked:** source/test hashes remain unchanged from the passing correction review, so reused 122/122 SQL-wrapper/model tests, TypeScript and prior JavaScript export rather than repeating unchanged suites. These do not execute Swift or ActivityKit. All 19 build-input hashes still match the inspected preflight archive, which includes RIR, restored symbols and the existing Start-message code. Prior ten generated native-copy/target/resource checks and host-only inline-module discovery remain applicable. Reviewed all proposed paths/content; no credentials, signing files, device identifiers, private records, generated artifacts or unrelated changes found. Fresh publication checks cover hashes, historical-document preservation, sensitive-pattern scan, ignored evidence, Markdown links and whitespace. Historical entries/reflections remain intact; only current project status fields are refreshed.
+
+**Local evidence preserved, excluded from publication:** copied the preflight report, SHA-256 manifest and 19-file inspected archive from temporary storage into `proofs/lock-screen/.expo/evidence/rir-preflight-2026-11-16/`. Copies were byte/hash verified, and Git confirms the directory is ignored by the existing proof ignore rule. No ignore-setting change. The preflight recorded Free plan, 15/15 iOS builds used, $0 estimated charges, period ending 2026-12-01 UTC. No fresh allowance query or billing change in this publication review. Exhausted allowance blocks a new free preview, not publication of this explicitly unbuilt checkpoint; no paid build authorized.
+
+**Exact proposed publication paths (14):**
+
+1. README.md
+2. docs/BUILD_LOG.md
+3. docs/HANDOFF.md
+4. docs/PROJECT.md
+5. proofs/lock-screen/App.tsx
+6. proofs/lock-screen/README.md
+7. proofs/lock-screen/native/ProofActivity.swift
+8. proofs/lock-screen/native/ProofCoordinator.swift
+9. proofs/lock-screen/native/ProofIntents.swift
+10. proofs/lock-screen/native/ProofSQL.json
+11. proofs/lock-screen/native/ProofStore.swift
+12. proofs/lock-screen/native/ProofWidget.swift
+13. proofs/lock-screen/tests/persistence.test.cjs
+14. proofs/lock-screen/tests/routines.test.cjs
+
+**Suggested commit:** Add optional per-set RIR to Lock Screen proof
+
+**Next small task:** only when explicitly authorized, verify the reviewed hashes and current local/remote Git state, stage exactly these 14 paths, inspect staged contents/whitespace, and publish normally. This task does not stage, commit, push, upload or build. Publication would not establish a native/device pass. The local review hash receipt is kept beside the ignored preflight evidence for a later comparison.
+
+## RIR symbol restoration review passed — 2026-11-16
+
+**Result:** the narrow correction passes source review; no further source edit required. Compared the entire current `ProofWidget.swift` with the saved pre-correction copy: the only differences are 14 restored symbols across 13 lines (3 checkmarks, 6 em dashes, 2 middle dots, 1 multiplication sign, 2 minus signs). Every corrected line exactly matches a line in published baseline **23e8cf2d3928bd3fc2ade9b8e6586e7e3cc82b25**. Actions, original IDs, retries, storage/timer behavior, accessibility labels/meaning and layout modifiers are unchanged by the correction; intended RIR additions remain intact.
+
+**Focused checks:** strict UTF-8/code-point inspection found no remaining garbled sequences, replacement characters or unexpected control characters. The only non-ASCII characters in the file are the five intended symbol types. Its bytes still match the previously checked generated extension source (SHA-256 `162af4f00255662bdb14febe4629f9b66cf1930f37c688de02160178b7a31f6c`). Whitespace and documentation-link checks passed. No unrelated test suite, TypeScript check, export or regeneration was repeated; previous results remain historical evidence. HEAD remains the baseline on main; all accumulated work remains unstaged.
+
+**Limits and next step:** the dense RIR/context row explicitly remains pending rendered verification, including Undo countdown, long names/notices and larger text. This review establishes neither native compilation, older-content decoding, installed migration, device behavior nor accessibility. The RIR patch and Start-message correction remain **unbuilt/device-unverified**. The next validation step is a separately authorized native preview only after sufficient free allowance is confirmed; none is authorized here. Last verified allowance was exhausted (15/15); no paid build authorized. Original blank → 0 stays inconclusive/not reproduced; TS-001/TS-002 remain open. No source changes, upload, build, dependency change, staging, commit or push in this review; historical entries/reflections below are preserved.
+
+## RIR review — encoding correction awaiting review — 2026-11-16
+
+**Outcome:** found a blocking source-text encoding regression in the prepared `ProofWidget.swift` diff against **23e8cf2d3928bd3fc2ade9b8e6586e7e3cc82b25**. Existing checkmarks, minus buttons, separators and failure messages contained garbled Unicode sequences. This was confirmed in UTF-8 source/code points, not inferred from terminal appearance. Restored 14 symbol occurrences across 13 lines; every corrected line exactly matches a baseline line. No layout, action, storage or other source behavior was changed by this correction. **Stop for correction review; not cleared for a build.**
+
+Starting HEAD still matched the baseline on main tracking origin/main, with the same 14 accumulated unstaged paths and no staged files. Existing work is preserved. No fresh remote/allowance query, upload, build, dependency change, staging, commit or push.
+
+**Bounded review findings:** SQL NULL is read with an explicit NULL check into Swift `Int?`, mapped to bridge `NSNull`, displayed with `??`/optional mapping, and passed unchanged to optional ActivityKit RIR; zero is not replaced by blank. The additive v7 migration is under the write transaction/version recheck. Complete marks the existing actuals row completed and creates/advances rest within the same transaction; Undo retains RIR in that row. Re-completion gets a fresh rest identity. New-set/Add Set INSERTs omit RIR and default to NULL. Adjustment/Clear use the existing session/current-set/rest/unfinished guards; ±1 validation and database constraints enforce integer 0–10. RIR is absent from the required-reps gate. Exact retry cases retain original operation/delta/IDs. Existing rest, Start/snapshot and workout action SQL is unchanged; only the existing `readSets` projection gains RIR.
+
+**Compatibility limit:** the added optional field uses synthesized Codable and is intended to decode missing RIR as nil; [Apple documents missing/null handling for decodeIfPresent](https://developer.apple.com/documentation/swift/keyeddecodingcontainer/decodeifpresent%28_%3Aforkey%3A%29-8tib2). This supports the source assessment, not execution of the app's decoder. Swift was unavailable on this Windows PATH. Native compilation/decoding and installed migration remain **Not run**.
+
+**Layout risks:** normal and Undo draft views retain existing adjustment dimensions and Complete Set/End Rest actions; saved rest is unchanged after symbol restoration. The context/RIR/Clear row is dense. Long names, the small Undo countdown, two-line notices and larger text may truncate or exceed the nominal height estimate. The weight/reps row also has finite width for large/decimal values. No rendered-fit or accessibility pass is claimed, and no speculative resizing was added.
+
+**Checks after correction:** 122/122 SQL-wrapper/routine-model tests and TypeScript Passed. Ten fresh generated native-file SHA-256 comparisons and host/extension source/resource memberships Passed. All 13 corrected lines were compared to baseline; only text symbols changed. Markdown links/whitespace checked. No repeated JS export was needed for a Swift-string-only correction. Wrappers do not execute Swift, ActivityKit, React UI or failure/retry presentation; generated-source checks are not compilation.
+
+**Next small task:** review the narrow symbol-restoration correction and confirm the remaining layout/decoder test plan. Do not build in this task. The Start-message correction and RIR remain unbuilt/device-unverified; initial blank → 0 remains inconclusive/not reproduced; TS-001/TS-002 and all untested phone cases stay open. Last verified free allowance is exhausted (15/15); no paid build authorized. Historical entries and learning reflections below are unchanged.
+
+## Optional per-set RIR prepared locally — 2026-11-16
+
+**Current state:** before editing, clean main tracked origin/main; HEAD and successful remote-main query both matched published **23e8cf2d3928bd3fc2ade9b8e6586e7e3cc82b25**. Bounded RIR implementation is now local/uncommitted. No upload, build, staging, commit, push, dependency or Git-setting change. Older checkpoint sections below retain their historical scope.
+
+**Implemented:** optional actual RIR (reps in reserve), whole numbers 0–10; blank is unrecorded, explicit zero retained. + on blank enters 1; − leaves blank; bounds clamp; Clear returns to blank. Native guarded mutations commit before publication. Draft RIR survives reopening, completion includes it in the existing atomic actuals/rest transaction, Undo keeps it editable, and re-completion saves the correction. Every new planned/today-only set starts blank RIR; Add Set still copies only pounds/reps. No routine targets, RPE conversion or recommendations.
+
+**Compatibility and actions:** transactional v7 adds one nullable checked column, leaving historical RIR blank and other rows/rest metadata/identities intact. Archived workout JSON is not rewritten; older missing RIR means unrecorded. Existing migrations run only when needed. Optional ActivityKit RIR is designed to decode absent fields as nil; this is source-reviewed, not native-tested. New adjustment/clear intents carry original session/set/rest IDs and use the existing current-draft/unfinished-exercise guards. Failed actions retain their exact operation, delta and identities for retry. No changes to Complete/Undo/Continue/Add/Next/Finish SQL or rest gating.
+
+**Layout:** draft context and RIR −/value/+/Clear share the first row, followed by existing weight/reps and completion/End Rest rows. Button sizes are unchanged; draft padding is 8 points and text scaling is disabled there. Undo countdown remains visible even with rejection feedback. Normal saved-set rest confirmation/Undo/Continue and positive/zero/Off behavior are unchanged. Three nominal 44-point rows plus spacing/padding total 156 points; this is a source estimate, not rendered fit. Long names, larger text and VoiceOver remain unverified; a broader layout change may be needed if phone checks expose clipping.
+
+**Local checks:** 122 tests Passed (103 persistence SQL-wrapper tests, 19 routine/model checks), TypeScript, iOS JavaScript export, ten regenerated native SHA-256 comparisons and source/resource target memberships. Added 12 tests cover null/zero, bounds/clear/reopen, Complete/Undo/re-completion/Add Set across three rest modes, missing reps, stale requests, write rollback, and v6 migration/rollback/rerun across draft/active/acknowledged/undone/finished states. Wrappers execute shipped SQL with separate JS orchestration; they do not execute Swift, ActivityKit or UI. Markdown links and whitespace checked. Swift compilation, native decoding, installed migration, rendered fit/accessibility and new phone behavior: **Not run**.
+
+**Evidence retained:** c059edb9's bounded compilation/device evidence remains build-specific. The subsequently published Start-message correction is still **unbuilt/device-unverified**, as is this RIR patch. Initial blank → 0 stays **inconclusive / not reproduced**; no adjustment fix established. Failure injection, deliberate stale/duplicate execution and broader lifecycle/accessibility trials remain device-unrun. TS-001 automatic-reveal delay and TS-002 countdown jumps stay open/deferred. Production framework remains open. Last verified free allowance 15/15 used; no paid build authorized or allowance query in this task.
+
+**Next small task:** review the bounded RIR diff, nullable mapping/retry identities and three-row layout before seeking any separately authorized native build. See the [future RIR phone checklist](../proofs/lock-screen/README.md#rir-phone-checklist--not-run). Do not submit a build while allowance or authorization is absent.
+
 ## Start integration publication review — 2026-11-15
 
 **No publication blocker found.** Local main/HEAD and a successful fresh read-only remote-main query both match **e9856759843deeb8005c2eb05204b5eef4d3d4ec**; upstream origin/main. Reviewed the accumulated snapshot/migration/value/rest implementation, subsequent expected-error patch, tests and documentation. No source edits in this review. All 19 proposed paths below remain unstaged; no upload/build/commit/push.

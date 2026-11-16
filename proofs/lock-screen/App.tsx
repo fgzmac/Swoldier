@@ -15,7 +15,7 @@ type Snapshot = {
   plannedSetsRecorded: boolean;
   sets: {
     setID: string; number: number; plannedPounds: number | null; plannedReps: number | null; exerciseID: string; isAdded: boolean;
-    pounds: number | null; reps: number | null; completed: boolean; completionAttempts: number;
+    pounds: number | null; reps: number | null; rir: number | null; completed: boolean; completionAttempts: number;
   }[];
   exerciseID: string;
   exerciseName: string;
@@ -29,6 +29,7 @@ type Snapshot = {
   finishedAt: number | null;
   pounds: number | null;
   reps: number | null;
+  rir: number | null;
   completed: boolean;
   completionAttempts: number;
   recordCount: number;
@@ -158,13 +159,13 @@ export default function App() {
                 'Current draft ' + saved.setNumber + '/' + saved.setCount + ': ' + (saved.pounds ?? '—') + ' lb × ' + (saved.reps ?? '—') + ' reps')
               : 'No session started.'}</Text>
             {saved?.routineName && <Text>Workout snapshot: {saved.routineName} · revision {saved.routineRevision}</Text>}
-            <Text>— means blank, not zero. Enter reps before completing a set; blank pounds permits a reps-only record.</Text>
+            <Text>RIR means reps in reserve: estimated additional reps, optional 0–10. — means unrecorded, not zero. Enter reps before completing a set; blank pounds permits a reps-only record.</Text>
             {saved && <Text>Current exercise: {saved.exerciseName} ({saved.exerciseNumber}/{saved.exerciseCount})</Text>}
             {saved?.exercises.map(exercise => <Text key={exercise.exerciseID}>{exercise.name}: {exercise.finishedAt == null ? 'Not finished' : 'Finished'}</Text>)}
             {saved?.finishedAt != null && <Text>Workout finished at: {saved.finishedAt}</Text>}
             {saved?.sets.map(set => (
               <View key={set.setID}>
-                <Text>{saved.exercises.find(e => e.exerciseID === set.exerciseID)?.name} · Set {set.number}: {set.completed ? 'Saved' : 'Draft'} {set.pounds ?? '—'} lb × {set.reps ?? '—'}</Text>
+                <Text>{saved.exercises.find(e => e.exerciseID === set.exerciseID)?.name} · Set {set.number}: {set.completed ? 'Saved' : 'Draft'} {set.pounds ?? '—'} lb × {set.reps ?? '—'} · RIR {set.rir ?? '—'}</Text>
                 <Text>{set.isAdded ? 'Today-only added set; no routine target' : `Plan: ${set.plannedPounds ?? '—'} lb × ${set.plannedReps ?? '—'}`}</Text>
               </View>
             ))}

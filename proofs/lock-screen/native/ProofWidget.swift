@@ -68,7 +68,7 @@ struct ProofWidget: Widget {
             .buttonStyle(.plain)
             .lineLimit(1)
             .minimumScaleFactor(0.8)
-            .padding(14)
+            .padding(showsUndoneDraft(context) || (!showsRest(context) && !context.state.completed) ? 8 : 14)
         } dynamicIsland: { context in
             DynamicIsland {
                 DynamicIslandExpandedRegion(.center) {
@@ -144,6 +144,12 @@ struct ProofWidget: Widget {
                     failureMessage("Weight change failed")
                     Button(intent: ProofAdjustWeight(sessionID: failed.sessionID,
                         setID: failed.setID, restID: failed.restID, delta: delta)) { actionLabel("Retry change") }
+                case .rir(let delta):
+                    failureMessage("RIR change failed")
+                    Button(intent: ProofAdjustRIR(sessionID: failed.sessionID, setID: failed.setID, restID: failed.restID, delta: delta)) { actionLabel("Retry RIR") }
+                case .clearRIR:
+                    failureMessage("Clear RIR failed")
+                    Button(intent: ProofClearRIR(sessionID: failed.sessionID, setID: failed.setID, restID: failed.restID)) { actionLabel("Retry Clear RIR") }
                 case .reps(let delta):
                     failureMessage("Rep change failed")
                     Button(intent: ProofAdjustReps(sessionID: failed.sessionID,
@@ -174,24 +180,36 @@ struct ProofWidget: Widget {
 
     private func draft(_ context: ActivityViewContext<ProofActivity>, setID: String, restID: String, duringUndoneRest: Bool = false) -> some View {
         VStack(spacing: 4) {
-            HStack {
-                Text(duringUndoneRest
-                     ? "Set \(context.state.setNumber ?? 1) returned to draft"
-                     : "\(context.state.exerciseName ?? "Exercise") · Set \(context.state.setNumber ?? 1)/\(context.state.setCount ?? 3)")
-                    .font(.caption.weight(.semibold))
-                Spacer(minLength: 4)
-                if duringUndoneRest, let deadline = context.state.restDeadline {
-                    countdown(deadline, started: context.state.restStartedAt).font(.headline)
-                } else if let notice = context.state.notice {
-                    Text(notice).font(.caption)
+            // Three 44-point rows; combine context and RIR instead of adding a fourth row.
+            HStack(spacing: 4) {
+                VStack(alignment: .leading, spacing: 1) {
+                    HStack(spacing: 3) {
+                        Text(context.state.exerciseName ?? "Exercise").font(.caption).lineLimit(1)
+                        if duringUndoneRest, let deadline = context.state.restDeadline {
+                            countdown(deadline, started: context.state.restStartedAt).font(.caption2)
+                        }
+                    }
+                    if let notice = context.state.notice {
+                        Text(notice).font(.caption2).lineLimit(2)
+                    } else {
+                        HStack(spacing: 3) {
+                            Text("Set \(context.state.setNumber ?? 1)/\(context.state.setCount ?? 3)\(duringUndoneRest ? " · Undo" : "")").font(.caption2)
+                        }
+                    }
+                }.frame(minWidth: 60, maxWidth: .infinity, alignment: .leading)
+                Button(intent: ProofAdjustRIR(sessionID: context.attributes.sessionID, setID: setID, restID: restID, delta: -1)) {
+                    adjustment("−", "Decrease reps in reserve by one; blank remains unrecorded")
                 }
-            }
-            if duringUndoneRest {
-                // Always actionable: storage decides at execution, not on a zero redraw.
-                let instruction = context.state.notice
-                Text(instruction == nil || instruction == "Complete at zero or Continue"
-                     ? (context.state.restDeadline == nil ? "Complete Set when ready" : "Complete Set at zero or End Rest") : instruction ?? "")
-                    .font(.caption2)
+                Text("RIR \(context.state.rir.map { String($0) } ?? "—")").font(.subheadline).monospacedDigit()
+                    .accessibilityLabel(context.state.rir.map { "Reps in reserve, \($0)" } ?? "Reps in reserve, unrecorded")
+                Button(intent: ProofAdjustRIR(sessionID: context.attributes.sessionID, setID: setID, restID: restID, delta: 1)) {
+                    adjustment("+", "Increase reps in reserve by one; first entry is one")
+                }
+                Button(intent: ProofClearRIR(sessionID: context.attributes.sessionID, setID: setID, restID: restID)) {
+                    Text("Clear").font(.subheadline).frame(minWidth: 44, minHeight: 44)
+                        .background(Color.primary.opacity(0.08), in: RoundedRectangle(cornerRadius: 10))
+                        .contentShape(Rectangle())
+                }.accessibilityLabel("Clear reps in reserve to unrecorded")
             }
             HStack(spacing: 6) {
                 Button(intent: ProofAdjustWeight(sessionID: context.attributes.sessionID,
@@ -219,7 +237,7 @@ struct ProofWidget: Widget {
                         .accessibilityHint("Dismisses rest without saving the draft; preserves your edits")
                 }
             }
-        }
+        }.minimumScaleFactor(1)
     }
 
     @ViewBuilder

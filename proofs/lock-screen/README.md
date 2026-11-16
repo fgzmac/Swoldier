@@ -1,5 +1,75 @@
 # Swoldier Lock Screen proof
 
+## RIR phone results and current checklist — 2026-11-16
+
+Build **2614e927-835b-4180-a588-d326d043c282** previously passed native compilation/signing. The following device evidence is supplied by the user: screenshot-supported states are recorded from the user's description, not independently re-inspected here; actions are **Passed — user-reported**, not observed automated execution. These results supersede the earlier dated unbuilt/unrun status only within the stated scope. c059edb9 retains its separate historical results.
+
+### Screenshot-supported states
+
+| Check | Recorded evidence and limit |
+| --- | --- |
+| Bounded upgrade preservation | Before/after upgrade, Editor Test B revision 17 retained visible drafts, plans, record/request counts and Undo/rest state. Existing drafts gained blank RIR. This supports only the displayed installed state, not every historical record or all routine settings. |
+| Short-name layout | RIR controls fit the shown short-name Lock Screen layouts. This is not all-size, long-name, larger-text or accessibility validation. |
+| Draft persistence | Reopened app displayed draft RIR 2. No general recovery guarantee inferred. |
+| Distinct actuals | Saved sets displayed distinct RIR values, including explicit 0. |
+| Positive-rest Undo | Displayed retained RIR and a running timer. |
+| End Rest preserves draft | Set 2 remained Draft 50 lb × 8, RIR 2; one saved record, rest Skipped / Dismissed. |
+| Missing reps still blocks Complete | Editor Test A revision 8 remained Draft 42.5 lb × blank reps, RIR 2; one Complete request, zero saved records, rest Not started. Card displayed “Enter reps before Complete.” |
+
+### Passed — user-reported interactions
+
+- Blank/minus, plus, explicit zero, Clear and 0–10 bounds behaved as specified.
+- Optional blank RIR completion passed.
+- Undo and re-completion preserved or updated RIR without duplicates in the reported sequence; this is not a deliberate duplicate-execution/concurrency stress test.
+- Next planned set and Add Set began with blank RIR.
+- Clear after Undo saved blank RIR.
+- RIR behavior passed with tracking Off, On/0 seconds and positive duration.
+- Positive-rest expiry permitted re-completion with a fresh countdown.
+- Completion after End Rest saved Set 2 with RIR 2, two records and a fresh countdown. This subsequent action/result is user-reported, distinct from the earlier screenshot-supported one-record draft state.
+- Friendly unfinished-workout Start rejection appeared without raw exception/file-path text and preserved the active workout. The existing Start-message correction is now compiled and has this bounded user-reported wording pass.
+
+### Remaining phone checklist — Not run
+
+- Broader recovery (including force-quit/system termination), concurrency, deliberate stale/duplicate execution and injected failure/exact-action retry trials.
+- Older-history preservation and other installed migration states; general routine-setting preservation. The shown revision-17 upgrade is not comprehensive migration coverage.
+- Isolated decoding of older ActivityKit content lacking RIR; a successful upgrade alone does not establish that decoding path executed.
+- Long names, larger text, all layout sizes, VoiceOver/accessibility and fully locked (unauthenticated) interaction. The dense RIR/context row still needs these checks; shown short-name fit is a bounded result.
+
+The earlier blank → 0 observation remains **inconclusive / not reproduced**, with no adjustment-source fix established. TS-001 delayed automatic reveal and TS-002 countdown jumps remain **open/deferred**. Production framework remains open. No new upload/build or spending in this documentation review; last verified Starter balance $43, usage overage $0, user-reported subscription total $19. [Publication review and exact paths](../../docs/HANDOFF.md#rir-phone-evidence-and-publication-review--2026-11-16).
+
+The preparation and build checkpoints below retain their historical evidence and limitations. The original unrun checklist records what was planned then; use the scoped outcomes and remaining checks above for current status.
+
+## RIR symbol restoration accepted — 2026-11-16
+
+Focused review verified all 14 restored symbols across 13 lines against baseline 23e8cf2. The entire file equals its pre-correction source with only those symbol replacements; intended RIR controls/retries and all actions, IDs, layout modifiers and accessibility meaning are preserved. No remaining garbled text/replacement characters found; generated extension source still matches. No source edit or unrelated suite rerun. [Review record](../../docs/HANDOFF.md#rir-symbol-restoration-review-passed--2026-11-16). The dense RIR/context row remains pending rendered verification; native compilation, older-content decoding, device behavior and accessibility remain unverified. The Start-message correction is still unbuilt/device-unverified. No build authorized and no paid usage; all earlier evidence limits and open issues remain.
+
+## RIR review correction — 2026-11-16
+
+**Awaiting correction review.** Source review found garbled existing symbols in the RIR card patch, including saved checkmarks, minus buttons and feedback. Restored 14 occurrences across 13 lines to their baseline text; no action, layout, storage or timer logic changed. 122 tests, TypeScript and ten fresh native-copy/target checks Passed. These are wrapper/source/configuration checks, not Swift compilation or UI execution. The dense RIR/context row, long names/notices, Undo countdown and larger text remain layout risks. Older ActivityKit decoding and installed migration remain Not run. See the [correction review record](../../docs/HANDOFF.md#rir-review--encoding-correction-awaiting-review--2026-11-16); the phone checklist below remains entirely unrun. No build authorized, last verified allowance exhausted. Earlier Start-message and troubleshooting/evidence limits remain unchanged.
+
+## Optional RIR implementation — 2026-11-16
+
+Published baseline [23e8cf2](https://github.com/fgzmac/Swoldier/commit/23e8cf2d3928bd3fc2ade9b8e6586e7e3cc82b25) was verified locally/remotely with a clean working tree before this local change. RIR is **reps in reserve**: the user's estimate of additional possible reps, not a recommendation. Current implementation is unbuilt/device-unverified. Earlier evidence below remains tied to its named build.
+
+- Optional actual per-set integer 0–10. — means unrecorded; 0 is meaningful. RIR minus preserves blank, first plus enters 1, subsequent adjustments clamp, and Clear restores blank. Reps are still required for Complete; RIR is not.
+- Background App Intents mutate native SQLite using session/set/rest guards. Draft, completed record, bridge and card carry the same nullable value. Saving completion and rest remains atomic; publication follows commit. Undo restores the entered RIR; re-completion saves the correction. Exact-action failures retry the original RIR operation and identities.
+- New planned sets and Add Set drafts have blank RIR. Add Set copies the last completed pounds/reps only. Routines, plans and snapshot targets gain no RIR fields.
+- v7 adds a nullable integer/check-constrained column inside the existing migration transaction. Installed records start with blank RIR; values, counts, sessions, deadlines and acknowledgements are preserved. Old archived JSON is not rewritten. Older ActivityKit content missing the optional RIR field is intended to decode safely as nil; native decoding remains Not run.
+- Three draft rows combine context/RIR, weight/reps, and Complete/End Rest. Existing 40×44 adjustment controls and minimum-44-high action controls are retained; Clear is at least 44×44. No shrinking to fit. Exercise context and Undo countdown remain compact; rejection feedback retains the countdown. Normal saved-set rest still shows confirmation/Undo/Continue. Rendered fit and accessibility are unverified, especially long exercise names and large text.
+
+Windows checks: **122 tests Passed** (103 SQL-wrapper/19 routine-model), TypeScript, local iOS JavaScript export, ten regenerated native source/resource hash comparisons and target-membership checks. Tests run production SQL/TypeScript with separate JS orchestration, not Swift or ActivityKit. Generated Xcode configuration inspection is not compilation/signing. No dependency change or cloud activity.
+
+### RIR phone checklist — Not run
+
+1. Before any later authorized upgrade, capture existing plans, actuals, counts, rest/deadline/acknowledgement and routine state. Install without deleting/resetting; reopen and compare. Existing historical RIR should be blank. Check the older activity refreshes safely.
+2. In a fresh draft, verify RIR —; minus keeps it blank, plus enters 1, minus reaches explicit 0, and repeated adjustments stop at 0/10. Clear restores —. Reopen at blank, zero and a nonzero value to verify persistence; pounds/reps/plans must stay unchanged.
+3. Complete with RIR blank and with explicit 0/nonzero; verify saved actuals and counts in the app. Missing reps must still reject completion, with no new record/rest. Required actions remain on the authenticated visible Lock Screen.
+4. Undo a rated set during positive rest: RIR is immediately editable, deadline/plans/other records unchanged. Edit or Clear, try early Complete, then separately test End Rest and natural-expiry re-completion. Verify corrected RIR saved once with fresh rest. Repeat the relevant flow with tracked zero and rest Off.
+5. Advance and Add Set: new drafts have blank RIR even when the previous record is rated; Add Set copies pounds/reps only. Check final-set Undo and explicit Next/Finish flow remain intact.
+6. Check RIR labels/Clear, weight/reps, rejection feedback, countdown and Complete Set/End Rest for clipping and reachable controls, including long names/larger text and VoiceOver separately. Test exact-action failure retries and stale requests only in a deliberate controlled trial; ordinary taps do not prove duplicate intent execution.
+
+All checklist outcomes remain **Not run**. The published Start-message correction is still unbuilt/device-unverified. Initial blank → 0 remains inconclusive/not reproduced; no fix claimed. TS-001 delayed automatic reveal and TS-002 countdown jumps remain open/deferred. Last verified free allowance 15/15; no paid build authorized. [Current handoff](../../docs/HANDOFF.md#optional-per-set-rir-prepared-locally--2026-11-16).
+
 ## Blank-value repeat checks — 2026-11-15
 
 For existing build **c059edb9-035e-44fa-adc2-b5291b038cf9**, the following bounded repeats are **Passed — user-reported actions, with screenshot-supported states**. Screenshots are recorded from the user's supplied description, not independently re-inspected in this task.

@@ -59,6 +59,62 @@ struct ProofAdjustReps: LiveActivityIntent {
     }
 }
 
+struct ProofAdjustRIR: LiveActivityIntent {
+    static let title: LocalizedStringResource = "Adjust reps in reserve"
+    static var supportedModes: IntentModes { .background }
+    static var authenticationPolicy: IntentAuthenticationPolicy { .requiresLocalDeviceAuthentication }
+
+    @Parameter(title: "Session") var sessionID: String
+    @Parameter(title: "Set") var setID: String
+    @Parameter(title: "Rest", default: "none") var restID: String
+    @Parameter(title: "Change") var delta: Int
+
+    init() {}
+    init(sessionID: String, setID: String, restID: String, delta: Int) {
+        self.sessionID = sessionID
+        self.setID = setID
+        self.restID = restID
+        self.delta = delta
+    }
+
+    func perform() async throws -> some IntentResult {
+        #if PROOF_WIDGET_EXTENSION
+        try rejectExtensionExecution()
+        #else
+        await ProofCoordinator.shared.apply(sessionID: sessionID, setID: setID,
+                                            restID: restID, action: .rir(delta))
+        #endif
+        return .result()
+    }
+}
+
+struct ProofClearRIR: LiveActivityIntent {
+    static let title: LocalizedStringResource = "Clear reps in reserve"
+    static var supportedModes: IntentModes { .background }
+    static var authenticationPolicy: IntentAuthenticationPolicy { .requiresLocalDeviceAuthentication }
+
+    @Parameter(title: "Session") var sessionID: String
+    @Parameter(title: "Set") var setID: String
+    @Parameter(title: "Rest", default: "none") var restID: String
+
+    init() {}
+    init(sessionID: String, setID: String, restID: String) {
+        self.sessionID = sessionID
+        self.setID = setID
+        self.restID = restID
+    }
+
+    func perform() async throws -> some IntentResult {
+        #if PROOF_WIDGET_EXTENSION
+        try rejectExtensionExecution()
+        #else
+        await ProofCoordinator.shared.apply(sessionID: sessionID, setID: setID,
+                                            restID: restID, action: .clearRIR)
+        #endif
+        return .result()
+    }
+}
+
 struct ProofCompleteSet: LiveActivityIntent {
     static let title: LocalizedStringResource = "Complete proof set"
     static var supportedModes: IntentModes { .background }

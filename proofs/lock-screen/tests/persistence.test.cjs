@@ -44,10 +44,10 @@ function transaction(db, fn, immediate = true) {
   catch (e) { db.exec('ROLLBACK'); throw e; }
 }
 function migrate(db) {
-  if (db.prepare('PRAGMA user_version').get().user_version >= 6) return;
+  if (db.prepare('PRAGMA user_version').get().user_version >= 7) return;
   transaction(db, () => {
     const version = db.prepare('PRAGMA user_version').get().user_version;
-    if (version >= 6) return;
+    if (version >= 7) return;
     if (version < 2) {
       const cols = new Set(db.prepare('PRAGMA table_info(proof_set)').all().map(r => r.name));
       for (const m of sql.migrations) if (!cols.has(m.column)) db.exec(m.statement);
@@ -56,8 +56,9 @@ function migrate(db) {
     if (version < 3) for (const text of sql.migrationsV3) db.exec(text);
     if (version < 4) for (const text of sql.migrationsV4) db.exec(text);
     if (version < 5) for (const text of sql.migrationsV5) db.exec(text);
-    for (const text of sql.migrationsV6) db.exec(text);
-    db.exec('PRAGMA user_version = 6');
+    if (version < 6) for (const text of sql.migrationsV6) db.exec(text);
+    for (const text of sql.migrationsV7) db.exec(text);
+    db.exec('PRAGMA user_version = 7');
   });
 }
 function open(path) {
@@ -413,7 +414,7 @@ if (!isMainThread) {
       let s=read(db,1000);assert.equal(s.deadline,deadline);assert.equal(s.skippedAt,skipped);
       assert.equal(s.continuedAt,skipped);assert.equal(s.awaitingContinue,skipped==null);
       assert.deepEqual(db.prepare('SELECT * FROM proof_sets_v2 ORDER BY ordinal').all(),oldSets);
-      assert.equal(db.prepare('PRAGMA user_version').get().user_version,6);
+      assert.equal(db.prepare('PRAGMA user_version').get().user_version,7);
       migrate(db);assert.deepEqual(read(db,1000),s);
     });
   }
@@ -542,7 +543,7 @@ if (!isMainThread) {
     assert.equal(s.undoneAt,null);assert.equal(s.restSetID,'installed:set:1');assert.equal(s.restID,'installed:set:1:rest');
     assert.deepEqual([s.deadline,s.skippedAt,s.continuedAt],[deadline,skipped,continued]);
     assert.deepEqual(db.prepare('SELECT * FROM proof_sets_v2 ORDER BY ordinal').all(),oldSets);
-    assert.equal(db.prepare('PRAGMA user_version').get().user_version,6);migrate(db);assert.deepEqual(read(db),s);
+    assert.equal(db.prepare('PRAGMA user_version').get().user_version,7);migrate(db);assert.deepEqual(read(db),s);
     const undone=act(db,undoIDs(s),'undo');
     if(continued==null) {
       assert.equal(undone.recordCount,0);assert.equal(undone.deadline,deadline);
@@ -558,7 +559,7 @@ if (!isMainThread) {
     assert.throws(()=>migrate(db),/locked/);reader.exec('ROLLBACK');
     assert.equal(db.prepare('PRAGMA user_version').get().user_version,3);
     assert.equal(db.prepare('PRAGMA table_info(proof_rests_v2)').all().some(c=>c.name==='undone_at'),false);
-    migrate(db);assert.equal(db.prepare('PRAGMA user_version').get().user_version,6);
+    migrate(db);assert.equal(db.prepare('PRAGMA user_version').get().user_version,7);
     assert.equal(db.prepare('PRAGMA table_info(proof_rests_v2)').all().some(c=>c.name==='undone_at'),true);
   });
 
@@ -922,7 +923,7 @@ if (!isMainThread) {
     db.exec("UPDATE proof_sets_v5 SET pounds=135,reps=10,completed=1,completion_attempts=2 WHERE ordinal=1 AND exercise_id='legacy:exercise:1'; INSERT INTO proof_rests_v2 VALUES('legacy','original-rest','legacy:exercise:1:set:1',1020,NULL,NULL,NULL); UPDATE proof_session_v2 SET active_rest_id='original-rest'; PRAGMA user_version=5");
     if(phase==='acknowledged')db.exec('UPDATE proof_rests_v2 SET continued_at=1021');
     if(phase==='undone')db.exec("UPDATE proof_rests_v2 SET undone_at=1005; UPDATE proof_sets_v5 SET completed=0 WHERE set_id='legacy:exercise:1:set:1'");
-    const before=db.prepare('SELECT * FROM proof_sets_v5 ORDER BY set_id').all();migrate(db);assert.deepEqual(db.prepare('SELECT * FROM proof_sets_v5 ORDER BY set_id').all(),before);
+    const before=db.prepare('SELECT * FROM proof_sets_v5 ORDER BY set_id').all();migrate(db);assert.deepEqual(db.prepare('SELECT * FROM proof_sets_v5 ORDER BY set_id').all().map(r=>({...r})),before.map(r=>({...r,rir:null})));
     const after=read(db);assert.equal(after.deadline,1020);assert.equal(after.restID,'original-rest');assert.equal(after.continuedAt,phase==='acknowledged'?1021:null);assert.equal(after.undoneAt,phase==='undone'?1005:null);
     migrate(db);assert.deepEqual(read(db),after);
   });
@@ -935,7 +936,7 @@ if (!isMainThread) {
     try{assert.throws(()=>migrate(db),/deliberate_missing_table/);}finally{sql.migrationsV6.pop();}
     assert.equal(db.prepare('PRAGMA user_version').get().user_version,5);assert.deepEqual(db.prepare('SELECT * FROM proof_sets_v5').all(),before);
     assert.equal(db.prepare('PRAGMA table_info(proof_rests_v2)').all().some(x=>x.name==='track_rest'),false);
-    migrate(db);assert.equal(db.prepare('PRAGMA user_version').get().user_version,6);assert.deepEqual(db.prepare('SELECT * FROM proof_sets_v5').all(),before);
+    migrate(db);assert.equal(db.prepare('PRAGMA user_version').get().user_version,7);assert.deepEqual(db.prepare('SELECT * FROM proof_sets_v5').all().map(r=>({...r})),before.map(r=>({...r,rir:null})));
   });
   test('completed installed fixture survives first routine Start with its original records',t=>{
     const {db,initial}=fixture(t);const old=finishAll(db,initial);const records=all(db,sql.readSets,{sessionID:old.sessionID});
@@ -950,3 +951,81 @@ if (!isMainThread) {
     assert.deepEqual([current(s).planned_pounds,current(s).planned_reps],[250.25,40]);
   });
 }
+
+
+if (isMainThread) {
+  test('RIR distinguishes blank and zero, clamps 0..10, clears and survives reopening',t=>{
+    const {db,path,initial}=fixture(t);let s=initial;
+    assert.equal(current(s).rir,null);
+    s=act(db,ids(s),'rir',1000,-1);assert.equal(current(s).rir,null);
+    s=act(db,ids(s),'rir',1000,1);assert.equal(current(s).rir,1);
+    s=act(db,ids(s),'rir',1000,-1);assert.equal(current(s).rir,0);
+    s=act(db,ids(s),'rir',1000,-1);assert.equal(current(s).rir,0);
+    for(let i=0;i<12;i++)s=act(db,ids(s),'rir',1000,1);
+    assert.equal(current(s).rir,10);
+    const reopened=open(path);try{assert.deepEqual(read(reopened),s);}finally{reopened.close();}
+    const before=s;s=act(db,ids(s),'rir',1000,2);assert.deepEqual(s,before);
+    s=act(db,ids(s),'clearRIR');assert.equal(current(s).rir,null);
+    assert.equal(s.recordCount,0);assert.equal(current(s).completion_attempts,0);
+    for(const value of [-1,11,1.5,'invalid'])assert.throws(()=>db.prepare('UPDATE proof_sets_v5 SET rir=? WHERE set_id=?').run(value,s.setID),/CHECK constraint/);
+  });
+  for(const mode of ['off','zero','positive'])test('RIR Complete/Undo/re-completion and Add Set preserve actuals in '+mode+' rest',t=>{
+    const seed=routineSeed({exercises:[{exerciseID:'rir',name:'Fictional RIR',trackRest:mode!=='off',restSeconds:mode==='positive'?20:0,sets:[{pounds:42.5,reps:8}]}]});
+    const {db,initial}=routineFixture(t,seed);let s=act(db,ids(initial),'rir',1000,1);
+    s=act(db,ids(s),'complete',1000);const saved=s,old=undoIDs(s),deadline=s.deadline;
+    assert.equal(current(s).rir,1);assert.equal(s.recordCount,1);
+    s=act(db,old,'undo',1001);assert.equal(current(s).rir,1);
+    s=act(db,ids(s),'rir',1002,-1);assert.equal(current(s).rir,0);assert.equal(s.deadline,deadline);
+    assert.equal(current(s).pounds,42.5);assert.equal(current(s).planned_pounds,42.5);
+    assert.equal(current(s).completion_attempts,current(saved).completion_attempts);
+    s=act(db,ids(s),'complete',1021);assert.equal(s.recordCount,1);assert.equal(current(s).rir,0);assert.notEqual(s.restID,old.restID);
+    const newer=s;
+    for(const action of ['rir','clearRIR','undo','continueRest']){s=act(db,old,action,1022,1);assert.deepEqual(s,{...newer,remaining:mode==='positive'?19:0});}
+    s=act(db,ids(s),'continueRest',1022);s=act(db,ids(s),'addSet',1022);
+    assert.equal(current(s).rir,null);assert.equal(current(s).pounds,42.5);assert.equal(current(s).reps,8);
+    assert.equal(current(s).planned_pounds,null);assert.equal(s.allSets[0].rir,0);
+  });
+  test('blank RIR permits completion; RIR does not bypass missing reps or alter next defaults',t=>{
+    const seed=routineSeed({exercises:[{exerciseID:'blank',name:'Fictional blanks',trackRest:false,restSeconds:null,sets:[{pounds:null,reps:null},{pounds:0,reps:0}]}]});
+    const {db,initial}=routineFixture(t,seed);let s=act(db,ids(initial),'rir',1000,1);
+    s=act(db,ids(s),'complete');assert.equal(s.recordCount,0);assert.equal(s.restState,'not_started');
+    s=act(db,ids(s),'clearRIR');s=act(db,ids(s),'reps',1000,1);s=act(db,ids(s),'complete');
+    assert.equal(s.recordCount,1);assert.equal(s.allSets[0].rir,null);assert.equal(s.allSets[0].pounds,null);
+    assert.equal(current(s).rir,null);assert.equal(current(s).pounds,0);assert.equal(current(s).reps,0);
+  });
+  test('RIR write failure rolls back and original-ID retry cannot edit an advanced set',t=>{
+    const {db,initial}=fixture(t);const original=ids(initial);
+    db.exec("CREATE TRIGGER fail_rir BEFORE UPDATE OF rir ON proof_sets_v5 BEGIN SELECT RAISE(ABORT,'forced RIR failure'); END");
+    assert.throws(()=>act(db,original,'rir',1000,1),/forced RIR failure/);assert.deepEqual(read(db),initial);
+    db.exec('DROP TRIGGER fail_rir');let s=act(db,original,'rir',1000,1);assert.equal(current(s).rir,1);
+    s=act(db,ids(s),'complete');s=act(db,ids(s),'continueRest',1001);const before=read(db,1001);
+    for(const action of ['rir','clearRIR'])assert.deepEqual(act(db,original,action,1001,1),before);
+  });
+  for(const phase of ['draft','active','acknowledged','undone','finished'])test('v7 additive migration preserves installed v6 '+phase+' data and retries safely',t=>{
+    const {db,initial}=fixture(t);let s=initial;
+    if(phase==='finished')s=finishAll(db,s);
+    else if(phase!=='draft'){
+      s=act(db,ids(s),'complete');
+      if(phase==='acknowledged')s=act(db,ids(s),'continueRest',1001);
+      if(phase==='undone')s=act(db,undoIDs(s),'undo',1001);
+    }
+    db.exec('ALTER TABLE proof_sets_v5 DROP COLUMN rir; PRAGMA user_version=6');
+    const tables=['proof_sets_v5','proof_rests_v2','proof_session_v2','proof_exercises_v5','proof_workouts_v6'];
+    const before=Object.fromEntries(tables.map(name=>[name,db.prepare('SELECT * FROM '+name).all().map(r=>({...r}))]));
+    sql.migrationsV7.push('SELECT * FROM deliberate_missing_table');
+    try{assert.throws(()=>migrate(db),/deliberate_missing_table/);}finally{sql.migrationsV7.pop();}
+    assert.equal(db.prepare('PRAGMA user_version').get().user_version,6);
+    assert.equal(db.prepare('PRAGMA table_info(proof_sets_v5)').all().some(c=>c.name==='rir'),false);
+    migrate(db);migrate(db);
+    for(const table of tables)assert.deepEqual(db.prepare('SELECT * FROM '+table).all().map(r=>({...r})),before[table].map(r=>table==='proof_sets_v5'?{...r,rir:null}:r));
+    assert.equal(db.prepare('PRAGMA user_version').get().user_version,7);
+  });
+}
+
+if (isMainThread) test('failed Complete rolls back record/rest while preserving draft RIR for retry',t=>{
+  const {db,initial}=fixture(t);let s=act(db,ids(initial),'rir',1000,1);const draft=s;
+  db.exec("CREATE TRIGGER fail_rir_rest BEFORE INSERT ON proof_rests_v2 BEGIN SELECT RAISE(ABORT,'forced rest failure'); END");
+  assert.throws(()=>act(db,ids(s),'complete'),/forced rest failure/);assert.deepEqual(read(db),draft);
+  db.exec('DROP TRIGGER fail_rir_rest');s=act(db,ids(s),'complete');
+  assert.equal(s.recordCount,1);assert.equal(s.allSets[0].rir,1);assert.equal(s.deadline,1020);
+});

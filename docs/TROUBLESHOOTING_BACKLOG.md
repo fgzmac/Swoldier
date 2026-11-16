@@ -1,5 +1,11 @@
 # Swoldier troubleshooting backlog
 
+## RIR and Start-feedback phone update — 2026-11-16
+
+On build 2614e927, friendly unfinished-workout Start rejection without raw exception/file-path text and preservation of the active workout **Passed — user-reported**. This updates the expected-refusal wording result only; unrelated errors, injected failure/retries and broad concurrency remain untested. [Scoped RIR/upgrade evidence and remaining checks](../proofs/lock-screen/README.md#rir-phone-results-and-current-checklist--2026-11-16).
+
+**TS-001 delayed automatic reveal and TS-002 countdown jumps remain open/deferred.** These RIR checks do not establish a fix for either. The original blank → 0 observation remains **inconclusive / not reproduced**; no adjustment-source correction was established. Dense RIR/context fit has support only in the shown short-name layouts; long names/larger text/accessibility remain unverified. Preserve all earlier reports below as historical evidence.
+
 ## Blank-value repeats and publication review — 2026-11-15
 
 c059edb9's bounded fresh-start pounds-minus, Complete/Undo/minus and direct blank-plus-after-Undo repeats **Passed — user-reported**, with screenshot-supported card/app states. Blank remained blank on minus; direct plus produced 5 lb × 1 while the blank plan and zero-record/one-request state remained. Fresh-start revision 17 had blank pounds/reps, zero records/requests and no rest. Initial blank → 0 remains **inconclusive / not reproduced**, not fixed; no adjustment correction was established. Prior reports below remain intact.

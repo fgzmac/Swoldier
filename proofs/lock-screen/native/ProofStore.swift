@@ -6,6 +6,7 @@ struct ProofSetSnapshot: Sendable {
     let ordinal: Int
     let pounds: Double?
     let reps: Int?
+    let rir: Int?
     let plannedPounds: Double?
     let plannedReps: Int?
     let exerciseID: String
@@ -17,6 +18,7 @@ struct ProofSetSnapshot: Sendable {
         ["setID": setID, "number": ordinal, "plannedPounds": plannedPounds.map { $0 as Any } ?? NSNull(),
          "plannedReps": plannedReps.map { $0 as Any } ?? NSNull(),
          "exerciseID": exerciseID, "isAdded": isAdded, "pounds": pounds.map { $0 as Any } ?? NSNull(), "reps": reps.map { $0 as Any } ?? NSNull(),
+         "rir": rir.map { $0 as Any } ?? NSNull(),
          "completed": completed, "completionAttempts": completionAttempts]
     }
 }
@@ -65,6 +67,7 @@ struct ProofSnapshot: Sendable {
          "routineName": routineName.map { $0 as Any } ?? NSNull(),
          "routineRevision": routineRevision.map { $0 as Any } ?? NSNull(),
          "pounds": displaySet.pounds.map { $0 as Any } ?? NSNull(), "reps": displaySet.reps.map { $0 as Any } ?? NSNull(),
+         "rir": displaySet.rir.map { $0 as Any } ?? NSNull(),
          "setNumber": displaySet.ordinal, "completed": completed,
          "plannedSetsRecorded": completed, "recordCount": recordCount,
          "completionAttempts": sets.reduce(0) { $0 + $1.completionAttempts },
@@ -103,11 +106,11 @@ struct ProofMigration: Decodable { let column, statement: String }
 struct ProofSQL: Decodable {
     let schema: String
     let migrations: [ProofMigration]
-    let schemaV2, importLegacy, migrationsV3, migrationsV4, migrationsV5, migrationsV6, reset: [String]
+    let schemaV2, importLegacy, migrationsV3, migrationsV4, migrationsV5, migrationsV6, migrationsV7, reset: [String]
     let registerFixture, startRequest, readWorkout, archiveWorkout, clearFinishedPointer, registerRoutine, snapshotExercises, snapshotSets: String
     let startSession, startExercises, startSets, readSession, readExercises, readSets, readRest: String
     let addSet, finishExercise, advanceExercise, finishLastExercise, finishWorkout: String
-    let countCompleteRequest, complete, createRest, advanceRest, weight, reps, continueRest, undo, markUndone: String
+    let countCompleteRequest, complete, createRest, advanceRest, weight, reps, rir, clearRIR, continueRest, undo, markUndone: String
 }
 
 final class ProofStore {
@@ -232,6 +235,11 @@ final class ProofStore {
             case .weight(let delta):
                 params["delta"] = String(delta)
                 changed = try run(sql.weight, params) == 1
+            case .rir(let delta):
+                params["delta"] = String(delta)
+                changed = try run(sql.rir, params) == 1
+            case .clearRIR:
+                changed = try run(sql.clearRIR, params) == 1
             case .reps(let delta):
                 params["delta"] = String(delta)
                 changed = try run(sql.reps, params) == 1
@@ -319,6 +327,7 @@ final class ProofStore {
                         ordinal: Int(sqlite3_column_int64(stmt, 1)),
                         pounds: sqlite3_column_type(stmt, 4) == SQLITE_NULL ? nil : sqlite3_column_double(stmt, 4),
                         reps: sqlite3_column_type(stmt, 5) == SQLITE_NULL ? nil : Int(sqlite3_column_int64(stmt, 5)),
+                        rir: sqlite3_column_type(stmt, 10) == SQLITE_NULL ? nil : Int(sqlite3_column_int64(stmt, 10)),
                         plannedPounds: sqlite3_column_type(stmt, 2) == SQLITE_NULL ? nil : sqlite3_column_double(stmt, 2),
                         plannedReps: sqlite3_column_type(stmt, 3) == SQLITE_NULL ? nil : Int(sqlite3_column_int64(stmt, 3)),
                         exerciseID: try text(stmt, 8), isAdded: sqlite3_column_int(stmt, 9) == 1,
@@ -361,14 +370,14 @@ final class ProofStore {
             guard sqlite3_step(stmt) == SQLITE_ROW else { throw ProofError.storage }
             return Int(sqlite3_column_int(stmt, 0))
         }
-        guard version < 6 else { return }
+        guard version < 7 else { return }
         try transaction {
             // Recheck under the write lock to prevent a second legacy import.
             let lockedVersion: Int = try withStatement("PRAGMA user_version") { stmt in
                 guard sqlite3_step(stmt) == SQLITE_ROW else { throw ProofError.storage }
                 return Int(sqlite3_column_int(stmt, 0))
             }
-            guard lockedVersion < 6 else { return }
+            guard lockedVersion < 7 else { return }
             if lockedVersion < 2 {
                 let columns: Set<String> = try withStatement("PRAGMA table_info(proof_set)") { stmt in
                     var result = Set<String>()
@@ -392,8 +401,9 @@ final class ProofStore {
                 for statement in sql.migrationsV4 { try execute(statement) }
             }
             if lockedVersion < 5 { for statement in sql.migrationsV5 { try execute(statement) } }
-            for statement in sql.migrationsV6 { try execute(statement) }
-            try execute("PRAGMA user_version = 6")
+            if lockedVersion < 6 { for statement in sql.migrationsV6 { try execute(statement) } }
+            for statement in sql.migrationsV7 { try execute(statement) }
+            try execute("PRAGMA user_version = 7")
         }
     }
 
