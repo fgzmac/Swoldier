@@ -8,6 +8,18 @@ const { tmpdir } = require('node:os');
 const model = require('../routineModel.ts'); // Executes production TypeScript through Node's type stripping.
 const sql = require('../native/RoutineSQL.json');
 const workoutSQL = require('../native/ProofSQL.json');
+test('only the typed unfinished-workout outcome becomes a friendly Start notice',()=>{
+  const refusal={startRejection:'workout_unfinished'};const before=structuredClone(refusal);
+  const message=model.routineStartNotice(refusal);
+  assert.match(message,/already in progress/);assert.match(message,/resume/);
+  assert.doesNotMatch(message,/UnexpectedException|ExpoModulesCore|\.swift|workout_unfinished/);assert.deepEqual(refusal,before);
+  const snapshot={sessionID:'saved-session',routineRevision:3,pounds:null,reps:0};
+  assert.equal(model.routineStartNotice(snapshot),null);assert.deepEqual(snapshot,{sessionID:'saved-session',routineRevision:3,pounds:null,reps:0});
+  assert.throws(()=>model.routineStartNotice({startRejection:'storage_failed'}),/storage_failed/);
+  assert.throws(()=>model.routineStartNotice({startRejection:null}),/Unrecognized/);
+  // No matching arbitrary message/stack text: unrelated exceptions keep the editor catch path.
+  assert.equal(model.routineStartNotice(new Error('UnexpectedException: A workout is unfinished.')),null);
+});
 test('name contract uses Unicode code points, ECMAScript trim and C0/C1 rejection',()=>{
   const combined='e\u0301';
   assert.equal(model.validName(combined.repeat(40)),combined.repeat(40));
@@ -175,9 +187,9 @@ test('unknown exercise and duplicate routine name leave saved plans intact',t=>{
 });
 test('routine operations leave a populated installed workout database byte-for-byte unchanged',t=>{
   const {db,dir}=fixture(t);const path=join(dir,'LockScreenProof.sqlite3');const workout=new DatabaseSync(path);
-  workout.exec(workoutSQL.schema);[...workoutSQL.schemaV2,...workoutSQL.migrationsV3,...workoutSQL.migrationsV4,...workoutSQL.migrationsV5].forEach(q=>workout.exec(q));
+  workout.exec(workoutSQL.schema);[...workoutSQL.schemaV2,...workoutSQL.migrationsV3,...workoutSQL.migrationsV4,...workoutSQL.migrationsV5,...workoutSQL.migrationsV6].forEach(q=>workout.exec(q));
   const p={sessionID:'fixture',setID:'fixture:exercise:1:set:1',restID:'none',newRestID:'saved-rest',now:1000};
-  for(const name of ['startSession','startExercises','startSets','countCompleteRequest','complete','createRest','advanceRest'])run(workout,workoutSQL[name],p);
+  for(const name of ['startSession','startExercises','startSets','registerFixture','countCompleteRequest','complete','createRest','advanceRest'])run(workout,workoutSQL[name],p);
   workout.close();const hash=()=>createHash('sha256').update(readFileSync(path)).digest('hex');const before=hash();
   const e=exercise(db,'Saved name');let plan=save(db,model.toPlan(draft('Plan',e.id)));plan=save(db,{...plan,exercises:[]});list(db);
   assert.equal(hash(),before);assert.equal(plan.exercises.length,0);assert.equal(db.prepare(sql.exercises).all().length,1);

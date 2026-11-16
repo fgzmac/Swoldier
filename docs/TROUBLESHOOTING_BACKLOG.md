@@ -1,5 +1,17 @@
 # Swoldier troubleshooting backlog
 
+## Blank-value repeats and publication review — 2026-11-15
+
+c059edb9's bounded fresh-start pounds-minus, Complete/Undo/minus and direct blank-plus-after-Undo repeats **Passed — user-reported**, with screenshot-supported card/app states. Blank remained blank on minus; direct plus produced 5 lb × 1 while the blank plan and zero-record/one-request state remained. Fresh-start revision 17 had blank pounds/reps, zero records/requests and no rest. Initial blank → 0 remains **inconclusive / not reproduced**, not fixed; no adjustment correction was established. Prior reports below remain intact.
+
+The Start-message correction review found no blocker, but its four changed build inputs remain unbuilt/device-unverified. c059edb9's compile/device evidence is separate. Both deferred troubleshooting issues and untested cases remain open. [Current review, evidence limits and proposed publication list](HANDOFF.md#start-integration-publication-review--2026-11-15).
+
+## Start integration issues — 2026-11-15
+
+- **Minus on blank pounds: open, cause unconfirmed.** On c059edb9, Off reps-only completion → Undo → pounds minus reportedly showed 0, followed by plus → 5. User confirmed only the Lock Screen was inspected before plus; stored mutation is unknown, and direct blank → 5 is not proven. Source and native-style TEXT-bound SQL checks keep NULL through minus/Undo/reopen; no adjustment/storage/display fix prepared. Blank reps has equivalent source handling and local checks but no phone minus result. Next: capture the card, reopen immediately after minus and before plus/Complete, and inspect the app's fresh draft; reopening itself can repair publication. Do not delete/reset to diagnose it.
+- **Expected unfinished-Start developer details: correction prepared, unbuilt/device-unverified.** A dedicated native outcome replaces the expected UnexpectedException display with friendly resume wording and a stable diagnostic code. Unfinished-session protection and unrelated error reporting remain unchanged. Requires review and later native/device validation; no paid build authorized.
+- c059edb9 has scoped preservation/snapshot/value/rest/Undo/Add Set reports in the [evidence table](../proofs/lock-screen/README.md#start-device-evidence-and-two-issues--2026-11-15). These do not establish broad concurrency, retry/recovery/accessibility or older-session history preservation. **TS-001 delayed automatic reveal and TS-002 countdown jumps remain open/deferred.** Last verified free allowance was 15/15; no allowance query or new build in this task.
+
 ## Optional-rest results — 2026-11-14
 
 Build 1a119269 now has supplied screenshot-supported workout preservation and scoped user-reported routine/optional-rest passes, including remembered 60 seconds and blank-versus-zero handling. [Evidence and unrun cases](../proofs/lock-screen/README.md#current-optional-rest-preview--2026-11-14). The earlier missing-set observation remains **inconclusive**; subsequent blank-versus-zero tests passed, with no confirmed bug or fix. These editor results do not resolve **TS-001 delayed automatic reveal** or **TS-002 countdown jumps**; both remain open/deferred. Start remains disconnected and disabled-rest workout behavior unimplemented. Earlier notes below describe their original checkpoints.

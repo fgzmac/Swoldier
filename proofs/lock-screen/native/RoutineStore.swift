@@ -111,6 +111,31 @@ final class RoutineStore {
         }
     }
 
+    // One read transaction captures the saved revision and stable exercise names.
+    // Caller never supplies plan values; dirty editor state is not a workout source.
+    func workoutSnapshot(id: String, revision: Int) throws -> String {
+        try transaction(immediate: false) {
+            guard let row = try rows("SELECT document FROM routine_plans WHERE id=:id AND revision=CAST(:revision AS INTEGER)",
+                                     ["id": id, "revision": String(revision)]).first else { throw RoutineError.conflict }
+            let plan = try JSONDecoder().decode(RoutinePlan.self, from: Data(row[0].utf8))
+            guard plan.id == id, plan.revision == revision, !plan.exercises.isEmpty else {
+                throw RoutineError.invalid("Add at least one exercise before starting this routine.")
+            }
+            var document = try JSONSerialization.jsonObject(with: Data(encode(plan).utf8)) as! [String: Any]
+            var entries = document["exercises"] as! [[String: Any]]
+            for index in entries.indices {
+                let entry = plan.exercises[index]
+                guard !entry.sets.isEmpty,
+                      let name = try rows("SELECT name FROM routine_exercises WHERE id=:id", ["id": entry.exerciseID]).first?.first else {
+                    throw RoutineError.invalid("This routine needs valid exercises and planned sets before starting.")
+                }
+                entries[index]["name"] = name
+            }
+            document["exercises"] = entries
+            return String(decoding: try JSONSerialization.data(withJSONObject: document), as: UTF8.self)
+        }
+    }
+
     func save(_ json: String) throws -> String {
         guard json.utf8.count <= 131072 else { throw RoutineError.invalid("Routine is too large for this proof.") }
         var plan: RoutinePlan

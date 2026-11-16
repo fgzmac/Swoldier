@@ -1,5 +1,122 @@
 # Swoldier Lock Screen proof
 
+## Blank-value repeat checks — 2026-11-15
+
+For existing build **c059edb9-035e-44fa-adc2-b5291b038cf9**, the following bounded repeats are **Passed — user-reported actions, with screenshot-supported states**. Screenshots are recorded from the user's supplied description, not independently re-inspected in this task.
+
+| Trial | Action evidence | Screenshot-supported state |
+| --- | --- | --- |
+| Fresh-start pounds minus | User followed the minus check. | Lock Screen captures and reopened app retain blank pounds/reps. Editor Test B revision 17: zero records, zero Complete requests, rest not started. |
+| Complete → Undo → pounds minus | User reports “Stays blank.” | Card and reopened app show blank pounds × 1, zero saved records, one Complete request, tracking Off and the original blank plan. |
+| Direct blank → pounds plus once after Undo | User confirmed success. | Card and app show 5 lb × 1; original blank plan retained, zero records and one Complete request. |
+
+The initial blank → 0 observation remains **inconclusive / not reproduced** in these repeat trials. It is preserved in the earlier entry; no cause or adjustment-source correction was established, and no fix is claimed. The new direct blank → 5 evidence is separate from the earlier 0 → 5 observation. Blank-reps minus, deliberate stale/duplicate execution, failure/retry injection, broad concurrency/lifecycle/recovery/accessibility and older archived-session history remain device-unrun unless separately evidenced. TS-001 automatic-reveal delay and TS-002 countdown jumps remain open/deferred.
+
+The subsequent unfinished-workout Start-message correction remains **unbuilt and device-unverified**. c059edb9's native compilation and these device results do not cover it. [Publication review and exact proposed paths](../../docs/HANDOFF.md#start-integration-publication-review--2026-11-15).
+
+## Start device evidence and two issues — 2026-11-15
+
+These results belong to **c059edb9-035e-44fa-adc2-b5291b038cf9**, not the later local wording correction. Screenshot-supported states below are recorded from the user's supplied description; the images were not independently re-inspected here. Other interactions are **Passed — user-reported** only within the stated sequence.
+
+| Reported check | Evidence and limit |
+| --- | --- |
+| Upgrade | Screenshots support preservation of the displayed completed workout. This does not establish every migration case or preservation of older archived sessions. |
+| Unsaved routine edits | Start was prevented — Passed, user-reported. |
+| Editor Test A revision 3 snapshot | Started at 40 × 8, 50 × 8, 45 × 10. Editing the saved routine to 42.5 did not change this active revision-3 workout — Passed, user-reported. |
+| Competing Start | Rejected with active workout unchanged — Passed, user-reported for this sequential trial. Expected rejection displayed UnexpectedException and ExpoModulesCore/ConcurrentFunctionDefinition.swift:90: wording defect, not broad concurrency evidence. |
+| Positive rest and Undo | 90-second rest, saved confirmation, Undo editing and corrected completion after expiry without End Rest — Passed, user-reported within this sequence. |
+| Finished revision 3 | Reported actuals 40 × 9, 50 × 8, 45 × 10; three records/four requests; original plans preserved. Request counts do not establish duplicate intent execution. |
+| New Start / decimal | Revision 4 used 42.5 × 8; decimal completion — Passed, user-reported. This does not inspect older archived history. |
+| Nullable/zero values and rest modes | Blank pounds and explicit zero survived Start/completion distinctly. Tracked zero and tracking Off retained confirmation/Undo/Continue without a wait — Passed, user-reported. |
+| Off-mode Undo | Undo, editing and re-completion passed by report except pounds minus on blank: card showed 0, then plus showed 5. Only the Lock Screen was checked before plus; stored mutation versus display-only mismatch is unknown. Direct blank → 5 is not device-established by 0 → 5. |
+| Add Set / correction | Copied 0 × 12 to a today-only draft without a routine target. Undo/edit/re-complete saved 0 × 13, with three records total — Passed, user-reported. Blank/decimal Add Set copying remains a separate unrun phone case. |
+| Missing reps | Screenshot-supported Editor Test B revision 17: blank draft, three requests, zero records, rest not started. First reps plus entered 1 while pounds stayed blank — Passed, user-reported. Blank reps minus was not tested. |
+| Finished revision 17 | Screenshot-supported final state: blank pounds × 1 and 0 × 12 saved, original plans retained, two records/five requests, tracking Off and dismissed rest. |
+
+**Issue 1 — unresolved minus-on-blank mismatch:** current build inputs matched the recorded c059edb9 manifest before this task. Source trace is widget −5/−1 plus original IDs → background App Intent → coordinator → text-bound SQLite operation → committed native snapshot → ActivityKit publication. Undo changes completion/rest markers, not values. SQL explicitly keeps NULL on minus; native reads check NULL, bridge uses NSNull and the card displays nil as a dash. No coercion or root cause was established. A read-only attempt to inspect the hosted IPA returned HTTP 403, including after a fresh build-metadata query; the bundled resource was not inspected. No storage, adjustment, Undo, timer or publication fix was made.
+
+Windows SQL diagnostics using the actual shipped statements and Swift-equivalent TEXT parameter binding kept pounds NULL after Off Complete → Undo → minus, including after reopening; rest/drafts/plans/counts remained unchanged. Direct blank plus gave 5 locally, and blank reps minus/plus remained NULL/entered 1. These are SQL/JS results, **not** Swift/ActivityKit reproduction or a fix for the reported phone mismatch. All persistence-wrapper parameters now bind as text to match Swift; explicit-zero/decimal/action-guard regressions still pass.
+
+**Issue 2 — narrow local correction, unbuilt/device-unverified:** unfinished-workout protection now throws a dedicated native case at the same guard. Only that case becomes the stable `workout_unfinished` response code; the editor shows “A workout is already in progress. Go back to resume it. Your workout has not changed.” It remains open with edits/request identity intact. Back is labeled “Back to workout.” Unknown rejection codes and unrelated native exceptions keep their diagnostics; no string-matching or blanket error suppression. SQL, migration, snapshot semantics, rest modes and action identities are unchanged.
+
+**Current checks:** 110 tests (91 workout SQL-wrapper and 19 routine/model checks), TypeScript, local iOS JS/Hermes export (582 modules), ten regenerated native-file comparisons and documentation checks Passed. Swift compilation/signing and phone behavior of this correction **Not run**. Old build c059edb9's compile pass does not cover the correction. Failure/retry injection, deliberate stale/duplicate execution, broad concurrency/lifecycle/recovery/accessibility, older-session history, blank-reps minus and direct blank-pounds plus remain unrun unless separately evidenced. TS-001/TS-002 remain open; countdown jumps are not fixed. Last verified allowance remains 15/15 used; no new build/allowance query or paid build authorization.
+
+### Next diagnostic on the existing build — not yet run
+
+On an available reps-only set with confirmed blank pounds, complete it and Undo. Capture the blank card, tap pounds minus once, then **before plus or Complete**, reopen and inspect the app's freshly read draft value. Capture the card before reopening because foreground repair may republish it. App blank/card zero suggests the publication/display path; app zero establishes a stored-value change and warrants further tracing. Record the session/set and displayed values/counts/rest without publishing private identifiers. Do not delete/reset to diagnose this. Check blank reps minus separately when an appropriate blank draft is available. Do not treat either result as passed in advance.
+
+## Saved-routine Start preview — 2026-11-15
+
+[Install preview / view build](https://expo.dev/accounts/fgzmacaraeg/projects/swoldier-lock-screen-proof/builds/c059edb9-035e-44fa-adc2-b5291b038cf9): **c059edb9-035e-44fa-adc2-b5291b038cf9 FINISHED**. Exactly one build; current native compilation/signing Passed and signed IPA exported. Source is published e985675 plus the unchanged reviewed Start/nullable-value integration. Fresh archive: 19 required inputs, every hash matches local source; ten native copies/target memberships match. No source/dependency/signing changes, retries, staging, commit or push. Free iOS usage is now 15/15, zero remaining and $0 overage. [Full provenance, warnings and limitations](../../docs/HANDOFF.md#saved-routine-start-preview-ready--2026-11-15).
+
+**Installation and every new native runtime/device check remain Not run.** Before upgrading, capture installed routines/workout values, plans, counts, rest timestamps and acknowledgement. Install over the existing proof without deleting/resetting, close/reopen and compare. A countdown may expire during installation; its original deadline should remain. Confirm unfinished work cannot be replaced, then use the six focused checks below for saved/dirty Start, snapshot isolation, nullable/decimal actions, Undo/Add Set and Off/zero/positive rest. Keep actual device evidence separate from compilation and Windows wrappers. No history browser was added; countdown jumps and delayed automatic reveal remain open. Earlier unbuilt statements are checkpoint history.
+
+## Saved-routine Start integration — 2026-11-15
+
+**Implemented locally; native compilation/device checks Not run.** Baseline is published e985675; existing assessment work and historical evidence are preserved. The previously pending blank-value decision is now adopted as specified here. Earlier Start-disconnected/unimplemented statements describe their earlier checkpoints.
+
+**Review — 2026-11-15:** no blocking defect found and no source correction made. Ready for a separately authorized preview after current allowance/archive checks. Re-ran all 107 tests and TypeScript, verified three additional isolated v5 expired/skipped/finished migration cases and ten existing generated native-copy hashes/target membership. Wrapper results do not execute Swift or the native routine read transaction. Earlier JS export/regeneration results remain historical; neither was rerun in this source-unchanged review. No fresh upload archive or native/device test ran.
+
+### Values and starting a workout
+
+- Blank pounds/reps remain null through storage and bridge, displayed as **—** with blank accessibility labels on the card. Decimal pounds use Double/SQLite REAL rather than integer reads; zero is displayed as zero. Complete requires reps, including valid explicit 0; pounds may remain blank for a reps-only record. First + on a blank enters 5 lb or 1 rep; minus leaves blank unchanged. Existing nonblank ±5 lb/±1 rep actions remain. There is no new clear-to-blank control in this bounded pass.
+- Open a saved routine, then **Start saved routine**. New/dirty edits receive a save-first message and remain intact; save them explicitly, then Start. The app never silently discards edits or starts an older saved plan behind them. Empty routines reject Start. Stale revisions reject instead of silently using newer values; close/reopen to inspect the latest saved routine.
+- Native `RoutineStore.workoutSnapshot` captures the saved revision and exercise names together. The workout transaction copies routine ID/revision/name, ordered exercise source IDs/names, planned sets, actual drafts and tracking settings. Session-scoped exercise/set IDs are fresh; completion/rest IDs retain their existing exact-action guards. Changes to the routine afterward cannot rewrite the workout snapshot, plans or completed actuals.
+- The editor retains a native-generated Start UUID across retries; `proof_workouts_v6.request_id` is unique and committed with the snapshot. A retry returns its original current session without rereading an edited routine, even after that workout finishes. An older archived request is rejected without replacing the current session. A new request cannot replace unfinished work; return to the workout and resume/finish it. If ActivityKit publication fails after storage committed, retry the same Start or return and use Show Live Activity. A fresh intentional Start after finishing may create a new workout.
+- The client UUID lives only while this editor is mounted. After closing/reopening, Start uses a new token and rejects if a workout is unfinished; resume that existing workout instead. This prevents replacement but is not a tested automatic replay after process termination. A rejected/missing-rep Complete may increment the diagnostic received-request count; it must not save a record or create/restart rest.
+- Routine workouts use provisional editor bounds (0–2000 lb, 0–1000 reps) so valid saved values are not clamped to fictional fixture limits. Fixture bounds stay unchanged. All adjustments mutate only draft actual-entry values. Add Set copies the last completed actuals, including blank pounds/decimal values, into a today-only draft; its planned targets remain absent. Undo restores the same entered values and re-completion gets a fresh rest identity.
+
+### Migration, retention and rest modes
+
+v6 runs under the existing write transaction/version guard. It copies and rebuilds `proof_sets_v5` with nullable actuals/decimal pounds and `proof_rests_v2` with nullable deadline plus stored start time/tracking flag; completed rows require entered reps. Installed set/rest IDs, values, counters, deadlines, skipped/continued/undone timestamps and exercise order stay unchanged. Existing exercise settings default to tracked 20-second fixture rest. No installed session is converted into a saved-routine session or reset; RoutinePlans storage is not rewritten. Legacy countdown start is reconstructed as its existing deadline minus 20 seconds, not a new deadline.
+
+The single current-session pointer remains the target of all native guards. `proof_workouts_v6` retains source snapshot/request metadata; when a finished workout is replaced, its full readout is archived and its set/exercise/rest rows remain under their original session. No archive UI is added. Reset rejects routine workouts and removes only the current fictional fixture; it cannot erase archived history or routine plans. Downgrading to an older app after v6 is not supported.
+
+| Rest setting | Completion presentation and eligibility |
+| --- | --- |
+| Track rest Off | Save completion plus a no-deadline acknowledgement. Show saved confirmation, Undo and Continue; no countdown/time gate. Continue dismisses without recording a skipped countdown. |
+| Track rest On, 0 seconds | Save start and equal deadline, show 0:00 plus confirmation/Undo/Continue. No elapsed-time wait; Continue still acknowledges the ordinary next-draft transition. |
+| Track rest On, positive duration | Save actual set and start/deadline atomically; show bounded countdown plus confirmation/Undo/Continue. Repeat Complete cannot restart it. Early Continue skips the countdown; late Continue preserves expired state. |
+
+Undo in all modes restores editing immediately without changing acknowledgement/deadline. For an undone draft, Complete checks the saved deadline on execution: reject early positive rest unless End Rest was used; permit after expiry without a redraw/tap prerequisite, or immediately when tracking is Off/zero. Normal next-set transitions still require Continue; this is an acknowledgement opportunity, not a disabled-rest time wait. Final Continue reveals Add Set above Next Exercise/Finish Workout; no automatic advance/finish.
+
+The card now uses persisted start/deadline for positive intervals, rather than the old fixed 20-second rendering range; zero uses literal 0:00 and Off omits the timer. Apple's [bounded Timer format](https://developer.apple.com/documentation/swiftui/systemformatstyle/timer) documents countdown over a supplied interval. It does not establish prompt whole-card refresh or fix observed countdown jumps. No isStale selection, new polling or scheduled background work added. Optional activity metadata and optional numeric values are intended to decode older integer cards; actual upgrade decoding remains untested.
+
+### Validation and focused later device checklist
+
+**Passed locally:** 107 tests (89 earlier checks + 18 new integration/migration checks), TypeScript, iOS JS/Hermes export, ten regenerated native source/resource comparisons and host/extension membership. Tests use production SQL/TypeScript with separate JS orchestration, not Swift/native validation, bridge calls, ActivityKit or React rendering. They cover concurrent identical Starts, replay after finish, stale revision, snapshot copies/order including more than nine exercises, history preservation, rollback, v5 active/acknowledged/undone migration, blanks/zeros/decimals, Undo/Add Set and rest modes. Source/config review is not a native compile.
+
+**All checks below Not run:**
+
+1. Capture installed workout/routine data before upgrading without delete/reset. Compare values, plans, counts, rest timestamps and acknowledgement after reopening; resume an existing unfinished session. Confirm a new routine Start cannot replace it.
+2. Create a small fictional routine with a decimal-weight set, a blank-pounds/reps-only set and a blank-reps draft; configure positive, zero and Off rest on separate exercises. Try Start with unsaved edits: save-first feedback must preserve them. Save and Start; verify order/names/plans/rest.
+3. Repeatedly request Start; verify one session. Edit/save that routine afterward and confirm the active workout retains its original revision/name/plans/rest. Reopening/Show Live Activity must restore the same workout.
+4. Check minus on blanks, first + at 5 lb/1 rep, explicit zeros and decimal adjustments. Missing reps must reject Complete without a record or new rest; the received-request counter can increase. Entered zero remains valid. Complete a reps-only set with blank pounds; Undo/edit/re-complete and Add Set must preserve the correct values without changing plans.
+5. Off: no timer/wait, saved confirmation/Undo/Continue remain. On/0: 0:00 with acknowledgement. Positive: correct saved duration, repeated Complete cannot restart, early End Rest/Continue versus natural expiry behave correctly. For undone drafts, Complete after expiry must work without an extra Continue or app opening.
+6. Finish explicitly, then start another routine. Prior records must remain stored; old requests/actions must not alter the new workout. Check visible Lock Screen actions, long names, decimals/blank labels and reachable controls. Record layout, decoding, failure/retry and lifecycle evidence separately; do not infer fixes for either open troubleshooting issue.
+
+Next: a separately authorized preview after checking current free allowance and a fresh isolated archive/source hashes. Then use the upgrade-first checklist above. No cloud upload/build or publication in this review; RIR, production framework, templates and broader history UI remain outside this implementation.
+
+## Routine-to-workout integration assessment — 2026-11-15
+
+Published baseline [e985675](https://github.com/fgzmac/Swoldier/commit/e9856759843deeb8005c2eb05204b5eef4d3d4ec) freshly verified against local/remote main. Routine editing is published; the older publication instructions below are historical. **Start integration is not implemented.** No source changes in this assessment.
+
+**Confirmed compatibility issue:** routine sets allow optional Double pounds and optional integer reps. Workout `proof_sets_v5` actuals are NOT NULL; ProofSetSnapshot/ContentState require Int values and snapshot reads use sqlite3_column_int64. The fictional adjustment clamps are also narrower than routine input bounds. SQLite INTEGER affinity alone does not prevent decimal storage, but the native projection cannot preserve it. Merely copying existing routine documents into the workout path is not lossless. Nullable planned columns alone do not solve nullable drafts/actuals.
+
+**Decision requested:** extend workout storage, bridge and card values to preserve blanks/decimal pounds; decide Complete behavior with blank reps and the first +/− action on a blank field. Recommended, not adopted: blank pounds can remain blank for reps-only records, while completion requires entered reps; do not fabricate the first numeric value. No conversion to zero, rounding or filled-values-only Start fallback has been added.
+
+### Bounded implementation plan — not implemented
+
+1. Start names a saved routine ID/revision; unsaved edits require an explicit Save/discard/cancel choice, never silent use or loss. Read names/order/plans/rest with that saved revision in a consistent routine transaction. Empty named routines need clear rejection rather than a fabricated exercise.
+2. Copy the revision and all values into workout-owned rows with fresh session/exercise-instance/set identities; retain the stable source exercise identity separately. Later routine edits must not be consulted to mutate active/history records. Validate without truncating decimals or applying fictional fixture clamps to routine data.
+3. Persist a Start request identity so retries return the same snapshot, including after it finishes. Serialize Starts; retain an unfinished session and offer resume rather than replacing it. The present single-slot session table requires deliberate history-preserving migration/retention before starting another workout; Reset is not that migration.
+4. Preserve installed records, drafts, deadlines, acknowledgements, action IDs and legacy rest behavior. New rest settings belong to the snapshot. Disabled tracking has no countdown/wait, but still has a durable completion/Undo/Continue acknowledgement. Tracked zero remains enabled with zero duration, no wait and the same explicit acknowledgement; neither auto-advances.
+5. Keep exact-action retries, duplicate/stale guards, immediate-edit Undo, Add Set copying actuals, exercise advancement and explicit Finish. Commit changes before publishing success. No templates, redesign, dependencies or new production framework decision.
+
+**Checks performed:** shipped schema/migrations in isolated in-memory SQLite reject null pounds and reps separately, accept explicit zero, retain decimal 42.25, and reject a second session-slot insert. These diagnose existing constraints; they do not execute Swift or prove new integration. No installed data modified.
+
+**Planned acceptance checks — all Not run:** snapshot isolation after routine revision/name/order/plan/rest edits; dirty-editor decisions; repeated/concurrent/retried Start including a finished request; existing unfinished and completed session preservation; blank/zero/decimal round-trip under the eventual adopted rules; disabled/zero/positive rest modes; exact action guards across sessions; Undo/Add/Next/Finish regressions; migration reruns and failure rollback. Wrapper tests must be labeled separately from native compilation, installed-data migration, UI and physical-device results. Both deferred troubleshooting issues stay open. [Current handoff](../../docs/HANDOFF.md#routine-to-workout-integration-assessment--2026-11-15).
+
 ## Current optional-rest preview — 2026-11-14
 
 [Build and installation page](https://expo.dev/accounts/fgzmacaraeg/projects/swoldier-lock-screen-proof/builds/1a119269-ecca-4cce-962d-5bf4d7d10e9a): **1a119269-ecca-4cce-962d-5bf4d7d10e9a FINISHED**, November 14 at 3:21 PM America/Los_Angeles. Includes routine editing, optional Track rest and the reviewed decoder-local correction. **Native compilation/signing Passed**, zero errors/eight reported warnings; signed IPA exported. Warning output includes generated AppDelegate iOS deprecations, duplicate libc++ and a missing Metal-toolchain library path; Fastlane separately warns of future Ruby 3.3+ requirements. No source/dependency/signing edits to suppress warnings.

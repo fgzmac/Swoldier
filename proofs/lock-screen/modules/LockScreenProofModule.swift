@@ -12,6 +12,18 @@ public final class LockScreenProofModule: Module {
         AsyncFunction("saveRoutine") { (json: String) async throws -> String in
             try await RoutineService.shared.save(json)
         }
+        AsyncFunction("newRoutineStartRequest") { () async -> String in
+            await ProofCoordinator.shared.newStartRequest()
+        }
+        AsyncFunction("startRoutine") { (id: String, revision: Int, requestID: String) async throws -> [String: Any] in
+            do {
+                return try await ProofCoordinator.shared.startRoutine(id: id, revision: revision, requestID: requestID).dictionary
+            } catch ProofError.unfinishedWorkout {
+                // Expected refusal, not an Expo UnexpectedException. Keep a stable diagnostic code.
+                // All other errors still reject with their original diagnostics.
+                return ["startRejection": "workout_unfinished"]
+            }
+        }
         AsyncFunction("start") { () async throws -> [String: Any] in
             try await ProofCoordinator.shared.start().dictionary
         }

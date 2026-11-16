@@ -32,6 +32,17 @@ export function validName(value: string): string {
   if (!name || points.length > 80 || malformed || /[\u0000-\u001f\u007f-\u009f]/.test(name)) throw Error('Enter a name of 1–80 characters without line breaks.');
   return name;
 }
+// Only this explicit native outcome is an expected Start refusal. Do not sanitize
+// arbitrary exception messages or silently treat an unknown rejection as success.
+export function routineStartNotice(result: unknown): string | null {
+  if (typeof result === 'object' && result !== null && 'startRejection' in result) {
+    if (result.startRejection === 'workout_unfinished') {
+      return 'A workout is already in progress. Go back to resume it. Your workout has not changed.';
+    }
+    throw Error(`Unrecognized Start rejection: ${String(result.startRejection)}`);
+  }
+  return null;
+}
 function numberField(value: string, label: string, max: number, decimal = false, required = false): number | null {
   const text = value.trim();
   if (!text && !required) return null;

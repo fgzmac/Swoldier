@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { Alert, Button, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
-import { editPlan, moveEntry, newEntry, newPlan, toPlan, validName } from './routineModel';
+import { editPlan, moveEntry, newEntry, newPlan, routineStartNotice, toPlan, validName } from './routineModel';
 import type { EditEntry, EditPlan, Exercise, Library, Plan } from './routineModel';
 export type RoutineModule = {
   routineLibrary(): Promise<string>;
   createRoutineExercise(name: string): Promise<string>;
   saveRoutine(json: string): Promise<string>;
+  newRoutineStartRequest(): Promise<string>;
+  startRoutine(id: string, revision: number, requestID: string): Promise<unknown>;
 };
 export default function RoutineEditor({ native, close }: { native: RoutineModule | null; close(): void }) {
   const [library, setLibrary] = useState<Library>({ exercises: [], routines: [] });
@@ -17,6 +19,7 @@ export default function RoutineEditor({ native, close }: { native: RoutineModule
   const [message, setMessage] = useState('');
   const lock = useRef(false);
   const alive = useRef(true);
+  const startRequest = useRef<{ id: string; revision: number; token: string } | null>(null);
   const available = native && typeof native.routineLibrary === 'function';
   useEffect(() => {
     alive.current = true;
@@ -70,11 +73,31 @@ export default function RoutineEditor({ native, close }: { native: RoutineModule
     } catch (error) { setMessage(error instanceof Error ? error.message : 'Could not save routine. Your edits remain here; retry.'); }
     finally { lock.current = false; setBusy(false); }
   }
+  async function startSaved() {
+    if (!native || !draft || lock.current) return;
+    if (dirty || !draft.id) {
+      setMessage('Save your routine changes before starting. Unsaved edits have not been used or discarded.');
+      return;
+    }
+    lock.current = true; setBusy(true); setMessage('');
+    try {
+      if (!startRequest.current || startRequest.current.id !== draft.id || startRequest.current.revision !== draft.revision) {
+        startRequest.current = { id: draft.id, revision: draft.revision, token: await native.newRoutineStartRequest() };
+      }
+      const result = await native.startRoutine(draft.id, draft.revision, startRequest.current.token);
+      const notice = routineStartNotice(result);
+      if (notice) { setMessage(notice); return; }
+      close();
+    } catch (error) {
+      // Keep both edits and the request identity: publication may fail after durable Start.
+      setMessage(error instanceof Error ? error.message : 'Could not start. Retry uses the same request.');
+    } finally { lock.current = false; setBusy(false); }
+  }
   return <ScrollView automaticallyAdjustKeyboardInsets keyboardShouldPersistTaps="handled" contentContainerStyle={styles.page}>
     <Text accessibilityRole="header" style={styles.heading}>Routine editor</Text>
-    <Button title="Back to fictional workout" disabled={busy} onPress={() => leave(close)} />
+    <Button title="Back to workout" disabled={busy} onPress={() => leave(close)} />
     {!available ? <Text>This editor needs a native build with routine storage. The current installed preview does not include it.</Text> : <>
-      <Text>Save your plan here. Start Workout still uses the fictional proof.</Text>
+      <Text>Save your plan, then start that saved revision. Later routine edits will not change the workout. An unfinished workout must be resumed or finished first.</Text>
       <Button title="Create routine" disabled={busy} onPress={() => leave(() => open(newPlan()))} />
       <Text accessibilityRole="header">Saved routines</Text>
       {!library.routines.length && <Text>No saved routines yet.</Text>}
@@ -136,6 +159,8 @@ export default function RoutineEditor({ native, close }: { native: RoutineModule
             <Button key={e.id} title={`Use ${e.name}`} disabled={busy} onPress={() => add(e)} />)}
         </View>}
         <Button title="Save routine" disabled={busy} onPress={() => void save()} />
+        <Button title="Start saved routine" disabled={busy} onPress={() => void startSaved()} />
+        {dirty && <Text>Save changes before Start; unsaved edits stay here.</Text>}
       </View>}
     </>}
     {!!message && <Text accessibilityRole="alert">{message}</Text>}

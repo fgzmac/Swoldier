@@ -6,13 +6,16 @@ import { Alert, AppState, Button, Platform, SafeAreaView, ScrollView, StyleSheet
 
 type Snapshot = {
   sessionID: string;
+  routineID: string | null;
+  routineName: string | null;
+  routineRevision: number | null;
   setID: string;
   restID: string;
   setNumber: number;
   plannedSetsRecorded: boolean;
   sets: {
     setID: string; number: number; plannedPounds: number | null; plannedReps: number | null; exerciseID: string; isAdded: boolean;
-    pounds: number; reps: number; completed: boolean; completionAttempts: number;
+    pounds: number | null; reps: number | null; completed: boolean; completionAttempts: number;
   }[];
   exerciseID: string;
   exerciseName: string;
@@ -24,8 +27,8 @@ type Snapshot = {
   hasNextExercise: boolean;
   workoutFinished: boolean;
   finishedAt: number | null;
-  pounds: number;
-  reps: number;
+  pounds: number | null;
+  reps: number | null;
   completed: boolean;
   completionAttempts: number;
   recordCount: number;
@@ -35,7 +38,7 @@ type Snapshot = {
   restSetID: string | null;
   restUndoneAt: number | null;
   awaitingContinue: boolean;
-  restState: 'not_started' | 'running' | 'expired' | 'skipped';
+  restState: 'not_started' | 'running' | 'expired' | 'skipped' | 'disabled';
   restRemainingSeconds: number;
 };
 
@@ -140,27 +143,29 @@ export default function App() {
     }
   }
 
-  if (editingRoutines) return <SafeAreaView style={styles.screen}><RoutineEditor native={proof} close={() => setEditingRoutines(false)} /></SafeAreaView>;
+  if (editingRoutines) return <SafeAreaView style={styles.screen}><RoutineEditor native={proof} close={() => { setEditingRoutines(false); void refresh(); }} /></SafeAreaView>;
 
   return (
     <SafeAreaView style={styles.screen}>
       <ScrollView contentContainerStyle={styles.content}>
         <Text accessibilityRole="header" style={styles.title}>Workout proof</Text>
         <Button title="Routine editor" disabled={busy} onPress={() => setEditingRoutines(true)} />
-        <Text accessibilityRole="header">Two-exercise proof — Add Set, Next Exercise, Finish Workout</Text>
+        <Text accessibilityRole="header">Routine workout / fictional fixture</Text>
         {proof ? (
           <>
             <Text>{saved
               ? (saved.workoutFinished ? 'Workout finished' : saved.plannedSetsRecorded ? 'Current exercise sets recorded' :
-                'Current draft ' + saved.setNumber + '/' + saved.setCount + ': ' + saved.pounds + ' lb × ' + saved.reps + ' reps')
+                'Current draft ' + saved.setNumber + '/' + saved.setCount + ': ' + (saved.pounds ?? '—') + ' lb × ' + (saved.reps ?? '—') + ' reps')
               : 'No session started.'}</Text>
+            {saved?.routineName && <Text>Workout snapshot: {saved.routineName} · revision {saved.routineRevision}</Text>}
+            <Text>— means blank, not zero. Enter reps before completing a set; blank pounds permits a reps-only record.</Text>
             {saved && <Text>Current exercise: {saved.exerciseName} ({saved.exerciseNumber}/{saved.exerciseCount})</Text>}
             {saved?.exercises.map(exercise => <Text key={exercise.exerciseID}>{exercise.name}: {exercise.finishedAt == null ? 'Not finished' : 'Finished'}</Text>)}
             {saved?.finishedAt != null && <Text>Workout finished at: {saved.finishedAt}</Text>}
             {saved?.sets.map(set => (
               <View key={set.setID}>
-                <Text>{saved.exercises.find(e => e.exerciseID === set.exerciseID)?.name} · Set {set.number}: {set.completed ? 'Saved' : 'Draft'} {set.pounds} lb × {set.reps}</Text>
-                <Text>{set.isAdded ? 'Today-only added set; no routine target' : `Plan: ${set.plannedPounds} lb × ${set.plannedReps}`}</Text>
+                <Text>{saved.exercises.find(e => e.exerciseID === set.exerciseID)?.name} · Set {set.number}: {set.completed ? 'Saved' : 'Draft'} {set.pounds ?? '—'} lb × {set.reps ?? '—'}</Text>
+                <Text>{set.isAdded ? 'Today-only added set; no routine target' : `Plan: ${set.plannedPounds ?? '—'} lb × ${set.plannedReps ?? '—'}`}</Text>
               </View>
             ))}
             <Text>Saved records: {saved?.recordCount ?? 0}</Text>
@@ -168,6 +173,7 @@ export default function App() {
             <Text>Rest: {saved?.restState === 'running'
               ? saved.restRemainingSeconds + ' seconds remaining'
               : saved?.restState === 'skipped' ? 'Skipped'
+              : saved?.restState === 'disabled' ? 'Tracking off (no countdown or wait)'
               : saved?.restState === 'expired' ? 'Expired (0 seconds)'
               : 'Not started'}</Text>
             {saved && <Text>Rest screen: {saved.awaitingContinue ? 'Awaiting Continue' : 'Dismissed / no rest'}</Text>}
@@ -179,8 +185,8 @@ export default function App() {
               onPress={() => void act('start')}
               disabled={busy || saved?.workoutFinished === true}
             />
-            <Button title="Reset proof data" disabled={busy || !saved} onPress={() => {
-              Alert.alert('Reset fictional data?', 'This removes all fictional proof sets/rest, including migrated proof data, and ends its Live Activity.', [
+            <Button title="Reset proof data" disabled={busy || !saved || saved.routineID != null} onPress={() => {
+              Alert.alert('Reset fictional data?', 'This removes only the current fictional fixture and ends its Live Activity. Saved-routine workouts, archived workouts and routines are kept.', [
                 { text: 'Cancel', style: 'cancel' },
                 { text: 'Reset', style: 'destructive', onPress: () => void act('reset') },
               ]);

@@ -1,5 +1,25 @@
 # Lock Screen feasibility and device proof
 
+## Blank-value repeats and publication review — 2026-11-15
+
+c059edb9's bounded fresh-start pounds-minus, Complete/Undo/minus and direct blank-plus-after-Undo repeats **Passed — user-reported**, with screenshot-supported card/app states. Blank remained blank on minus; direct plus produced 5 lb × 1 while the blank plan and zero-record/one-request state remained. Fresh-start revision 17 had blank pounds/reps, zero records/requests and no rest. Initial blank → 0 remains **inconclusive / not reproduced**, not fixed; no adjustment correction was established. Prior reports below remain intact.
+
+The Start-message correction review found no blocker, but its four changed build inputs remain unbuilt/device-unverified. c059edb9's compile/device evidence is separate. Both deferred troubleshooting issues and untested cases remain open. [Current review, evidence limits and proposed publication list](HANDOFF.md#start-integration-publication-review--2026-11-15).
+
+## Start integration device evidence and limits — 2026-11-15
+
+c059edb9 now has [scoped screenshot-supported/user-reported results](../proofs/lock-screen/README.md#start-device-evidence-and-two-issues--2026-11-15) for displayed upgrade preservation, saved-revision isolation, nullable/zero/decimal entries, positive/zero/Off rest and selected Undo/Add Set flows. Minus on blank pounds remains a reported mismatch: only the card was checked before plus, so stored mutation versus display-only behavior is unknown. Local SQL checks do not reproduce it and do not justify a platform/publication fix. The separate expected Start-rejection wording patch is unbuilt/device-unverified. No new general ActivityKit timing, concurrency, lifecycle or accessibility guarantee; both deferred issues remain open. Historical unrun states below retain their original checkpoint scope.
+
+## Saved-routine integration preview — 2026-11-15
+
+Preview **c059edb9-035e-44fa-adc2-b5291b038cf9** compiled and exported a signed IPA successfully with the reviewed source unchanged. [Build results and upgrade-first checklist](HANDOFF.md#saved-routine-start-preview-ready--2026-11-15). This establishes native compilation/signing, not installed migration, older ActivityKit-content decoding, nullable bridge/runtime behavior, Lock Screen actions or rendered fit. All new device checks remain Not run. TS-001/TS-002 remain open/deferred; no timing fix or new platform guarantee is claimed. Earlier unbuilt sections retain their original checkpoint scope.
+
+## Saved-routine integration — 2026-11-15
+
+Local, unbuilt integration preserves nullable/decimal values through native storage and activity content. Disabled rest displays saved confirmation/Undo/Continue without a countdown; zero-duration tracked rest shows literal 0:00; positive rest renders its persisted bounded interval. Existing background intents, explicit acknowledgement, deadline guards and exact retries remain in use. [Implementation and unrun native/device checklist](../proofs/lock-screen/README.md#saved-routine-start-integration--2026-11-15). Windows wrapper/config checks do not establish native compilation, old-content decoding or phone behavior. No new automatic-reveal guarantee or countdown-jump fix; both troubleshooting issues remain open. Prior device evidence stays attached to its original builds.
+
+The 2026-11-15 source review found no blocking defect; optional content fields and integer-to-optional-Double decoding are structurally compatible in source, but actual Swift/ActivityKit decoding is **Not run**. Ten existing generated copies/target memberships match the current source. Long names, decimal/blank values and Off/zero/Undo card fit require native and physical-device validation. [Review limits and next task](HANDOFF.md#saved-routine-start-review--2026-11-15).
+
 ## Optional-rest device evidence — 2026-11-14
 
 Build 1a119269 compiled/signed successfully. Workout preservation has supplied screenshot support; routine preservation, Off persistence, remembered 60 seconds, disabled blank versus enabled validation retaining edits, On/0 persistence and independent routine settings are **Passed — user-reported**. [Scoped results and remaining checks](../proofs/lock-screen/README.md#current-optional-rest-preview--2026-11-14). This foreground-editor evidence establishes no new Lock Screen capability, countdown fix or general recovery guarantee. Start remains disconnected; future disabled-rest workout confirmation/Undo/Continue behavior is adopted but unimplemented. Complete Set / End Rest wording remains device-unverified. Earlier missing-set observation is inconclusive, not a confirmed bug/fix. Both troubleshooting issues and production framework remain open. Earlier checkpoint statements below retain their historical scope.

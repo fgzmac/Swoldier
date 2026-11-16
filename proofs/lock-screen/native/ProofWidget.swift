@@ -16,7 +16,7 @@ struct ProofWidget: Widget {
                 } else if let setID = context.state.setID, let restID = context.state.restID {
                     if showsUndoneDraft(context) {
                         draft(context, setID: setID, restID: restID, duringUndoneRest: true)
-                    } else if showsRest(context), let deadline = context.state.restDeadline {
+                    } else if showsRest(context) {
                         if context.state.restUndoneAt != nil, context.state.restSetID != nil {
                             Text("Set returned to draft")
                                 .font(.caption.weight(.semibold))
@@ -27,7 +27,9 @@ struct ProofWidget: Widget {
                                 .accessibilityLabel("Set saved")
                         }
                         HStack(spacing: 8) {
-                            countdown(deadline).font(.title2.weight(.semibold))
+                            if let deadline = context.state.restDeadline {
+                                countdown(deadline, started: context.state.restStartedAt).font(.title2.weight(.semibold))
+                            }
                             if let completedSetID = context.state.restSetID {
                                 Button(intent: ProofUndoSet(sessionID: context.attributes.sessionID,
                                     setID: completedSetID, restID: restID)) {
@@ -77,10 +79,12 @@ struct ProofWidget: Widget {
                     } else if context.state.workoutFinished == true {
                         Text("Workout finished")
                     } else if showsRest(context), let deadline = context.state.restDeadline {
-                        countdown(deadline)
+                        countdown(deadline, started: context.state.restStartedAt)
+                    } else if showsRest(context) {
+                        Text(context.state.restUndoneAt == nil ? "Set saved · Continue" : "Set returned to draft")
                     } else {
                         Text(context.state.completed ? "Planned sets recorded"
-                             : "Set \(context.state.setNumber ?? 1) · \(context.state.pounds) lb × \(context.state.reps)")
+                             : "Set \(context.state.setNumber ?? 1) · \(context.state.poundsText) lb × \(context.state.repsText)")
                     }
                 }
             } compactLeading: {
@@ -89,13 +93,13 @@ struct ProofWidget: Widget {
                 if context.state.saveFailed {
                     Text("!").accessibilityLabel("Action failed")
                 } else if showsRest(context), let deadline = context.state.restDeadline {
-                    countdown(deadline)
+                    countdown(deadline, started: context.state.restStartedAt)
                 } else { Text(context.state.workoutFinished == true ? "✓" : "\(context.state.setNumber ?? 1)/\(context.state.setCount ?? 3)") }
             } minimal: {
                 if context.state.saveFailed {
                     Text("!").accessibilityLabel("Action failed")
                 } else if showsRest(context), let deadline = context.state.restDeadline {
-                    countdown(deadline).font(.caption2)
+                    countdown(deadline, started: context.state.restStartedAt).font(.caption2)
                 } else { Text(context.state.workoutFinished == true ? "✓" : "\(context.state.setNumber ?? 1)/\(context.state.setCount ?? 3)") }
             }
         }
@@ -160,7 +164,7 @@ struct ProofWidget: Widget {
         // No wall clock or isStale gate. Normal rest awaits Continue; committed
         // Undo exposes the draft immediately while retaining this same countdown.
         // Old skipped content was already dismissed; foreground migration backfills it.
-        context.state.restDeadline != nil && context.state.restContinuedAt == nil && context.state.restSkippedAt == nil
+        context.state.awaitingContinue ?? (context.state.restDeadline != nil && context.state.restContinuedAt == nil && context.state.restSkippedAt == nil)
     }
 
     private func showsUndoneDraft(_ context: ActivityViewContext<ProofActivity>) -> Bool {
@@ -173,11 +177,11 @@ struct ProofWidget: Widget {
             HStack {
                 Text(duringUndoneRest
                      ? "Set \(context.state.setNumber ?? 1) returned to draft"
-                     : "Ex \(context.state.exerciseNumber ?? 1) · Set \(context.state.setNumber ?? 1)/\(context.state.setCount ?? 3)")
+                     : "\(context.state.exerciseName ?? "Exercise") · Set \(context.state.setNumber ?? 1)/\(context.state.setCount ?? 3)")
                     .font(.caption.weight(.semibold))
                 Spacer(minLength: 4)
                 if duringUndoneRest, let deadline = context.state.restDeadline {
-                    countdown(deadline).font(.headline)
+                    countdown(deadline, started: context.state.restStartedAt).font(.headline)
                 } else if let notice = context.state.notice {
                     Text(notice).font(.caption)
                 }
@@ -186,19 +190,19 @@ struct ProofWidget: Widget {
                 // Always actionable: storage decides at execution, not on a zero redraw.
                 let instruction = context.state.notice
                 Text(instruction == nil || instruction == "Complete at zero or Continue"
-                     ? "Complete Set at zero or End Rest" : instruction ?? "")
+                     ? (context.state.restDeadline == nil ? "Complete Set when ready" : "Complete Set at zero or End Rest") : instruction ?? "")
                     .font(.caption2)
             }
             HStack(spacing: 6) {
                 Button(intent: ProofAdjustWeight(sessionID: context.attributes.sessionID,
                     setID: setID, restID: restID, delta: -5)) { adjustment("−", "Decrease weight by 5 pounds") }
-                Text("\(context.state.pounds) lb").font(.headline).monospacedDigit()
+                Text("\(context.state.poundsText) lb").accessibilityLabel(context.state.pounds == nil ? "Pounds blank" : "\(context.state.poundsText) pounds").font(.headline).monospacedDigit()
                 Button(intent: ProofAdjustWeight(sessionID: context.attributes.sessionID,
                     setID: setID, restID: restID, delta: 5)) { adjustment("+", "Increase weight by 5 pounds") }
                 Spacer(minLength: 4)
                 Button(intent: ProofAdjustReps(sessionID: context.attributes.sessionID,
                     setID: setID, restID: restID, delta: -1)) { adjustment("−", "Decrease reps by one") }
-                Text("\(context.state.reps) reps").font(.headline).monospacedDigit()
+                Text("\(context.state.repsText) reps").accessibilityLabel(context.state.reps == nil ? "Reps blank" : "\(context.state.repsText) reps").font(.headline).monospacedDigit()
                 Button(intent: ProofAdjustReps(sessionID: context.attributes.sessionID,
                     setID: setID, restID: restID, delta: 1)) { adjustment("+", "Increase reps by one") }
             }
@@ -218,11 +222,15 @@ struct ProofWidget: Widget {
         }
     }
 
-    private func countdown(_ deadline: Date) -> some View {
-        Text(.currentDate, format: .timer(
-            countingDownIn: deadline.addingTimeInterval(-20)..<deadline, showsHours: false
-        ))
-        .monospacedDigit()
+    @ViewBuilder
+    private func countdown(_ deadline: Date, started: Date?) -> some View {
+        let beginning = started ?? deadline.addingTimeInterval(-20)
+        if deadline <= beginning {
+            Text("0:00").monospacedDigit()
+        } else {
+            Text(.currentDate, format: .timer(countingDownIn: beginning..<deadline, showsHours: false))
+                .monospacedDigit()
+        }
     }
     private func adjustment(_ symbol: String, _ description: String) -> some View {
         Text(symbol).font(.headline)

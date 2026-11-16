@@ -4,6 +4,128 @@ Record a short entry after each working session. Newest entries go first. Write 
 
 **Planned:** agreed or proposed work. **Implemented:** code exists. **Verified:** a named check ran and passed.
 
+## 2026-11-15 — Record blank-value repeats and review Start publication
+
+**Status** — Bounded c059edb9 repeats Passed with user-reported actions and screenshot-supported states. No publication blocker found in the 19-path accumulated diff against e985675. Start-message correction remains unbuilt/device-unverified. Documentation only in this task; no upload/build/staging/commit/push.
+
+- Read AGENTS/current handoff/project/latest log and reviewed the accumulated diff/callers. Local main and successful fresh remote-main query match e9856759843deeb8005c2eb05204b5eef4d3d4ec; upstream origin/main. Preserved all work, logs and personal reflections.
+- Recorded fresh-start pounds minus: card/app blank pounds/reps, Editor Test B revision 17, zero records/requests, no rest. Complete → Undo → minus: reported stays blank, screenshot-supported blank pounds × 1, zero records/one request, Off and blank plan. Direct blank plus once after Undo: reported success, screenshot-supported 5 lb × 1, unchanged blank plan/zero records/one request. Images were not independently re-inspected; source of each observation remains explicit.
+- Preserved initial blank → 0 as inconclusive/not reproduced. No adjustment-source correction or fix established. The direct blank-plus pass comes from this new trial, not the earlier 0 → 5 observation. Blank-reps minus and other unreported trials remain unrun.
+- Reviewed typed unfinished-workout rejection through store/coordinator/module and the sole production RoutineEditor caller. Exact code maps to friendly resume wording before close; dirty edits, request identity and protection remain intact. Unknown rejection codes and unrelated exceptions retain diagnostics; successful snapshots still follow the existing path. No source correction needed. The local patch is not part of c059edb9 and has no new Swift/native/device validation.
+- Re-ran all 110 tests and TypeScript successfully. SQL wrappers/production-TypeScript checks do not execute Swift or ActivityKit. Compared local c059edb9 archive with its manifest: all 19 archived inputs match. Fifteen current inputs match; four later Start-message inputs differ (RoutineEditor.tsx, routineModel.ts, modules/LockScreenProofModule.swift, native/ProofStore.swift). Existing generated native-copy hashes checked; prior JS export applies to unchanged bytes. No hosted IPA download or new export/native build attempted.
+- Reviewed publication paths/content for credentials/signing/device identifiers/private records/generated artifacts: no findings. Necessary dependency lockfile is already tracked and unchanged, so not added to the proposed diff. All 19 changed paths belong to this checkpoint. Checked Markdown links/whitespace and preservation of historical content/reflections; only current status documentation updated in this task.
+- Refreshed handoff with exact proposed paths and suggested commit message: Add saved-routine workout snapshots and clear Start feedback. Keep native compilation/device evidence scoped; remaining failure/retry/stale/duplicate/concurrency/lifecycle/accessibility/history checks unrun. TS-001/TS-002 stay open/deferred. Last verified allowance 15/15 used; no allowance query, paid authorization or new build.
+
+### What I learned — user-written
+
+### Next small task
+
+When authorized, recheck scope/Git, stage only the 19 reviewed paths, inspect staged changes/whitespace and publish normally. Preserve the distinction between tested c059edb9 and the unbuilt Start-message patch.
+
+---
+
+## 2026-11-15 — Record Start device sequence; investigate blank minus and clarify refusal
+
+**Status** — c059edb9 device evidence recorded with limits. Minus-on-blank mismatch remains unresolved; no storage/display fix claimed. Expected unfinished-Start wording corrected locally, **unbuilt/device-unverified**. No cloud upload/build, staging, commit or push; last verified allowance remains 15/15 used, no paid build authorized.
+
+- Read AGENTS/current handoff/project/proof/backlog and latest log. Local main remains e9856759843deeb8005c2eb05204b5eef4d3d4ec; all 17 initial accumulated paths preserved. Before editing, all 19 build inputs matched the c059edb9 source manifest. No fresh Git remote query or settings/dependency changes.
+- Recorded screenshot-supported preservation of the displayed completed workout from the supplied description, without independently re-inspecting images. Unsaved Start refusal, revision-3 snapshot isolation after editing the routine to 42.5, sequential competing Start refusal, 90-second rest/confirmation/Undo/expiry re-completion, explicit finish and later revision-4 decimal Start/completion remain user-reported. Revision 3 finished at 40 × 9, 50 × 8, 45 × 10 with three records/four requests and original plans; no broad concurrency/history inference.
+- Recorded distinct blank/zero Start/completion and zero/Off rest confirmation/Undo/Continue reports. Off Undo/edit/re-complete passed except pounds minus on blank. Zero-valued Add Set copied 0 × 12 without a target; Undo/edit/re-complete saved 0 × 13 with three total records by report. The revision-17 missing-rep screenshot supports blank draft/three requests/zero records/no rest; reps plus → 1 with blank pounds was user-reported. Final screenshot supports blank pounds × 1 and 0 × 12, original plans, two records/five requests, Off/dismissed rest. Full evidence/limits are in the proof guide; no invented timestamps or broader passes.
+- Traced widget −5/−1 and IDs through background App Intents, coordinator, TEXT-bound SQL, Undo, commit, nullable snapshot/bridge and ActivityKit publication. SQL keeps NULL on minus; native NULL checks and optional display fields have no demonstrated nil-to-zero conversion. A local Off complete → Undo → minus diagnostic with native-style TEXT bindings retained SQL NULL and all draft/rest/plan/count data; direct plus gave 5 and blank reps minus/plus retained NULL/gave 1. No Swift/device reproduction. User clarified only the Lock Screen was checked before plus, so persisted mutation is not established; 0 → 5 is not direct blank → 5 evidence. Read-only hosted IPA inspection was blocked by HTTP 403 even after refreshed build metadata, so no bundled-resource comparison claimed.
+- No SQL, adjustment, Undo, rest, migration, identity or publication change made. Improved wrapper fidelity by binding all parameters as strings like ProofStore; added two focused regression/diagnostic cases including raw SQLite type and reopen checks. Existing explicit-zero/decimal/guard tests still pass. These establish local SQL behavior, not a fix for the phone report. Proposed the smallest next diagnostic: capture card before/after minus, reopen before plus/Complete and compare the fresh app value; foreground repair may change the card.
+- Established expected-error presentation path from installed Expo source: ConcurrentFunctionDefinition wraps non-Expo errors as UnexpectedException; RoutineEditor displayed its raw message. Replaced only the unfinished guard's generic input error with a dedicated case. The module catches only that case, returning stable workout_unfinished; the editor maps it to friendly resume wording without closing/discarding draft or retry identity. Back label now says Back to workout. Unknown outcomes/unrelated exceptions still expose diagnostic errors. Added a production-TypeScript response-scoping check; no framework/generated dependency files edited.
+- Passed all **110 tests** (91 workout SQL-wrapper, 19 routine/model), TypeScript and local iOS JS/Hermes export (582 modules). Regenerated existing config in an ignored isolated fixture and compared ten native files; source/resource wiring remains unchanged. Tests execute shipped SQL/production TypeScript via separate JS orchestration, not Swift, React UI or App Intents. The first independent VM diagnostic needed structuredClone supplied to its local sandbox; rerun passed, with no app change. Current Swift compilation/signing and corrected wording device tests remain Not run; c059edb9's compile pass covers the earlier bytes only.
+- Updated current status, evidence table, open-issue notes and handoff. Preserved prior log entries/personal reflections and build-specific evidence. Failure/retry injection, stale/duplicate execution, broad concurrency/lifecycle/recovery/accessibility, other migration cases/older archived history, blank-reps minus and direct blank-pounds plus remain phone-unrun. TS-001 delayed reveal and TS-002 countdown jumps remain open/deferred; no timing fix. Local links/whitespace and final scope checks performed.
+
+### What I learned — user-written
+
+### Next small task
+
+Use the existing installed build to distinguish persisted blank-minus behavior from card-only display before further correction. Capture the card before reopening, inspect the app before plus/Complete, and avoid deletion/reset. Review the unbuilt wording patch before any separately authorized future build.
+
+---
+
+## 2026-11-15 — Build one saved-routine Start preview
+
+**Status** — Exactly one authorized [preview](https://expo.dev/accounts/fgzmacaraeg/projects/swoldier-lock-screen-proof/builds/c059edb9-035e-44fa-adc2-b5291b038cf9), **c059edb9-035e-44fa-adc2-b5291b038cf9**, FINISHED. Current native compilation/signing Passed; installation, installed migration and native/device behavior **Not run**. No application-source edits, dependency changes, automatic retry, staging, commit or push.
+
+- Read AGENTS/current handoff/project/proof and latest log. Local main/HEAD remains e9856759843deeb8005c2eb05204b5eef4d3d4ec with upstream origin/main and all 17 accumulated paths unstaged. No fresh remote query or Git-setting change. Compared all 11 accumulated source/test hashes with the reviewed snapshot: unchanged. Existing 107 wrapper/model checks and migration diagnostics were not repeated for identical source and are not native runtime evidence.
+- Fresh account usage query confirmed Free, 14/15 iOS builds before submission, zero overage/$0 estimated charges. Inspected a fresh proof-isolated archive: exactly 19 required paths and all SHA-256 hashes matching local source, including package-lock.json and both SQL resources. Rechecked ten generated native copies and host/extension membership; excluded credentials/signing/device identifiers/private data, dependencies, generated artifacts and unrelated files. Recorded manifest and build diagnostics privately outside Git.
+- Build inputs were baseline e985675 plus nine reviewed source changes: App.tsx, RoutineEditor.tsx, modules/LockScreenProofModule.swift and native ProofActivity.swift, ProofCoordinator.swift, ProofSQL.json, ProofStore.swift, ProofWidget.swift, RoutineStore.swift. The other ten inputs match baseline after Git line-ending normalization. Local inputs remained unchanged after submission. EAS_NO_VCS and EAS_PROJECT_ROOT kept directory isolation; EAS's Git commit field is empty, with local base/manifest recorded separately.
+- Submitted once with cached EAS CLI 27.7.2, preview/iOS/internal distribution, noninteractive mode and frozen credentials. Existing Expo project, identifiers, registered phone and remote signing reused. CLI skipped fresh Apple-server provisioning validation; no certificate/profile changes made. Version/build remain 1.0.0 (1). No plan changes, paid charges or App Store submission.
+- Completed 2026-11-16T00:15:03.775Z / November 15 at 4:15 PM America/Los_Angeles. Raw logs confirm relevant proof/native/inline-module Swift compilation and ARCHIVE SUCCEEDED; EAS confirms exported and signed IPA. Formatted summary reports zero errors/eight warnings, which is not the total of repeated raw dependency warnings. Generated AppDelegate/UIRequiresFullScreen iOS 26 deprecations, duplicate libc++, missing Metal-toolchain Swift search path, extension stripping, Hermes script outputs and future Ruby 3.3 support were nonfatal. React/Expo/Hermes raw diagnostics include header/nullability/protocol/deprecation/concurrency and JS global/eval warnings. No warning diagnostic attributed to the proof Swift sources; none suppressed or corrected. A local log-print command encountered Windows console encoding and was rerun with UTF-8; this was not a build failure or resubmission.
+- Fresh post-build allowance is Free iOS **15/15, zero remaining**, zero overage builds and $0 estimated charges; reported cycle ends 2026-12-01T00:00:00Z. The single successful build consumed the previously confirmed free slot. No further build attempted.
+- Refreshed current status and upgrade-first checklist, preserving historical evidence and user-written reflections. Compilation does not establish installed migration, old content decoding, bridge/runtime validation, actual native concurrency/recovery, data preservation or layout/device interactions. All those checks remain Not run. Both troubleshooting issues remain open/deferred; production framework/RIR unchanged. Documentation links/whitespace and final source-preservation checks performed.
+
+### What I learned — user-written
+
+### Next small task
+
+Capture existing routine/workout data, install this preview over the existing app without deleting/resetting, close/reopen and compare. Confirm unfinished-session protection before continuing the focused saved-routine/blank-value/rest-mode phone checklist. Record device evidence separately from the successful compile/sign.
+
+---
+
+## 2026-11-15 — Review saved-routine Start, migration and value boundaries
+
+**Status** — No blocking defect found against e985675; ready for a separately authorized preview. No source correction, upload/cloud build, staging, commit or push. Current Swift compilation/signing and new native/device checks **Not run**.
+
+- Read AGENTS/current handoff/project/proof and latest log; local main/HEAD remains e9856759843deeb8005c2eb05204b5eef4d3d4ec, upstream origin/main. All 17 accumulated paths preserved and unstaged. No fresh remote query; the prior published-baseline observation remains historical.
+- Reviewed v6 rebuild/rollback, installed rows/counts/rest metadata, nullable/decimal reads/bridge/card, blank adjustment/missing-rep rules, rest modes and existing action guards. Start's write transaction serializes requests; routine document and names are read from one saved revision. The committed request mapping is checked before reloading a routine; unfinished work cannot be replaced, finished history is retained, and publication follows commit. No source correction required.
+- Clarified the retry boundary: the editor's UUID survives in-place retry while mounted, not closing/reopening. A new request after reopening meets unfinished-session protection and must resume; no native crash-recovery pass claimed. Existing rejected/stale Complete request counting remains diagnostic and can increase without saving a record or changing rest. Dirty-editor handling and the actual Swift routine-read transaction were source-reviewed, not executed by wrapper tests.
+- Re-ran `node --test --test-reporter=dot tests/*.test.cjs` and `npm run typecheck`: all 107 tests and TypeScript Passed. Independent targeted review subsets also passed; they are subsets, not extra test coverage. Production SQL/TypeScript executes through separate JavaScript orchestration, not Swift, React UI or ActivityKit.
+- Ran three additional isolated, in-memory SQL diagnostics for v5 expired, skipped and finished sessions. Compared all pre-existing columns/rows after shipped v6 migration, verified the retained session registration and SQLite integrity: Passed. The existing suite separately covers active/acknowledged/undone migration, rollback/reruns, concurrent identical Start, retained history, nullable actions and rest modes. No installed database touched.
+- Rechecked ten existing generated native source/resource copies against current SHA-256 hashes and inspected host/extension membership; all match. Upload allowlist includes the integration-bearing files. No source changed, so no regeneration, JS export or fresh archive was repeated. These are source/configuration checks, not a Swift compile or archive submission.
+- Updated current status, handoff and focused upgrade-first checklist. Local Markdown links/anchors and whitespace checked. Preserved prior entries/reflections and scoped historical device evidence. Native compilation/decoding, installed migration, actual native concurrency and recovery, phone actions/layout/accessibility remain Not run. TS-001/TS-002 remain open/deferred; production framework/RIR remain open work.
+
+### What I learned — user-written
+
+### Next small task
+
+Separately authorize one preview after current free-allowance and fresh isolated archive/hash checks. After successful compilation, capture installed data and upgrade without reset, then test saved-revision isolation, blank/zero/decimal actions and all three rest modes using the proof checklist. Keep native and device outcomes separate.
+
+---
+
+## 2026-11-15 — Implement nullable values and saved-routine workout snapshots
+
+**Status** — Implemented locally, unbuilt. 107 TypeScript/SQL-wrapper tests and Windows checks Passed. New Swift compilation/signing, installed migration/decoding and device behavior **Not run**. No cloud upload/build, dependencies, staging, commit or push.
+
+- Read AGENTS/current handoff/project/latest log; local main remains published e9856759843deeb8005c2eb05204b5eef4d3d4ec. Preserved the four existing assessment-document changes. The preceding assessment freshly verified remote main; no additional remote query in this implementation. User adopted the pending blank-value rules; no zero/filled-values-only fallback.
+- Added nullable pounds/reps across workout SQLite, Swift snapshot/activity state, bridge and app/card readouts. Decimal pounds use REAL/Double rather than integer projection. Complete requires reps but accepts explicit zero and blank pounds. First + on blank enters 5 lb/1 rep, minus leaves blank. Edits, Undo, re-completion and Add Set preserve entered values independently of plans. Routine workouts use existing provisional editor bounds; fictional fixture bounds stay unchanged.
+- Added native saved-revision snapshot capture with exercise names/order/source IDs, copied plans/rest and fresh session-scoped action IDs. The form explicitly requires saving dirty/new edits before Start, retains its request UUID across retries and never discards edits. Native BEGIN IMMEDIATE plus a unique request record deduplicates Start; unfinished work is rejected with a resume message. Publication happens after commit; a retry of a committed request does not reload later routine edits.
+- v6 atomically rebuilds set/rest tables for nullable numeric values/deadlines and backfills legacy tracked 20-second settings without changing existing deadlines/IDs/values/counters/Undo/acknowledgement. Added workout request/source registry and archival readouts; starting after explicit finish retains prior set/exercise/rest rows. Old action IDs remain guarded by the current pointer. Fixture Reset is restricted to the current fixture, protecting saved-routine workouts and archives. No installed database opened or reset locally; no history UI added.
+- Disabled rest now saves a no-deadline acknowledgement with confirmation/Undo/Continue and no timer/wait. Tracked zero shows 0:00 with acknowledgement and no elapsed-time gate. Positive rest uses the saved exercise duration and persisted start/deadline; duplicate completion cannot restart. Undone drafts remain immediately editable and check the actual deadline when Complete executes. Existing exact-action retries and final Add/Next/Finish flow retained.
+- Reused Apple's bounded [SystemFormatStyle.Timer](https://developer.apple.com/documentation/swiftui/systemformatstyle/timer) with the persisted interval; literal zero for a zero-length interval, no countdown for disabled tracking. Documentation establishes bounded formatting, not prompt whole-card refresh or a fix for jumps. Neither deferred issue was closed; no isStale, polling or background callback added.
+- Passed 107 tests: 89 existing checks plus 18 focused integration/migration cases. Cover blank/zero/decimal values, missing-rep rejection, Undo/re-completion/Add Set, rest modes, order beyond nine exercises, snapshot isolation, repeated/concurrent Start, stale revision, unfinished-session/archived-history preservation, old actions, rollback and v5 active/acknowledged/undone migration/reruns. They execute shipped SQL/production TypeScript through separate JS orchestration, not Swift/native runtime. Initial test setup still used v5; updated the wrapper to execute v6 before final passes. Two local edit commands used the wrong relative test path and wrote nothing; corrected paths before final checks.
+- TypeScript and local iOS JS/Hermes export Passed (582 modules). Re-ran the existing config plugin in an ignored isolated fixture, verified ten native source/resource copies and host/extension membership. Fixed local text encoding/line-ending artifacts found during diff review; final changed files are UTF-8. These checks do not compile Swift; no swift/swiftc available. No dependency/config/signing/identifier changes.
+- Updated current requirements, proof guide, handoff and scoped later device checklist. Preserved earlier source/device evidence, historical entries and blank user reflections. New native/device checks remain Not run; production framework and later RIR logging stay open. Local Markdown links/whitespace and final scope checks performed.
+
+### What I learned — user-written
+
+### Next small task
+
+Review v6 migration/retention, exact Start retry identity, nullable bridge/content decoding and disabled/zero/positive rest before any separately authorized preview build. Then use the upgrade-first device checklist without reset; do not treat wrapper results as native/device success.
+
+---
+
+## 2026-11-15 — Assess routine integration; identify blank-value decision
+
+**Status** — Integration not implemented: existing workout model cannot preserve allowed routine blanks/decimal pounds. Requested the specific blank-entry/completion decision before any fallback, as instructed. Documentation only; no source edit, dependency change, cloud upload/build, staging, commit or push.
+
+- Read AGENTS/current handoff/project/proof and latest log; local main/HEAD and a successful fresh remote-main query both equal e9856759843deeb8005c2eb05204b5eef4d3d4ec, upstream origin/main. Starting tree clean. Recorded routine-editor publication without rewriting prior review/build evidence.
+- Traced routine optional Double pounds/integer reps into current workout constraints: proof_sets_v5 actual pounds/reps are NOT NULL, snapshot/activity fields use Int, native projection uses sqlite3_column_int64, and adjustments clamp to fictional 200 lb/30 reps. Nullable plans alone do not provide nullable drafts. No silent zero conversion, rounding, narrower Start restriction or changed validation adopted.
+- Asked whether to extend the workout value model and what Complete with blank reps and first +/− on blank should do. Recommendation, not a requirement: preserve nullable/decimal data, allow blank pounds for reps-only records and require entered reps before completion. Await the user's decision before implementation.
+- Ran a read-only-to-project, in-memory SQLite diagnostic with shipped schema/migrations: confirmed separate NOT NULL failures for blank pounds/reps, explicit zero accepted, decimal 42.25 retained by SQLite, and second session insert ignored by the existing single-slot Start guard. Decimal loss in the native integer projection is a source finding, not execution of Swift. No installed database was opened or changed.
+- Identified additional necessary integration work without implementing it: independent saved-revision snapshots and fresh action identities, explicit dirty-editor handling, durable idempotent Start, retention of completed/active sessions, and acknowledgement independent of a countdown for disabled rest. Current rest creation is fixed at 20 seconds. Tracked zero should retain enabled identity/acknowledgement without a wait; disabled rest should retain confirmation/Undo/Continue without a timer.
+- Updated PROJECT, HANDOFF and implementation guide with the evidence, pending decision, bounded plan and unrun acceptance checks. No new integration tests claim success; Swift compilation/runtime/device checks remain Not run. Documentation links/whitespace checked; prior entries and personal reflections preserved. TS-001 automatic-reveal delay and TS-002 countdown jumps stay open/deferred; no missing-set bug/fix inferred.
+
+### What I learned — user-written
+
+### Next small task
+
+Resolve blank-value completion and adjustment behavior, then implement and test lossless snapshot storage/Start/rest integration without resetting installed data or replacing unfinished work.
+
+---
+
 ## 2026-11-14 — Record optional-rest device results and review publication
 
 **Status** — Scoped results for build **1a119269-ecca-4cce-962d-5bf4d7d10e9a** recorded; no publication blocker found. Documentation only in this task. No source changes, upload/cloud build, staging, commit or push.

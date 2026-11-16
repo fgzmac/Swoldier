@@ -16,10 +16,12 @@ struct ProofFailedAction: Codable, Hashable, Sendable {
 
 struct ProofActivity: ActivityAttributes {
     struct ContentState: Codable, Hashable {
-        let pounds: Int
-        let reps: Int
+        let pounds: Double?
+        let reps: Int?
         let completed: Bool
         var restDeadline: Date? = nil
+        var restStartedAt: Date? = nil
+        var awaitingContinue: Bool? = nil
         var restSkippedAt: Date? = nil
         // Optional for old content; nil means not acknowledged.
         var restContinuedAt: Date? = nil
@@ -48,6 +50,9 @@ struct ProofActivity: ActivityAttributes {
         // Temporary D1 metadata; optional so existing activity content still decodes.
         var diagnosticPublicationID: String? = nil
         var diagnosticPublicationTime: Date? = nil
+
+        var poundsText: String { pounds.map { $0.formatted(.number.precision(.fractionLength(0...2))) } ?? "—" }
+        var repsText: String { reps.map { String($0) } ?? "—" }
 
         func withoutPublicationDiagnostics() -> Self {
             var state = self

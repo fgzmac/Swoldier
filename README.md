@@ -1,5 +1,23 @@
 # Workout App
 
+## Blank-value repeats and publication review — 2026-11-15
+
+c059edb9's bounded fresh-start pounds-minus, Complete/Undo/minus and direct blank-plus-after-Undo repeats **Passed — user-reported**, with screenshot-supported card/app states. Blank remained blank on minus; direct plus produced 5 lb × 1 while the blank plan and zero-record/one-request state remained. Fresh-start revision 17 had blank pounds/reps, zero records/requests and no rest. Initial blank → 0 remains **inconclusive / not reproduced**, not fixed; no adjustment correction was established. Prior reports below remain intact.
+
+The Start-message correction review found no blocker, but its four changed build inputs remain unbuilt/device-unverified. c059edb9's compile/device evidence is separate. Both deferred troubleshooting issues and untested cases remain open. [Current review, evidence limits and proposed publication list](docs/HANDOFF.md#start-integration-publication-review--2026-11-15).
+
+## Start results and two issues — 2026-11-15
+
+Build c059edb9 has scoped screenshot-supported/user-reported Start, snapshot, value/rest-mode and Undo/Add Set results. Minus on blank pounds remains unresolved; local SQL preserves blank, while the phone's persisted value was not checked before plus. The expected unfinished-Start message has a narrow local correction, **unbuilt and device-unverified**. 110 SQL/TypeScript-wrapper tests and Windows checks Passed. [Evidence, limitations and next diagnostic](docs/HANDOFF.md#start-device-results-and-narrow-wording-correction--2026-11-15). No new upload/build/publication; last verified free allowance 15/15. Both deferred troubleshooting issues remain open; prior checkpoint statements below are historical.
+
+## Saved-routine preview ready — 2026-11-15
+
+The single authorized [saved-routine Start preview](https://expo.dev/accounts/fgzmacaraeg/projects/swoldier-lock-screen-proof/builds/c059edb9-035e-44fa-adc2-b5291b038cf9) FINISHED; native compilation/signing Passed. Installation, installed migration and new runtime/device checks remain Not run. Reviewed source is unchanged and remains uncommitted on baseline e985675. Free iOS allowance is now 15/15, zero remaining/$0 overage. [Upgrade-first checklist, warnings and build evidence](docs/HANDOFF.md#saved-routine-start-preview-ready--2026-11-15). Both troubleshooting issues and production framework remain open; earlier unbuilt statements below retain their checkpoint scope.
+
+## Saved-routine workout integration — 2026-11-15
+
+Published baseline is [e985675](https://github.com/fgzmac/Swoldier/commit/e9856759843deeb8005c2eb05204b5eef4d3d4ec). The isolated proof now locally starts independent saved-routine snapshots, preserves blank/decimal workout values and completed history, rejects replacement of unfinished work, and supports rest Off/zero/positive modes with saved confirmation/Undo/Continue. **Reviewed with no blocking defect; unbuilt:** 107 SQL-wrapper/model tests, three additional migration SQL diagnostics and Windows checks Passed; new Swift and device checks Not run. [Review, evidence limits and next task](docs/HANDOFF.md#saved-routine-start-review--2026-11-15). Both troubleshooting issues and production framework remain open. Earlier sections below retain their checkpoint-specific status, including former Start-disconnected statements.
+
 ## Optional routine rest — 2026-11-14
 
 The local routine editor has a per-exercise **Track rest** switch retaining duration text through off/on and save/reopen. The optional-rest/decoder correction [preview](https://expo.dev/accounts/fgzmacaraeg/projects/swoldier-lock-screen-proof/builds/1a119269-ecca-4cce-962d-5bf4d7d10e9a) FINISHED; native compilation/signing Passed. Workout preservation has supplied before/after screenshot support. Routine preservation, Off persistence, remembered 60 seconds, disabled blank/enabled blank validation without lost edits, On/0 persistence and routine independence are **Passed — user-reported**. Other device cases remain unrun; no missing-set bug/fix inferred. Start remains disconnected, and future disabled-rest workout behavior is unimplemented. Publication review found no blocker: 89 TypeScript/SQL-wrapper tests and TypeScript Passed; all 19 inputs match the successful preview archive. [Exact 16-file scope, evidence limits and next task](docs/HANDOFF.md#routine-editor-publication-review--2026-11-14). Work remains uncommitted; no new upload/build/staging/commit/push.

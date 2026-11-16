@@ -29,6 +29,25 @@ actor ProofCoordinator {
         defer { release() }
 
         guard let snapshot = try ProofStore().start() else { throw ProofError.storage }
+        try await show(snapshot)
+        return snapshot
+    }
+
+    func newStartRequest() -> String { UUID().uuidString }
+
+    func startRoutine(id: String, revision: Int, requestID: String) async throws -> ProofSnapshot {
+        await acquire()
+        defer { release() }
+        let snapshot = try ProofStore().startRoutine(id: id, revision: revision, requestID: requestID)
+        try await show(snapshot)
+        return snapshot
+    }
+
+    private func show(_ snapshot: ProofSnapshot) async throws {
+        // Storage has committed before any display/publication. Old sessions' actions stay guarded.
+        for old in Activity<ProofActivity>.activities where old.attributes.sessionID != snapshot.sessionID {
+            await old.end(nil, dismissalPolicy: .immediate)
+        }
         if let existing = activities(snapshot.sessionID).first {
             await existing.update(publication(content(snapshot)))
         } else if !snapshot.workoutFinished {
@@ -38,7 +57,6 @@ actor ProofCoordinator {
                 content: publication(content(snapshot)), pushType: nil
             )
         }
-        return snapshot
     }
 
     func read() async throws -> ProofSnapshot? {
@@ -94,6 +112,8 @@ actor ProofCoordinator {
         content(ProofActivity.ContentState(
             pounds: snapshot.displaySet.pounds, reps: snapshot.displaySet.reps, completed: snapshot.completed,
             restDeadline: snapshot.restDeadline.map { Date(timeIntervalSince1970: $0) },
+            restStartedAt: snapshot.restStartedAt.map { Date(timeIntervalSince1970: $0) },
+            awaitingContinue: snapshot.awaitingContinue,
             restSkippedAt: snapshot.restSkippedAt.map { Date(timeIntervalSince1970: $0) },
             restContinuedAt: snapshot.restContinuedAt.map { Date(timeIntervalSince1970: $0) },
             // Read the stored rest-to-set association for legacy and new completion IDs.
