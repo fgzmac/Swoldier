@@ -21,6 +21,12 @@ type Journal={targets?:Partial<Record<GoalPeriod,number>>;goals:Goal[];checks:Ch
 const dateOK=(s:string)=>/^\d{4}-\d\d-\d\d$/.test(s)&&localDay(new Date(s+'T12:00:00'))===s;
 const numeric=(s:string)=>/^\d+(\.\d+)?$/.test(s)&&Number.isFinite(Number(s));
 function field(label:string,value:string,change:(v:string)=>void){return <View key={label}><Text>{label}</Text><TextInput accessibilityLabel={label} value={value} onChangeText={change} style={{color:midnight.text,minHeight:44,borderWidth:1,borderRadius:8,padding:9}}/></View>}
+function PeriodButton({title,selected,onPress,disabled}:{title:GoalPeriod;selected:boolean;onPress:()=>void;disabled:boolean}){
+ return <Pressable accessibilityRole="tab" accessibilityState={{selected,disabled}} disabled={disabled} onPress={onPress}
+   style={{flexGrow:1,flexBasis:82,minHeight:44,paddingHorizontal:6,alignItems:'center',justifyContent:'center',borderRadius:8,backgroundColor:selected?'#405879':'transparent'}}>
+   <Text style={{color:selected?midnight.text:midnight.muted,fontWeight:'600'}}>{title}</Text>
+ </Pressable>;
+}
 export function Tracker({api,workouts,day}:{api:OrganizerAPI;workouts:Snapshot[];day:string}){
  const {value:j,save,busy,feedback}=useSection<Journal>(api,'accountability',{goals:[],checks:[],scans:[]});
  const [open,O]=useState(false),[form,F]=useState<Goal|null>(null),[check,C]=useState<Check|null>(null),[scan,S]=useState<Scan|null>(null),[error,E]=useState('');
@@ -43,10 +49,10 @@ export function Tracker({api,workouts,day}:{api:OrganizerAPI;workouts:Snapshot[]
    else {setTargetError('Enter a whole number of at least 1.');return;}
    if(await save({...j,targets})){setEditing(false);setTargetError('');}
  }
- return <View style={box}><Text style={{fontSize:18,fontWeight:'700'}}>Workout goals</Text>
- <View style={{flexDirection:'row',gap:6}}>{(['Weekly','Monthly','Yearly'] as const).map(p=><Action key={p} title={p} color={p===period?midnight.selected:midnight.muted} disabled={busy} onPress={()=>{periodTo(p);setEditing(false);setTargetError('')}}/>)}</View>
- <Text style={{color:midnight.muted}}>{range}</Text>
- <Text style={{fontSize:19,fontWeight:'700'}}>{goal?count+' / '+goal+' workouts'+(count>=goal?' · ✓ Goal met':''):count+' completed workouts'}</Text>
+ return <View style={{paddingHorizontal:5,gap:9}}><Text style={{fontSize:20,fontWeight:'700'}}>Workout goals</Text>
+ <View accessibilityRole="tablist" style={{flexDirection:'row',flexWrap:'wrap',padding:3,gap:3,borderRadius:10,backgroundColor:midnight.surface}}>{(['Weekly','Monthly','Yearly'] as const).map(p=><PeriodButton key={p} title={p} selected={p===period} disabled={busy} onPress={()=>{periodTo(p);setEditing(false);setTargetError('')}}/>)}</View>
+ <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',gap:8}}>
+ <Text style={{fontSize:19,fontWeight:'700'}}>{goal?count+' / '+goal+' workouts'+(count>=goal?' · ✓ Goal met':''):count+' completed workouts'}</Text><Text style={{color:midnight.muted,fontSize:13}}>{range}</Text></View>
  {goal!=null&&<View accessible={false} style={{height:5,backgroundColor:midnight.divider,borderRadius:3}}><View style={{width:`${Math.min(100,100*count/goal)}%`,height:5,backgroundColor:midnight.selected,borderRadius:3}}/></View>}
  {editing?<>{field(period+' workout target',input,setInput)}{!!targetError&&<Text>{targetError}</Text>}<Action title="Save goal" disabled={busy} onPress={()=>void setTarget()}/>{goal!=null&&<Action title="Remove goal" disabled={busy} onPress={()=>void setTarget(true)}/>}<Action title="Cancel" onPress={()=>setEditing(false)}/></>:<Action title={goal?'Edit target':'Set goal'} disabled={busy} onPress={()=>{setInput(goal?.toString()??'');setEditing(true)}}/>}
  {feedback}<Action title={(open?'▾':'▸')+' Accountability · '+j.goals.filter(g=>!g.archived).length+' active goals'} onPress={()=>O(!open)}/>{open&&<>

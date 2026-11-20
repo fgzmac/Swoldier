@@ -1,5 +1,25 @@
 # Workout App — project plan
 
+## 2026-11-20 — Lock Screen header and control spacing
+
+The Lock Screen card places the exercise name and set count on one row. Extra spacing separates the header, adjustment controls and workout actions.
+
+## 2026-11-20 — Training Week selected for Calendar
+
+The selected Calendar hero is option 3, Training Week, with the enamel clip, paper schedule and lifting strap.
+
+## 2026-11-20 — Calendar hero and dated task labels
+
+The Calendar month shows dated routine, supplement-group and water labels. Days display up to three entries ordered by time slot, with a count of additional entries. Selecting a date opens its complete agenda. Desk planner is the provisional header artwork pending selection.
+
+## 2026-11-20 — Routines journal artwork
+
+The selected artwork for the Routines library header is the training journal. It sits beside the title and routine count, above New routine.
+
+## 2026-11-20 — Midnight visual corrections after installation
+
+Today and Calendar follow the approved Midnight reference artwork, date typography and action placement. Both surfaces use one responsive agenda heading. The date takes the available space and the add action wraps to a separate line when needed. The local correction is awaiting iPhone visual verification.
+
 ## 2026-11-20 — Midnight app and Live Activity
 
 Today presents the active set, a direct Resume action, independent local weekly, monthly and yearly workout-count targets, and the shared daily agenda. Weekly targets count Monday through Sunday. The accountability journal and completed history remain accessible. Routines appear individually or inside named categories. The Calendar month marks dates with entries, with one add menu and dated occurrence options.

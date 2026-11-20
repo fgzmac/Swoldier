@@ -31,3 +31,17 @@ plugins/*
 !WeekPlanner.tsx
 !Organizer.tsx
 !Midnight.tsx
+
+!assets
+assets/*
+!assets/midnight
+assets/midnight/*
+!assets/midnight/bench.png
+!assets/midnight/cal.png
+!assets/midnight/drop.png
+!assets/midnight/pill.png
+!assets/midnight/right.png
+!assets/midnight/routines.png
+!assets/midnight/today.png
+!assets/midnight/training-journal.png
+!assets/midnight/calendar-planner.png

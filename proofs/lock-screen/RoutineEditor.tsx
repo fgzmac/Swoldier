@@ -1,7 +1,7 @@
-import {Text,midnight} from './Midnight';
+import {Text,journalArt,midnight} from './Midnight';
 import {Action,Groups,type OrganizerAPI} from "./Organizer";
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { AccessibilityInfo, Keyboard, Alert, Button, Pressable, ScrollView, StyleSheet, Switch, TextInput, View } from 'react-native';
+import { AccessibilityInfo, Image, Keyboard, Alert, Button, Pressable, ScrollView, StyleSheet, Switch, TextInput, View } from 'react-native';
 import { editPlan, moveEntry, newEntry, newPlan, routineStartNotice, toPlan, validName } from './routineModel';
 import type { Snapshot } from './workoutModel';
 import type { EditEntry, EditPlan, Exercise, Library, Plan } from './routineModel';
@@ -132,11 +132,19 @@ export default function RoutineEditor({ native, close, onResume, registerLeave, 
     finally{lock.current=false;setBusy(false);}
   }
   return <ScrollView ref={scroll} automaticallyAdjustKeyboardInsets keyboardShouldPersistTaps="handled" contentContainerStyle={styles.page}>
-    <View style={styles.row}><Text style={styles.brand}>SWOLDIER</Text>{draft&&<Action title="Cancel" color="#245BCD" disabled={busy} onPress={()=>leave(()=>{setDraft(null);setDirty(false);setUnfinished(null);})}/>}</View>
-    <Text accessibilityRole="header" style={styles.heading}>{draft ? (draft.id?'Edit routine':'New routine') : 'Routines'}</Text>
+    {draft ? <>
+      <View style={styles.row}><Text style={styles.brand}>SWOLDIER</Text><Action title="Cancel" color="#245BCD" disabled={busy} onPress={()=>leave(()=>{setDraft(null);setDirty(false);setUnfinished(null);})}/></View>
+      <Text accessibilityRole="header" style={styles.heading}>{draft.id?'Edit routine':'New routine'}</Text>
+    </> : <View style={styles.libraryHeader}>
+      <View style={styles.headerCopy}>
+        <Text style={styles.brand}>SWOLDIER</Text>
+        <Text accessibilityRole="header" style={styles.heading}>Routines</Text>
+        {available && <Text style={styles.subtitle}>{library.routines.length} {library.routines.length===1?'routine':'routines'}</Text>}
+      </View>
+      <Image accessible={false} resizeMode="contain" source={journalArt} style={styles.journal}/>
+    </View>}
     {!available ? <Text>A native iPhone build is required for routine storage.</Text> : <>
       {!draft&&<>
-      <Text style={styles.subtitle}>{library.routines.length} routines</Text>
       <Pressable accessibilityRole="button" disabled={busy} style={styles.primary} onPress={()=>open(newPlan())}><Text style={styles.primaryText}>＋ New routine</Text></Pressable>
       {!library.routines.length && <Text>No saved routines yet. Start with the exercises you want to log.</Text>}
       {native && <Groups api={native} plans={library.routines} render={plan => {
@@ -227,6 +235,8 @@ export default function RoutineEditor({ native, close, onResume, registerLeave, 
 const styles = StyleSheet.create({
   inset:{backgroundColor:"#222B3D",gap:8,padding:12,borderRadius:9,borderLeftWidth:3,borderColor:"#647e70"},invalid:{borderWidth:2,borderColor:"#FFB4AD"},brand:{fontWeight:'800',fontSize:17,color:'#F1F4FA'}, subtitle:{color:'#B4C1D3'},
   primary:{backgroundColor:'#245BCD',borderRadius:10,minHeight:50,alignItems:'center',justifyContent:'center',padding:12},primaryText:{color:'#F1F4FA',fontSize:18,fontWeight:'700'},
+  libraryHeader:{flexDirection:'row',alignItems:'center',justifyContent:'space-between',gap:12},
+  headerCopy:{flex:1,gap:6},journal:{width:'40%',maxWidth:144,aspectRatio:3/2},
   libraryCard:{borderWidth:2,borderColor:'#3A4961',borderRadius:12,backgroundColor:'#273246',flexDirection:'row',alignItems:'center'},libraryMain:{flex:1,minHeight:82,padding:16,gap:7},more:{minWidth:50,minHeight:50,alignItems:'center',justifyContent:'center'},
   choice:{borderWidth:2,borderColor:'#3A4961',borderRadius:10,padding:16,gap:6},choiceSelected:{borderColor:'#245BCD',borderWidth:2,backgroundColor:'#324569'},
   page: { padding: 20, gap: 18, backgroundColor:'#1B1F2D' }, heading: { fontSize: 24, fontWeight: '700' },

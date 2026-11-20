@@ -4,6 +4,28 @@ Record a short entry after each working session. Newest entries go first. Write 
 
 **Planned:** agreed or proposed work. **Implemented:** code exists. **Verified:** a named check ran and passed.
 
+## 2026-11-20 — Lock Screen header and control spacing
+
+Aligned the exercise name and set count on their first baseline. Added six points of bottom padding to the header and adjustment row. Reviewed the updated illustrative preview. The local generator and target inspection passed all ten source/resource comparisons. Native compilation and iPhone layout checks were not run.
+
+## 2026-11-20 — Training Week selected for Calendar
+
+Replaced the provisional Calendar artwork with the user-selected Training Week option. Rendered a four-screen comparison and individual images for visual review. TypeScript passed and the local iOS JavaScript export included all nine artwork files. The new artwork and screen layouts await native device verification.
+
+## 2026-11-20 — Calendar hero and dated task labels
+
+Replaced Calendar dots with labeled task chips using the existing dated agenda. Routine completion uses the scheduled occurrence ID; each water entry and supplement group uses its own checklist. Generated three hero options and included the desk planner as a provisional choice. The local iOS JavaScript export includes nine assets. TypeScript and 164 local tests passed, including leap-day placement, six-week layout structure, time-slot ordering, completion markers, overflow and date selection. Native rendering, scrolling and device fit remain unverified.
+
+## 2026-11-20 — Routines journal artwork
+
+Added the selected training journal to the Routines library header and exported a 432 × 288 PNG from the original sample. The TypeScript check and 14 targeted tests passed. The local iOS JavaScript export included all eight Midnight assets. Rendered iPhone fit is pending.
+
+## 2026-11-20 — Midnight visual corrections after installation
+
+The signed preview from a145fd4 used $2 in included credits, leaving $35 and $0 overage. Installed screenshots identified missing workout artwork and tab icons, a crowded Agenda action and a different month header from the approved design. Restored seven reference assets, adjusted Today’s typography and goal selector, and revised the Calendar month, agenda and workout actions. All data uses the existing workout and dated agenda stores.
+
+163 local tests, TypeScript and iOS JavaScript export passed. All seven packaged artwork files matched their local archive copies. A Chromium flex-layout check of the shared heading at 320, 393 and 430 point-equivalent widths with 1×, 1.5× and 2× text passed all 18 Today/Calendar cases, including six wrapped layouts. This check uses browser text metrics. Native rendering and device verification of the local correction are pending.
+
 ## 2026-11-20 — Midnight interface on the signed A–J foundation
 
 Compared the 23 A–J inputs with the corrected submission manifest before editing. Checkpointed the accumulated project changes separately. Implemented the four Midnight designs for Today, Routines, Calendar and the Live Activity. Resume reads the selected active session. Workout targets extend the existing revision-checked journal. Editing a calendar entry from either screen writes the same dated document. Show RIR changes a host preference and republishes the widget.

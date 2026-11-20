@@ -165,3 +165,24 @@ test('routine Resume uses the active session for that routine without issuing St
  actions(group.props.render(plan)).find(n=>n.props.title==='Resume workout').props.onPress();
  assert.deepEqual(resumes,['active']);
 });
+
+test('month cells show dated tasks, retain order within slots, announce overflow and select the right local date',()=>{
+ const make=(id,name,kind,slot,checked=false)=>({id,name,kind,slot,children:[{checked}]});
+ const entries=[make('w','Water · 8 oz','water','Night',true),make('r','Circuit','routine','Morning'),
+   make('s','Morning stack','supplements','Morning',false),make('r2','Mobility','routine','Afternoon')];
+ const selected=[], props={date:new Date(2024,1,1),days:{'2024-02-29':{agenda:{items:entries},rev:3}},
+   workouts:[{startRequestID:'r',workoutFinished:true}],selectDay:d=>selected.push(localDay(d)),busy:false};
+ const tree=editorHarness('WeekPlanner','MonthGrid').render(props);
+ const buttons=descendants(tree).filter(n=>n.type==='Pressable');
+ assert.equal(buttons.length,29);
+ const leap=buttons[28];assert.match(leap.props.accessibilityLabel,/Circuit, completed.*Morning stack.*Mobility.*Water · 8 oz, completed/);
+ const text=descendants(leap).filter(n=>n.type==='Text').map(n=>[n.props.children].flat().join(''));
+ assert.deepEqual(text,['29','✓ Circuit','Morning stack','Mobility','+1']);
+ assert.equal(buttons[0].props.accessibilityState.selected,true);
+ assert.equal(descendants(buttons[0]).filter(n=>n.type==='Text').length,1);
+ leap.props.onPress();assert.deepEqual(selected,['2024-02-29']);
+ assert.deepEqual(entries.map(i=>i.id),['w','r','s','r2']);
+ const six=editorHarness('WeekPlanner','MonthGrid').render({...props,date:new Date(2026,7,31)});
+ assert.equal(six.props.children[1].length,6);
+ assert.equal(descendants(six).filter(n=>n.type==='Pressable').length,31);
+});

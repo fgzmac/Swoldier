@@ -1,5 +1,27 @@
 # Current project handoff
 
+## 2026-11-20 — Lock Screen header and control spacing
+
+Check the revised widget on iPhone with a long exercise name and larger text, including the Undo editing state with RIR and End Rest visible. The local visual preview uses a short exercise name.
+
+## 2026-11-20 — Training Week selected for Calendar
+
+Training Week is now in the local Calendar header. A four-screen visual review is available under design-samples/midnight-screen-previews. Today, Routines and Calendar are browser renders of the current components with fictional state. The Lock Screen card is an illustrative reconstruction with Show RIR enabled. In the next preview, compare the selected artwork, month chips and agenda header on the phone.
+
+## 2026-11-20 — Calendar hero and dated task labels
+
+On a future iPhone preview, check a busy day with four or more entries, long routine names, larger text and a month spanning six weeks. Tap the date to verify that the full agenda opens with the same entries and completion states. Three Calendar hero samples are available locally; the desk planner is currently wired in.
+
+## 2026-11-20 — Routines journal artwork
+
+The selected training journal is wired into the local Routines library header. In the next preview, check the title, count and artwork together at standard and larger text sizes.
+
+## 2026-11-20 — Midnight visual corrections after installation
+
+Midnight preview 66ffdd5f compiled and signed from PR #1 commit a145fd4. The installed Today and Calendar screenshots showed a crowded Agenda header, missing illustrations and text-only tabs. They show an active workout summary. The Calendar screenshot is for a different date than the before-upgrade screenshot, so it does not verify the earlier date’s entries.
+
+The local correction restores the reference artwork, revises Today’s workout and goals, and separates the selected date, add action, month navigation and entry options. Review Today and Calendar side by side with their approved references in a future iPhone preview. Check the narrow-width header, large text, the add form opening directly below the header, and the same saved dated entries from both screens. The correction has no signed build or phone result yet.
+
 ## 2026-11-20 — Midnight review and upgrade checklist
 
 The feature branch `feat/midnight-ui` keeps the signed A–J inputs in a prerequisite commit and adds Midnight in a second commit. The previous signed preview was 3e11df7b. Midnight passed 163 local tests, TypeScript, iOS JavaScript export and generated native target/resource checks. Swift compilation, signing, upgrade, accessibility and rendered layouts are pending for Midnight.

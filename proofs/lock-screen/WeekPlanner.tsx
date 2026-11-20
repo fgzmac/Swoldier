@@ -1,7 +1,7 @@
-import {Text,midnight} from './Midnight';
+import {calendarArt,Control,Icon,Text,midnight} from './Midnight';
 import {Action} from './Organizer';
 import {useEffect,useRef,useState} from 'react';
-import {Button,Pressable,AppState,ScrollView,StyleSheet,TextInput,View} from 'react-native';
+import {Image,Button,Pressable,AppState,ScrollView,StyleSheet,TextInput,View} from 'react-native';
 import type {Library} from './routineModel';
 import {calendarProgress,localDay} from './workoutModel';
 import type {ProofModule,Snapshot} from './workoutModel';
@@ -13,10 +13,64 @@ import type {Item,Agenda} from './workoutModel';
 type Stored={rev:number;agenda:Agenda};
 const empty:Agenda={goal:null,items:[]};
 const ounces=(s:string)=>/^\d+(\.\d{1,2})?$/.test(s.trim())&&Number.isSafeInteger(Math.round(Number(s)*100))&&Number(s)>0;
+export function AgendaHeading({today, date, completed, adding, disabled, onAdd}: {
+ today:boolean;date:Date;completed:boolean;adding:boolean;disabled:boolean;onAdd:()=>void;
+}){
+ return <View style={styles.splitHeader}>
+   <View style={styles.dateCopy}>
+     <Text style={today?styles.sectionTitle:styles.eyebrow}>Agenda</Text>
+     <Text style={today?styles.caption:styles.sectionTitle}>{date.toLocaleDateString(undefined,{weekday:'long',month:'short',day:'numeric'})}{completed?' · ✓ Completed':''}</Text>
+   </View>
+   <Control pill title={adding?'Close':'+ Add to date'} accessibilityLabel={adding?'Close add menu':'Add to date'} disabled={disabled} onPress={onAdd}/>
+ </View>;
+}
+
 function Card({title,done,children,initiallyOpen=false}:{initiallyOpen?:boolean;title:string;done?:boolean;children:React.ReactNode}){
  const [open,set]=useState(initiallyOpen);
  return <View style={[styles.entry,done&&styles.complete]}><Pressable accessibilityRole="button" accessibilityState={{expanded:open}} onPress={()=>set(!open)} style={styles.touch}><Text style={styles.bold}>{open?'▾':'▸'} {title}{done?' · ✓ Completed':''}</Text></Pressable>{open&&children}</View>;
 }
+const chipColors:Record<Item['kind'],string> = {
+ routine:'#9BC0FF', supplements:'#96D4BD', water:'#96DDE9',
+};
+const visibleEntryLimit = 3;
+
+export function MonthGrid({date, days, workouts, selectDay, busy}:{
+ date:Date; days:Record<string,Stored>; workouts:Snapshot[]; selectDay:(day:Date)=>void; busy:boolean;
+}){
+ const year=date.getFullYear(), month=date.getMonth();
+ const offset=new Date(year,month,1).getDay(), last=new Date(year,month+1,0).getDate();
+ const weeks=Math.ceil((offset+last)/7);
+ const finished=new Set(workouts.filter(w=>w.workoutFinished).map(w=>w.startRequestID));
+ function cell(number:number){
+   if(number<1||number>last)return <View key={number} style={styles.dayCell}/>;
+   const cellDate=new Date(year,month,number), key=localDay(cellDate);
+   const entries=(days[key]?.agenda.items??[]).slice().sort((a,b)=>slots.indexOf(a.slot)-slots.indexOf(b.slot));
+   const selected=number===date.getDate();
+   function complete(item:Item){
+     return item.kind==='routine'?finished.has(item.id):item.children.length>0&&item.children.every(c=>c.checked);
+   }
+   const label=[cellDate.toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric',year:'numeric'}),
+     ...entries.map(item=>item.name+(complete(item)?', completed':''))].join('. ');
+   return <Pressable key={key} style={[styles.dayCell,selected&&styles.selectedCell]} disabled={busy}
+     accessibilityRole="button" accessibilityLabel={label} accessibilityHint="Opens this day’s agenda"
+     accessibilityState={{selected,disabled:busy}} onPress={()=>selectDay(cellDate)}>
+     <View style={[styles.dayNumber,selected&&styles.selected]}>
+       <Text style={{color:selected?midnight.background:midnight.text,fontWeight:selected?'700':'500'}}>{number}</Text>
+     </View>
+     {entries.slice(0,visibleEntryLimit).map(item=><View key={item.id} style={[styles.chip,{backgroundColor:chipColors[item.kind]}]}>
+       <Text numberOfLines={1} ellipsizeMode="tail" style={styles.chipText}>{complete(item)?'✓ ':''}{item.name}</Text>
+     </View>)}
+     {entries.length>visibleEntryLimit&&<Text style={styles.more}>+{entries.length-visibleEntryLimit}</Text>}
+   </Pressable>;
+ }
+ return <View>
+   <View style={styles.weekRow}>{['Su','Mo','Tu','We','Th','Fr','Sa'].map(name=><Text key={name} style={styles.weekday}>{name}</Text>)}</View>
+   {Array.from({length:weeks},(_,week)=><View key={week} style={styles.weekRow}>
+     {Array.from({length:7},(_,weekday)=>cell(1-offset+week*7+weekday))}
+   </View>)}
+ </View>;
+}
+
 export default function WeekPlanner({native,workouts,onStart,onResume,today}:{today?:string;native:ProofModule;workouts:Snapshot[];onStart:()=>void;onResume:(sessionID:string)=>void}){
  const [selectedDate,select]=useState(new Date()),[days,D]=useState<Record<string,Stored>>({}),[library,L]=useState<Library>({exercises:[],routines:[]});
  const [ready,loaded]=useState(false),[busy,B]=useState(false),[error,E]=useState('');const lock=useRef(false);
@@ -28,28 +82,57 @@ export default function WeekPlanner({native,workouts,onStart,onResume,today}:{to
  async function save(next:Agenda){await native.saveCalendarDay(day,stored?.rev??0,JSON.stringify(next));await load();}
  const patch=(item:Item)=>save({...agenda,items:agenda.items.map(i=>i.id===item.id?item:i)});
  const {waters,total,goal,waterDone,session,complete,done}=calendarProgress(agenda,workouts);
+ function entryOptions(i:Item){
+   return <Control title="•••" accessibilityLabel={'Options for '+i.name}
+     onPress={()=>options(menu===i.id?null:i.id)}/>;
+ }
  function controls(i:Item){return <View key={i.id} style={styles.stack}>
- {i.kind==='routine'&&session(i)&&!session(i)?.workoutFinished?<Pressable accessibilityRole="button" style={({pressed})=>({padding:14,backgroundColor:pressed?'#1E4CAC':'#245BCD'})} onPress={()=>onResume(session(i)!.sessionID)}><Text style={{color:'#F1F4FA'}}>Resume workout</Text></Pressable>:i.kind==='routine'?<Action title={session(i)?.workoutFinished?'Workout completed':session(i)?'Resume workout':'Start scheduled workout'} disabled={busy||!!session(i)?.workoutFinished||(!session(i)&&!library.routines.some(p=>p.id===i.routineID))} onPress={()=>void run(async()=>{if(!session(i)){const plan=library.routines.find(p=>p.id===i.routineID)!;const result=await native.startRoutine(plan.id!,plan.revision,i.id);if((result as any)?.startRejection)throw Error('Resume or finish the active workout in Today.');}onStart();})}/>:i.children.map(c=><Pressable key={c.id} accessibilityRole="checkbox" accessibilityState={{checked:c.checked}} disabled={busy} onPress={()=>void run(()=>patch({...i,children:i.children.map(x=>x.id===c.id?{...x,checked:!c.checked}:x)}))} style={styles.touch}><Text style={{textDecorationLine:c.checked?'line-through':'none'}}>{c.checked?'☑':'☐'} {c.label}{i.kind==='water'?' · '+displaySlot(i.slot):''}</Text></Pressable>)}
- <Action title="Options" accessibilityLabel={"Options for "+i.name} onPress={()=>options(menu===i.id?null:i.id)}/>{menu===i.id&&<><Text>Time slot · {displaySlot(i.slot)}</Text><View style={styles.row}>{slots.filter(s=>s!==i.slot).map(s=><Action key={s} title={displaySlot(s)} disabled={busy} onPress={()=>void run(()=>patch({...i,slot:s}))}/>)}</View>
+ {i.kind==='routine'?<Control primary title={session(i)?.workoutFinished?'✓ Workout completed':session(i)?'Resume workout':'Start workout'}
+   disabled={busy||!!session(i)?.workoutFinished||(!session(i)&&!library.routines.some(p=>p.id===i.routineID))}
+   onPress={()=>{const active=session(i);if(active){onResume(active.sessionID);return;}
+     void run(async()=>{const plan=library.routines.find(p=>p.id===i.routineID)!;
+       const result=await native.startRoutine(plan.id!,plan.revision,i.id);
+       if((result as any)?.startRejection)throw Error('Resume or finish the active workout in Today.');
+       onStart();
+     });
+   }}/>:i.children.map(c=><Pressable key={c.id} accessibilityRole="checkbox" accessibilityState={{checked:c.checked}} disabled={busy} onPress={()=>void run(()=>patch({...i,children:i.children.map(x=>x.id===c.id?{...x,checked:!c.checked}:x)}))} style={styles.touch}><Text style={{textDecorationLine:c.checked?'line-through':'none'}}>{c.checked?'☑':'☐'} {c.label}{i.kind==='water'?' · '+displaySlot(i.slot):''}</Text></Pressable>)}
+ {i.kind!=='routine'&&entryOptions(i)}{menu===i.id&&<><Text>Time slot · {displaySlot(i.slot)}</Text><View style={styles.row}>{slots.filter(s=>s!==i.slot).map(s=><Action key={s} title={displaySlot(s)} disabled={busy} onPress={()=>void run(()=>patch({...i,slot:s}))}/>)}</View>
  {!session(i)&&<Action title="Remove from date" disabled={busy} onPress={()=>void run(()=>save({...agenda,items:agenda.items.filter(x=>x.id!==i.id)}))}/>}</>}</View>}
  const [menu,options]=useState<string|null>(null);
  const [adding,addTo]=useState<string|null>(null);
  const firstSlot=slots.find(slot=>agenda.items.some(i=>i.slot===slot&&!(waterDone&&i.kind==='water')));
- const year=date.getFullYear(),month=date.getMonth(),count=new Date(year,month+1,0).getDate(),offset=new Date(year,month,1).getDay();
+ const year=date.getFullYear(),month=date.getMonth();
+ const calendarScroll=useRef<ScrollView>(null), agendaTop=useRef(0);
+ function openDay(next:Date){
+   select(next);
+   calendarScroll.current?.scrollTo({y:Math.max(0,agendaTop.current-8),animated:true});
+ }
  const Container=today?View:ScrollView;
- return <Container {...(today?{}:{automaticallyAdjustKeyboardInsets:true,keyboardShouldPersistTaps:"handled" as const,contentContainerStyle:styles.page})}>{!today&&<><Text style={styles.heading}>Calendar</Text><Text style={styles.bold}>{date.toLocaleDateString(undefined,{month:'long',year:'numeric'})}</Text>
- <View style={styles.row}>{['Previous month','Today','Next month'].map((s,n)=><Action key={s} accessibilityLabel={s} title={n===0?"‹":n===2?"›":"Today"} disabled={busy} onPress={()=>select(n===1?new Date():new Date(year,month+n-1,1))}/>)}</View>
- <View style={styles.grid}>{['Su','Mo','Tu','We','Th','Fr','Sa'].map(s=><Text key={s} style={styles.cell}>{s}</Text>)}{Array.from({length:offset},(_,n)=><View key={'pad'+n} style={styles.cell}/>)}{Array.from({length:count},(_,n)=><Pressable key={n} disabled={busy} accessibilityRole="button" accessibilityState={{selected:n+1===date.getDate()}} style={[styles.cell,n+1===date.getDate()&&styles.selected]} onPress={()=>select(new Date(year,month,n+1))}><Text style={{color:n+1===date.getDate()?midnight.background:midnight.text}}>{n+1}</Text>{!!days[localDay(new Date(year,month,n+1))]?.agenda.items.length&&<View accessibilityLabel="Scheduled entries" style={{width:5,height:5,borderRadius:3,backgroundColor:n+1===date.getDate()?midnight.background:midnight.selected}}/>}</Pressable>)}</View></>}
- <View style={[styles.card,done&&styles.complete]}><View style={styles.row}><Text style={styles.heading}>Agenda</Text><Action title={adding===day?"Close add menu":"+ Add to date"} onPress={()=>addTo(adding===day?null:day)}/></View><Text style={styles.bold}>{date.toLocaleDateString(undefined,{weekday:'long',month:'short',day:'numeric'})}{done?' · ✓ Completed':''}</Text>
+ return <Container {...(today?{}:{ref:calendarScroll,automaticallyAdjustKeyboardInsets:true,keyboardShouldPersistTaps:"handled" as const,contentContainerStyle:styles.page})}>{!today&&<>
+ <View style={styles.hero}>
+   <View style={styles.heroCopy}><Text accessibilityRole="header" style={styles.heading}>Calendar</Text>
+     <View style={{alignSelf:'flex-start'}}><Control title="Today" disabled={busy} onPress={()=>select(new Date())}/></View>
+   </View>
+   <Image accessible={false} resizeMode="contain" source={calendarArt} style={styles.heroArt}/>
+ </View>
+ <View style={styles.month}>
+ <View style={styles.splitHeader}><Text style={styles.monthTitle}>{date.toLocaleDateString(undefined,{month:'long',year:'numeric'})}</Text>
+   <View style={styles.row}>{[-1,1].map(step=><Control key={step} accessibilityLabel={step<0?'Previous month':'Next month'} title={step<0?'‹':'›'} disabled={busy} onPress={()=>select(new Date(year,month+step,1))}/>)}</View>
+ </View>
+ <MonthGrid date={date} days={days} workouts={workouts} selectDay={openDay} busy={busy}/>
+ </View></>}
+ <View onLayout={event=>{agendaTop.current=event.nativeEvent.layout.y;}} style={[styles.card,done&&styles.complete]}><AgendaHeading today={!!today} date={date} completed={done} adding={adding===day}
+   disabled={!ready||busy} onAdd={()=>addTo(adding===day?null:day)}/>
+ {ready&&adding===day&&<Add key={day} {...{native,library,agenda,save,run,busy}}/>}
  {!agenda.items.length&&<Text>No items scheduled</Text>}
  <View style={{flexDirection:'row',gap:8}}>
- {(today||waters.length>0)&&<View style={styles.metric}><Text style={styles.caption}>Water</Text><Text style={styles.bold}>{total} / {goal||"—"} oz{waterDone?' ✓':''}</Text></View>}
- {(today||agenda.items.some(i=>i.kind==='supplements'))&&<View style={styles.metric}><Text style={styles.caption}>Supplement groups</Text><Text style={styles.bold}>{agenda.items.filter(i=>i.kind==='supplements'&&complete(i)).length} / {agenda.items.filter(i=>i.kind==='supplements').length}</Text></View>}
+ {(today||waters.length>0)&&<View style={styles.metric}><View style={styles.metricLabel}><Icon name="water" size={16}/><Text style={styles.caption}>Water</Text></View><Text style={styles.bold}>{total} / {goal||"—"} oz{waterDone?' ✓':''}</Text></View>}
+ {(today||agenda.items.some(i=>i.kind==='supplements'))&&<View style={styles.metric}><View style={styles.metricLabel}><Icon name="supplements" size={16}/><Text style={styles.caption}>Supplement groups</Text></View><Text style={styles.bold}>{agenda.items.filter(i=>i.kind==='supplements'&&complete(i)).length} / {agenda.items.filter(i=>i.kind==='supplements').length}</Text></View>}
  </View>
- {slots.map(slot=>{const items=agenda.items.filter(i=>i.slot===slot&&!(waterDone&&i.kind==='water'));return items.length>0&&<Card key={day+slot} initiallyOpen={slot===firstSlot} title={slot==='Night'?'Evening':slot}>{items.map(i=>i.kind==='routine'?<View key={i.id} style={styles.entry}><Text style={styles.bold}>{i.name}</Text>{controls(i)}</View>:<Card key={i.id} title={i.name+(i.kind==='supplements'?' · '+i.children.filter(c=>c.checked).length+'/'+i.children.length:'')} done={i.kind==='water'?i.children[0].checked:complete(i)}>{controls(i)}</Card>)}</Card>})}
+ {slots.map(slot=>{const items=agenda.items.filter(i=>i.slot===slot&&!(waterDone&&i.kind==='water'));return items.length>0&&<Card key={day+slot} initiallyOpen={slot===firstSlot} title={slot==='Night'?'Evening':slot}>{items.map(i=>i.kind==='routine'?<View key={i.id} style={styles.entry}><View style={styles.itemHeading}><View style={styles.badge}><Icon name="routines"/></View><Text style={[styles.bold,{flex:1}]}>{i.name}</Text>{entryOptions(i)}</View>{controls(i)}</View>:<Card key={i.id} title={i.name+(i.kind==='supplements'?' · '+i.children.filter(c=>c.checked).length+'/'+i.children.length:'')} done={i.kind==='water'?i.children[0].checked:complete(i)}>{controls(i)}</Card>)}</Card>})}
  {waterDone&&<Card title={'Water · '+total+'/'+goal+' oz'} done>{waters.map(controls)}</Card>}</View>
  {!!error&&<Text accessibilityRole="alert">{error}</Text>}
- {ready?(adding===day&&<Add key={day} {...{native,library,agenda,save,run,busy}}/>):<Action title="Load calendar" onPress={()=>void run(load)}/>}</Container>;
+ {!ready&&<Action title="Load calendar" onPress={()=>void run(load)}/>}</Container>;
 }
 type AddProps={native:ProofModule;library:Library;agenda:Agenda;save:(a:Agenda)=>Promise<void>;run:(f:()=>Promise<void>)=>Promise<void>;busy:boolean};
 function Add({native,library,agenda,save,run,busy}:AddProps){
@@ -68,4 +151,13 @@ function Add({native,library,agenda,save,run,busy}:AddProps){
  {mode==='routine'?<View style={attempt&&!routine&&styles.invalid}>{library.routines.map(p=><Action key={p.id} title={(routine===p.id?'✓ ':'')+p.name} onPress={()=>R(p.id!)}/>)}{attempt&&!routine&&<Text>Select a saved routine</Text>}</View>:mode==='supplements'?<>{field('group','Group name',name,N)}{field('entries','Supplements · one per line, with optional amount, unit and notes',lines,L)}</>:<>{field('oz','Portion (oz)',qty,Q,true)}{field('goal','Daily goal (oz) · blank uses planned total',goal,G,true)}<Action title="Save goal only" disabled={busy} onPress={()=>submit(true)}/></>}
  <Action title="Add to calendar" disabled={busy} onPress={()=>submit()}/></>}</View>
 }
-const styles=StyleSheet.create({metric:{flex:1,backgroundColor:midnight.background,padding:10,borderRadius:9,gap:4},caption:{color:midnight.muted},selected:{backgroundColor:midnight.selected,borderRadius:10},entry:{borderTopWidth:1,borderColor:midnight.divider,paddingVertical:8,gap:6},page:{padding:18,gap:14},stack:{gap:8},heading:{fontSize:27,fontWeight:'700'},bold:{fontSize:17,fontWeight:'600'},card:{backgroundColor:'#273246',padding:14,gap:10,borderWidth:1,borderColor:'#3A4961',borderRadius:14},complete:{backgroundColor:'#254D47'},touch:{minHeight:44,justifyContent:'center'},row:{flexDirection:'row',flexWrap:'wrap'},grid:{flexDirection:'row',flexWrap:'wrap'},cell:{width:'14.28%',minHeight:36,alignItems:'center',justifyContent:'center',textAlign:'center'},input:{color:midnight.text,borderWidth:1,borderColor:'#85968c',borderRadius:7,padding:10,minHeight:44},invalid:{borderWidth:1,borderColor:'#FFB4AD'}});
+const styles=StyleSheet.create({metric:{flex:1,backgroundColor:midnight.background,padding:10,borderRadius:9,gap:4},caption:{fontSize:13,color:midnight.muted},splitHeader:{flexDirection:'row',flexWrap:'wrap',justifyContent:'space-between',alignItems:'center',columnGap:16,rowGap:8},
+ dateCopy:{flexGrow:1,flexShrink:1,flexBasis:144,gap:3},sectionTitle:{fontSize:21,fontWeight:'700'},eyebrow:{fontSize:12,color:midnight.muted,fontWeight:'600'},
+ hero:{flexDirection:'row',alignItems:'center',justifyContent:'space-between',gap:12},heroCopy:{flex:1,gap:6},heroArt:{width:'40%',maxWidth:140,aspectRatio:3/2},month:{gap:8},monthTitle:{flexGrow:1,fontSize:18,fontWeight:'700'},
+ itemHeading:{flexDirection:'row',alignItems:'center',gap:10},badge:{backgroundColor:'#324563',padding:8,borderRadius:9},metricLabel:{flexDirection:'row',alignItems:'center',flexWrap:'wrap',gap:5},
+ dayNumber:{minWidth:25,minHeight:25,paddingHorizontal:3,alignSelf:'center',alignItems:'center',justifyContent:'center'},selected:{backgroundColor:midnight.selected,borderRadius:16},entry:{borderTopWidth:1,borderColor:midnight.divider,paddingVertical:8,gap:6},page:{padding:18,gap:14},stack:{gap:8},heading:{fontSize:27,fontWeight:'700'},bold:{fontSize:17,fontWeight:'600'},card:{backgroundColor:'#273246',padding:14,gap:10,borderWidth:1,borderColor:'#3A4961',borderRadius:14},complete:{backgroundColor:'#254D47'},touch:{minHeight:44,justifyContent:'center'},row:{flexDirection:'row',flexWrap:'wrap',gap:8},weekRow:{flexDirection:'row'},
+ weekday:{flex:1,minWidth:0,textAlign:'center',color:midnight.muted,paddingVertical:5,fontSize:12},
+ dayCell:{flex:1,minWidth:0,minHeight:60,gap:2,paddingHorizontal:1,paddingTop:3,paddingBottom:4,borderTopWidth:StyleSheet.hairlineWidth,borderLeftWidth:StyleSheet.hairlineWidth,borderColor:midnight.divider},
+ selectedCell:{backgroundColor:'#263248'},chip:{borderRadius:3,paddingHorizontal:2,paddingVertical:1},chipText:{fontSize:11,fontWeight:'600',color:'#132136'},
+ more:{fontSize:11,fontWeight:'700',color:midnight.selected,textAlign:'center'},
+ input:{color:midnight.text,borderWidth:1,borderColor:'#85968c',borderRadius:7,padding:10,minHeight:44},invalid:{borderWidth:1,borderColor:'#FFB4AD'}});

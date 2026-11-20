@@ -236,6 +236,7 @@ struct ProofWidget: Widget {
                     }.frame(maxWidth: .infinity)
                 }
             }
+            .padding(.bottom, 6)
             HStack(spacing: 8) {
                 Button(intent: ProofCompleteSet(sessionID: context.attributes.sessionID,
                     setID: setID, restID: restID, actionToken: context.state.actionToken ?? "legacy")) {
@@ -281,11 +282,15 @@ struct ProofWidget: Widget {
     }
 
     private func exerciseHeader(_ context: ActivityViewContext<ProofActivity>) -> some View {
-        VStack(alignment: .leading, spacing: 1) {
+        HStack(alignment: .firstTextBaseline, spacing: 8) {
+            Text(context.state.exerciseName ?? "Exercise")
+                .font(.headline.bold()).lineLimit(2)
+                .frame(maxWidth: .infinity, alignment: .leading)
             Text("Set \(context.state.setNumber ?? 1) of \(context.state.setCount ?? 1)")
                 .font(.caption.bold()).foregroundStyle(.secondary).monospacedDigit()
-            Text(context.state.exerciseName ?? "Exercise").font(.headline.bold()).lineLimit(2)
-        }.frame(maxWidth: .infinity, alignment: .leading)
+                .fixedSize(horizontal: true, vertical: false)
+        }
+        .padding(.bottom, 6)
     }
 
     private func timerPanel(_ deadline: Date, started: Date?) -> some View {
