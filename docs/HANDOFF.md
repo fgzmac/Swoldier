@@ -1,5 +1,19 @@
 # Current project handoff
 
+## 2026-11-20 — Midnight review and upgrade checklist
+
+The feature branch `feat/midnight-ui` keeps the signed A–J inputs in a prerequisite commit and adds Midnight in a second commit. The previous signed preview was 3e11df7b. Midnight passed 163 local tests, TypeScript, iOS JavaScript export and generated native target/resource checks. Swift compilation, signing, upgrade, accessibility and rendered layouts are pending for Midnight.
+
+After a separately approved preview, check these on the iPhone in order.
+
+1. Before installation, capture the routine list and groups, active session and set, actuals including RIR, rest deadline, and today's agenda checks and water totals. Upgrade in place and reopen before changing anything.
+2. Use Resume from Today and the routine row. If the active session was scheduled, also use Calendar. Confirm the same session, set and rest state every time.
+3. Set different weekly, monthly and yearly targets. Edit and remove one. Check the other two, completed history and prior accountability entries. Move a routine into a category, collapse it, then remove the category and check it returns exactly once.
+4. Change one check or water entry in Today and reopen Calendar on that date. Verify its ID-equivalent entry, totals and selected slot, then edit from Calendar and check Today.
+5. With a long exercise name, a multi-digit set number and larger text, check widget width, reachable buttons and VoiceOver labels. Show RIR in Options, try blank, zero and nonzero values, hide and show it, then complete and Undo during rest. Compare the value and original deadline. Verify the preference persists across sessions.
+
+Both deferred troubleshooting issues remain open. Keep earlier device reports attached to their original builds.
+
 ## 2026-11-19 — Corrected A–J preview compiled and signed
 
 [Install build 3e11df7b](https://expo.dev/accounts/fgzmacaraeg/projects/swoldier-lock-screen-proof/builds/3e11df7b-346a-4408-b099-08a78fb3cf2d). Before submitting, compared the new 23-file EAS archive and live source with the failed build's manifest. Only ProofWidget.swift differed, exactly matching the recorded relocation of @ViewBuilder to countdown. Xcode archived successfully and Fastlane exported the signed IPA. Expo Doctor reported the existing Expo patch-version warning (57.0.32 versus expected ~57.0.33). One medium iOS preview consumed $2 included credits. The balance went from $39 to $37 with $0 overage.

@@ -1,6 +1,7 @@
+import {Text,midnight} from './Midnight';
 import {Action,Groups,type OrganizerAPI} from "./Organizer";
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { AccessibilityInfo, Keyboard, Alert, Button, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
+import { AccessibilityInfo, Keyboard, Alert, Button, Pressable, ScrollView, StyleSheet, Switch, TextInput, View } from 'react-native';
 import { editPlan, moveEntry, newEntry, newPlan, routineStartNotice, toPlan, validName } from './routineModel';
 import type { Snapshot } from './workoutModel';
 import type { EditEntry, EditPlan, Exercise, Library, Plan } from './routineModel';
@@ -13,7 +14,7 @@ export type RoutineModule = OrganizerAPI & {
   newRoutineStartRequest(): Promise<string>;
   startRoutine(id: string, revision: number, requestID: string): Promise<unknown>;
 };
-export default function RoutineEditor({ native, close, registerLeave, workouts = [] }: { native: RoutineModule | null; close(): void; workouts?: Snapshot[]; registerLeave?(guard: (action:()=>void)=>void): void }) {
+export default function RoutineEditor({ native, close, onResume, registerLeave, workouts = [] }: { native: RoutineModule | null; close(): void; onResume(sessionID:string):void; workouts?: Snapshot[]; registerLeave?(guard: (action:()=>void)=>void): void }) {
   const scroll=useRef<ScrollView>(null);
   const fields=useRef<Record<string,TextInput|null>>({});
   const [attempt,mark]=useState(false),[exerciseAttempt,markExercise]=useState(false),[discard,showDiscard]=useState(false);
@@ -131,12 +132,12 @@ export default function RoutineEditor({ native, close, registerLeave, workouts =
     finally{lock.current=false;setBusy(false);}
   }
   return <ScrollView ref={scroll} automaticallyAdjustKeyboardInsets keyboardShouldPersistTaps="handled" contentContainerStyle={styles.page}>
-    <View style={styles.row}><Text style={styles.brand}>SWOLDIER</Text>{draft&&<Action title="Cancel" color="#174f35" disabled={busy} onPress={()=>leave(()=>{setDraft(null);setDirty(false);setUnfinished(null);})}/>}</View>
-    <Text accessibilityRole="header" style={styles.heading}>{draft ? (draft.id?'Edit routine':'New routine') : 'Your routines'}</Text>
+    <View style={styles.row}><Text style={styles.brand}>SWOLDIER</Text>{draft&&<Action title="Cancel" color="#245BCD" disabled={busy} onPress={()=>leave(()=>{setDraft(null);setDirty(false);setUnfinished(null);})}/>}</View>
+    <Text accessibilityRole="header" style={styles.heading}>{draft ? (draft.id?'Edit routine':'New routine') : 'Routines'}</Text>
     {!available ? <Text>A native iPhone build is required for routine storage.</Text> : <>
       {!draft&&<>
-      <Text style={styles.subtitle}>Choose your next workout.</Text>
-      <Pressable accessibilityRole="button" disabled={busy} style={styles.primary} onPress={()=>open(newPlan())}><Text style={styles.primaryText}>＋ Create routine</Text></Pressable>
+      <Text style={styles.subtitle}>{library.routines.length} routines</Text>
+      <Pressable accessibilityRole="button" disabled={busy} style={styles.primary} onPress={()=>open(newPlan())}><Text style={styles.primaryText}>＋ New routine</Text></Pressable>
       {!library.routines.length && <Text>No saved routines yet. Start with the exercises you want to log.</Text>}
       {native && <Groups api={native} plans={library.routines} render={plan => {
         const sessions=workouts.filter(w=>w.routineID===plan.id), active=sessions.find(w=>!w.workoutFinished);
@@ -145,6 +146,7 @@ export default function RoutineEditor({ native, close, registerLeave, workouts =
           <Pressable accessibilityRole="button" accessibilityLabel={`Open ${plan.name}`} style={styles.libraryMain} disabled={busy} onPress={()=>open(editPlan(plan))}>
             <Text style={styles.cardTitle}>{plan.name}</Text><Text style={styles.subtitle}>{plan.exercises.length} exercises · {active?'In progress':last?.finishedAt?`Last completed ${new Date(last.finishedAt*1000).toLocaleDateString()}`:'Not started'}</Text>
           </Pressable>
+          {active&&<Action title="Resume workout" color={midnight.selected} onPress={()=>leave(()=>onResume(active.sessionID))}/>}
           <Pressable accessibilityRole="button" accessibilityLabel={`Options for ${plan.name}`} style={styles.more} disabled={busy} onPress={()=>Alert.alert(plan.name,'Routine options',[{text:'Cancel',style:'cancel'},{text:'Edit routine',onPress:()=>open(editPlan(plan))},{text:'Delete routine',style:'destructive',onPress:()=>Alert.alert(`Delete ${plan.name}?`,'The routine will leave your library. Calendar entries retain their scheduled names. Previous workouts and the active workout snapshot stay intact.',[{text:'Cancel',style:'cancel'},{text:'Delete routine',style:'destructive',onPress:()=>void removeRoutine(plan)}])}])}><Text style={styles.cardTitle}>•••</Text></Pressable>
         </View>;
       }}/> }
@@ -163,7 +165,7 @@ export default function RoutineEditor({ native, close, registerLeave, workouts =
             <Text style={styles.subtitle}>Exercise {index+1}</Text><Text accessibilityRole="header" style={{fontSize:22,fontWeight:'700'}}>{name}</Text>
             <Action title="Move" onPress={()=>setMoving(moving===entry.exerciseID?null:entry.exerciseID)}/>
             {moving===entry.exerciseID&&<View style={styles.row}>{[['Move up',index-1],['Move down',index+1],['Move to Top',0],['Move to Bottom',draft.exercises.length-1]].map(([label,pos])=><Action key={label} title={String(label)} disabled={busy||Number(pos)<0||Number(pos)>=draft.exercises.length||Number(pos)===index} onPress={()=>{change(moveEntry(draft,index,Number(pos)-index));setMoving(null)}}/>)}</View>}
-            <Action title="Remove exercise" color="#942734" accessibilityLabel={`Remove ${name} from routine`} disabled={busy}
+            <Action title="Remove exercise" color="#FFB4AD" accessibilityLabel={`Remove ${name} from routine`} disabled={busy}
               onPress={() => Alert.alert('Remove from this routine?', 'The saved exercise identity and workout history are kept.', [
                 { text: 'Cancel', style: 'cancel' }, { text: 'Remove', style: 'destructive', onPress: () => change({ ...draft, exercises: draft.exercises.filter((_, i) => i !== index) }) },
               ])} />
@@ -213,22 +215,22 @@ export default function RoutineEditor({ native, close, registerLeave, workouts =
       </View>}
     </>}
     {unfinished && <View style={styles.exercise}><Text onLayout={()=>reveal("A workout is still in progress")} style={styles.cardTitle}>A workout is still in progress</Text>
-      <Pressable accessibilityRole="button" disabled={busy} style={({pressed})=>({padding:14,borderRadius:10,backgroundColor:pressed?"#aed3ee":"#deefff"})} onPress={()=>leave(close)}><Text style={{color:"#123e64",fontWeight:"700"}}>Resume workout</Text></Pressable>
+      <Pressable accessibilityRole="button" disabled={busy} style={({pressed})=>({padding:14,borderRadius:10,backgroundColor:pressed?"#1E4CAC":"#245BCD"})} onPress={()=>leave(()=>onResume(unfinished.activeSession))}><Text style={{color:"#F1F4FA",fontWeight:"700"}}>Resume workout</Text></Pressable>
       <Action title="Finish and keep recorded sets" disabled={busy||dirty} onPress={()=>Alert.alert('Finish current workout?', 'Recorded sets are kept. Unperformed sets are marked skipped, and the selected saved routine starts.',[{text:'Cancel',style:'cancel'},{text:'Finish and start selected',onPress:()=>void resolve('finish')}])}/>
-      <Action title="Discard this workout and start selected routine" color="#a42b35" disabled={busy||dirty} onPress={()=>showDiscard(true)}/>
-      {discard&&<View onLayout={()=>reveal('Confirm discard')}><Text>Discard this unfinished workout and its recorded sets?</Text><Action title="Cancel" onPress={()=>showDiscard(false)}/><Action title="Discard and start selected" color="#a42b35" disabled={busy||dirty} onPress={()=>void resolve('discard')}/></View>}
+      <Action title="Discard this workout and start selected routine" color="#FFB4AD" disabled={busy||dirty} onPress={()=>showDiscard(true)}/>
+      {discard&&<View onLayout={()=>reveal('Confirm discard')}><Text>Discard this unfinished workout and its recorded sets?</Text><Action title="Cancel" onPress={()=>showDiscard(false)}/><Action title="Discard and start selected" color="#FFB4AD" disabled={busy||dirty} onPress={()=>void resolve('discard')}/></View>}
       {!discard&&<Action title="Cancel" onPress={()=>setUnfinished(null)}/>}
     </View>}
     {!!message && <Text accessibilityRole="alert">{message}</Text>}
   </ScrollView>;
 }
 const styles = StyleSheet.create({
-  inset:{backgroundColor:"#eff3ee",gap:8,padding:12,borderRadius:9,borderLeftWidth:3,borderColor:"#647e70"},invalid:{borderWidth:2,borderColor:"#a21f30"},brand:{fontWeight:'800',fontSize:17,color:'#18251d'}, subtitle:{color:'#565f59'},
-  primary:{backgroundColor:'#174f35',borderRadius:10,minHeight:50,alignItems:'center',justifyContent:'center',padding:12},primaryText:{color:'#fff',fontSize:18,fontWeight:'700'},
-  libraryCard:{borderWidth:2,borderColor:'#647568',borderRadius:12,backgroundColor:'#fff',flexDirection:'row',alignItems:'center'},libraryMain:{flex:1,minHeight:82,padding:16,gap:7},more:{minWidth:50,minHeight:50,alignItems:'center',justifyContent:'center'},
-  choice:{borderWidth:2,borderColor:'#647568',borderRadius:10,padding:16,gap:6},choiceSelected:{borderColor:'#174f35',borderWidth:2,backgroundColor:'#eff5ef'},
-  page: { padding: 20, gap: 18, backgroundColor:'#faf8f3' }, heading: { fontSize: 24, fontWeight: '700' },
-  section: { gap: 12 }, cardTitle:{fontSize:18,fontWeight:'700',color:'#18251d'}, exercise: { borderWidth: 2, borderColor: '#627569', borderRadius:16, backgroundColor:'#fff', padding:16, gap:12 },
+  inset:{backgroundColor:"#222B3D",gap:8,padding:12,borderRadius:9,borderLeftWidth:3,borderColor:"#647e70"},invalid:{borderWidth:2,borderColor:"#FFB4AD"},brand:{fontWeight:'800',fontSize:17,color:'#F1F4FA'}, subtitle:{color:'#B4C1D3'},
+  primary:{backgroundColor:'#245BCD',borderRadius:10,minHeight:50,alignItems:'center',justifyContent:'center',padding:12},primaryText:{color:'#F1F4FA',fontSize:18,fontWeight:'700'},
+  libraryCard:{borderWidth:2,borderColor:'#3A4961',borderRadius:12,backgroundColor:'#273246',flexDirection:'row',alignItems:'center'},libraryMain:{flex:1,minHeight:82,padding:16,gap:7},more:{minWidth:50,minHeight:50,alignItems:'center',justifyContent:'center'},
+  choice:{borderWidth:2,borderColor:'#3A4961',borderRadius:10,padding:16,gap:6},choiceSelected:{borderColor:'#245BCD',borderWidth:2,backgroundColor:'#324569'},
+  page: { padding: 20, gap: 18, backgroundColor:'#1B1F2D' }, heading: { fontSize: 24, fontWeight: '700' },
+  section: { gap: 12 }, cardTitle:{fontSize:18,fontWeight:'700',color:'#F1F4FA'}, exercise: { borderWidth: 2, borderColor: '#3A4961', borderRadius:16, backgroundColor:'#273246', padding:16, gap:12 },
   row: { flexDirection: 'row', gap: 12, flexWrap: 'wrap' }, field: { flex: 1, minWidth: 100 },
-  input: { borderWidth: 1, borderColor: '#777', borderRadius: 4, padding: 10, minHeight: 44, color: '#111' },
+  input: { borderWidth: 1, borderColor: '#777', borderRadius: 4, padding: 10, minHeight: 44, color: '#F1F4FA' },
 });

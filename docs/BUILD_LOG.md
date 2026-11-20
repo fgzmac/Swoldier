@@ -4,6 +4,16 @@ Record a short entry after each working session. Newest entries go first. Write 
 
 **Planned:** agreed or proposed work. **Implemented:** code exists. **Verified:** a named check ran and passed.
 
+## 2026-11-20 — Midnight interface on the signed A–J foundation
+
+Compared the 23 A–J inputs with the corrected submission manifest before editing. Checkpointed the accumulated project changes separately. Implemented the four Midnight designs for Today, Routines, Calendar and the Live Activity. Resume reads the selected active session. Workout targets extend the existing revision-checked journal. Editing a calendar entry from either screen writes the same dated document. Show RIR changes a host preference and republishes the widget.
+
+On Windows, 163 Node tests passed, including local period boundaries, target independence, mixed routine lists, shared agenda edits and routine Resume selection. TypeScript and the iOS JavaScript export passed. Isolated iOS project generation produced ten matching native source/resource copies and passed target membership, inline-module discovery and exact-set URL checks. Source comparison confirmed the original Dynamic Island body and countdown builder. Swift compilation, signing, installation, rendered fit, VoiceOver and device interactions await a future preview.
+
+A small learning exercise is to set weekly and monthly targets to different values, then remove the weekly one. What state should remain when you return to Monthly?
+
+**Personal learning reflection**
+
 ## 2026-11-19 — Corrected A–J preview compiled and signed
 
 [Install build 3e11df7b](https://expo.dev/accounts/fgzmacaraeg/projects/swoldier-lock-screen-proof/builds/3e11df7b-346a-4408-b099-08a78fb3cf2d). Before submitting, compared the new 23-file EAS archive and live source with the failed build's manifest. Only ProofWidget.swift differed, exactly matching the recorded relocation of @ViewBuilder to countdown. Xcode archived successfully and Fastlane exported the signed IPA. Expo Doctor reported the existing Expo patch-version warning (57.0.32 versus expected ~57.0.33). One medium iOS preview consumed $2 included credits. The balance went from $39 to $37 with $0 overage.

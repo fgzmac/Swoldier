@@ -47,7 +47,7 @@ struct ProofWidget: Widget {
                             }
                             Button(intent: ProofContinueRest(sessionID: context.attributes.sessionID,
                                 setID: setID, restID: restID, actionToken: context.state.actionToken ?? "legacy")) {
-                                actionLabel("End Rest").padding(.horizontal, 5).background(.thinMaterial, in: RoundedRectangle(cornerRadius: 8))
+                                actionLabel("End Rest", primary: true)
                             }
                         }
                     } else if context.state.completed {
@@ -76,10 +76,13 @@ struct ProofWidget: Widget {
                     Text("Open proof once to refresh this older card").font(.caption)
                 }
             }
+            .frame(maxWidth: .infinity)
+            .foregroundStyle(.white)
+            .activityBackgroundTint(Color(red: 0.106, green: 0.122, blue: 0.176))
             .buttonStyle(.plain)
             .lineLimit(1)
             .minimumScaleFactor(0.8)
-            .padding(.horizontal, 6).padding(.vertical, 2)
+            .padding(.horizontal, 10).padding(.vertical, 2)
         } dynamicIsland: { context in
             DynamicIsland {
                 DynamicIslandExpandedRegion(.center) {
@@ -161,11 +164,11 @@ struct ProofWidget: Widget {
                 case .continueRest:
                     failureMessage("End Rest failed — tap End Rest to retry")
                     Button(intent: ProofContinueRest(sessionID: failed.sessionID,
-                        setID: failed.setID, restID: failed.restID, actionToken: failed.actionToken ?? "legacy")) { actionLabel("End Rest").padding(.horizontal, 5).background(.thinMaterial, in: RoundedRectangle(cornerRadius: 8)) }
+                        setID: failed.setID, restID: failed.restID, actionToken: failed.actionToken ?? "legacy")) { actionLabel("End Rest", primary: true) }
                 case .skip:
                     failureMessage("End Rest failed — tap End Rest to retry")
                     Button(intent: ProofSkipRest(sessionID: failed.sessionID,
-                        setID: failed.setID, restID: failed.restID, actionToken: failed.actionToken ?? "legacy")) { actionLabel("End Rest").padding(.horizontal, 5).background(.thinMaterial, in: RoundedRectangle(cornerRadius: 8)) }
+                        setID: failed.setID, restID: failed.restID, actionToken: failed.actionToken ?? "legacy")) { actionLabel("End Rest", primary: true) }
                 case .weight(let delta):
                     failureMessage("Weight change failed")
                     Button(intent: ProofAdjustWeight(sessionID: failed.sessionID,
@@ -206,46 +209,43 @@ struct ProofWidget: Widget {
 
     private func draft(_ context: ActivityViewContext<ProofActivity>, setID: String, restID: String, duringUndoneRest: Bool = false) -> some View {
         VStack(spacing: 2) {
-            HStack {
-                exerciseHeader(context)
-                if duringUndoneRest, let deadline = context.state.restDeadline {
-                    timerPanel(deadline, started: context.state.restStartedAt)
-                }
-            }
+            exerciseHeader(context)
             if let notice = context.state.notice {
                 Text(notice).font(.caption.weight(.semibold))
             }
-            HStack(spacing: 8) {
-                Button(intent: ProofClearRIR(sessionID: context.attributes.sessionID, setID: setID, restID: restID, actionToken: context.state.actionToken ?? "legacy")) { actionLabel("Clear RIR") }
-                    .accessibilityLabel("Clear reps in reserve to unrecorded")
-                Spacer(minLength: 16)
-                Button(intent: ProofAdjustRIR(sessionID: context.attributes.sessionID, setID: setID, restID: restID, actionToken: context.state.actionToken ?? "legacy", delta: -1)) { adjustment("−", "Decrease reps in reserve; blank remains blank") }
-                Text("RIR \(context.state.rir.map { String($0) } ?? "—")").font(.subheadline).monospacedDigit()
-                Button(intent: ProofAdjustRIR(sessionID: context.attributes.sessionID, setID: setID, restID: restID, actionToken: context.state.actionToken ?? "legacy", delta: 1)) { adjustment("+", "Increase reps in reserve; first entry zero") }
-            }
             HStack(spacing: 6) {
-                Button(intent: ProofAdjustWeight(sessionID: context.attributes.sessionID,
-                    setID: setID, restID: restID, actionToken: context.state.actionToken ?? "legacy", delta: -5)) { adjustment("−", "Decrease weight by 5 pounds") }
-                Link("\(context.state.poundsText) lb", destination: editURL(context, setID: setID)).accessibilityLabel(context.state.pounds == nil ? "Edit set: pounds blank" : "Edit set: \(context.state.poundsText) pounds").accessibilityHint("Opens this exact set in the app").frame(minHeight: 44).font(.headline).monospacedDigit()
-                Button(intent: ProofAdjustWeight(sessionID: context.attributes.sessionID,
-                    setID: setID, restID: restID, actionToken: context.state.actionToken ?? "legacy", delta: 5)) { adjustment("+", "Increase weight by 5 pounds") }
-                Spacer(minLength: 4)
-                Button(intent: ProofAdjustReps(sessionID: context.attributes.sessionID,
-                    setID: setID, restID: restID, actionToken: context.state.actionToken ?? "legacy", delta: -1)) { adjustment("−", "Decrease reps by one") }
-                Text(context.state.notice == "Enter reps before Complete" && context.state.reps == nil ? "Enter reps" : "\(context.state.repsText) reps").accessibilityLabel(context.state.reps == nil ? "Reps blank" : "\(context.state.repsText) reps").font(.headline).monospacedDigit()
-                Button(intent: ProofAdjustReps(sessionID: context.attributes.sessionID,
-                    setID: setID, restID: restID, actionToken: context.state.actionToken ?? "legacy", delta: 1)) { adjustment("+", "Increase reps by one") }
+                HStack(spacing: 1) {
+                    Button(intent: ProofAdjustWeight(sessionID: context.attributes.sessionID,
+                        setID: setID, restID: restID, actionToken: context.state.actionToken ?? "legacy", delta: -5)) { adjustment("−", "Decrease weight by 5 pounds") }
+                    Link(destination: editURL(context, setID: setID)) { stat(context.state.poundsText, "lb") }.accessibilityLabel(context.state.pounds == nil ? "Edit set: pounds blank" : "Edit set: \(context.state.poundsText) pounds").accessibilityHint("Opens this exact set in the app").frame(minHeight: 44).font(.headline).monospacedDigit()
+                    Button(intent: ProofAdjustWeight(sessionID: context.attributes.sessionID,
+                        setID: setID, restID: restID, actionToken: context.state.actionToken ?? "legacy", delta: 5)) { adjustment("+", "Increase weight by 5 pounds") }
+                }.frame(maxWidth: .infinity)
+                HStack(spacing: 1) {
+                    Button(intent: ProofAdjustReps(sessionID: context.attributes.sessionID,
+                        setID: setID, restID: restID, actionToken: context.state.actionToken ?? "legacy", delta: -1)) { adjustment("−", "Decrease reps by one") }
+                    stat(context.state.repsText, "reps").accessibilityLabel(context.state.reps == nil ? "Reps blank" : "\(context.state.repsText) reps").font(.headline).monospacedDigit()
+                    Button(intent: ProofAdjustReps(sessionID: context.attributes.sessionID,
+                        setID: setID, restID: restID, actionToken: context.state.actionToken ?? "legacy", delta: 1)) { adjustment("+", "Increase reps by one") }
+                }.frame(maxWidth: .infinity)
+                if context.state.showRIR == true {
+                    HStack(spacing: 1) {
+                        Button(intent: ProofAdjustRIR(sessionID: context.attributes.sessionID, setID: setID, restID: restID, actionToken: context.state.actionToken ?? "legacy", delta: -1)) { adjustment("−", "Decrease reps in reserve; blank remains blank") }
+                        stat(context.state.rir.map { String($0) } ?? "—", "RIR")
+                        Button(intent: ProofAdjustRIR(sessionID: context.attributes.sessionID, setID: setID, restID: restID, actionToken: context.state.actionToken ?? "legacy", delta: 1)) { adjustment("+", "Increase reps in reserve; first entry zero") }
+                    }.frame(maxWidth: .infinity)
+                }
             }
             HStack(spacing: 8) {
                 Button(intent: ProofCompleteSet(sessionID: context.attributes.sessionID,
                     setID: setID, restID: restID, actionToken: context.state.actionToken ?? "legacy")) {
-                    actionLabel(duringUndoneRest ? "Complete Set" : "Complete")
+                    actionLabel(duringUndoneRest ? "Complete Set" : "Complete", primary: true)
                 }
                 .accessibilityLabel(duringUndoneRest ? "Complete Set" : "Complete")
                 Button(intent: ProofOptions(sessionID: context.attributes.sessionID, setID: setID, restID: restID, actionToken: context.state.actionToken ?? "legacy")) { actionLabel("Options") }
                 if duringUndoneRest {
                     Button(intent: ProofContinueRest(sessionID: context.attributes.sessionID,
-                        setID: setID, restID: restID, actionToken: context.state.actionToken ?? "legacy")) { actionLabel("End Rest").padding(.horizontal, 5).background(.thinMaterial, in: RoundedRectangle(cornerRadius: 8)) }
+                        setID: setID, restID: restID, actionToken: context.state.actionToken ?? "legacy")) { VStack(spacing: 0) { Text("End Rest"); if let deadline = context.state.restDeadline { countdown(deadline, started: context.state.restStartedAt) } }.frame(maxWidth: .infinity, minHeight: 44).padding(.horizontal, 5).background(.thinMaterial, in: RoundedRectangle(cornerRadius: 8)) }
                         .accessibilityLabel("End Rest")
                         .accessibilityHint("Dismisses rest without saving the draft; preserves your edits")
                 }
@@ -261,6 +261,12 @@ struct ProofWidget: Widget {
     private func options(_ context: ActivityViewContext<ProofActivity>, setID: String, restID: String) -> some View {
         VStack(spacing: 4) {
             HStack {
+                Toggle(isOn: context.state.showRIR == true, intent: ProofRIRVisibility(sessionID: context.attributes.sessionID, setID: setID, restID: restID, actionToken: context.state.actionToken ?? "legacy", visible: context.state.showRIR != true)) { Text("Show RIR") }
+                    .toggleStyle(.switch)
+                Button(intent: ProofClearRIR(sessionID: context.attributes.sessionID, setID: setID, restID: restID, actionToken: context.state.actionToken ?? "legacy")) { actionLabel("Clear RIR") }
+                    .accessibilityLabel("Clear reps in reserve to unrecorded")
+            }
+            HStack {
                 Link(destination: editURL(context, setID: setID)) { actionLabel("Edit set in app") }
                 Button(intent: ProofBack(sessionID: context.attributes.sessionID, setID: setID, restID: restID, actionToken: context.state.actionToken ?? "legacy")) { actionLabel("Back") }
             }
@@ -275,12 +281,11 @@ struct ProofWidget: Widget {
     }
 
     private func exerciseHeader(_ context: ActivityViewContext<ProofActivity>) -> some View {
-        HStack(alignment: .firstTextBaseline, spacing: 6) {
-            Text(context.state.exerciseName ?? "Exercise").font(.headline.bold()).lineLimit(2)
-            Spacer(minLength: 0)
+        VStack(alignment: .leading, spacing: 1) {
             Text("Set \(context.state.setNumber ?? 1) of \(context.state.setCount ?? 1)")
-                .font(.subheadline.bold()).monospacedDigit().fixedSize(horizontal: true, vertical: false)
-        }
+                .font(.caption.bold()).foregroundStyle(.secondary).monospacedDigit()
+            Text(context.state.exerciseName ?? "Exercise").font(.headline.bold()).lineLimit(2)
+        }.frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private func timerPanel(_ deadline: Date, started: Date?) -> some View {
@@ -290,9 +295,9 @@ struct ProofWidget: Widget {
         }
         .foregroundStyle(.white)
         .padding(.horizontal, 8).padding(.vertical, 2)
-        .background(Color(red: 0.06, green: 0.13, blue: 0.10), in: RoundedRectangle(cornerRadius: 10))
-        .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.mint.opacity(0.95), lineWidth: 1.5))
-        .shadow(color: .mint.opacity(0.3), radius: 2)
+        .background(Color(red: 0.15, green: 0.20, blue: 0.28), in: RoundedRectangle(cornerRadius: 10))
+        .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color(red: 0.55, green: 0.73, blue: 1), lineWidth: 1.5))
+        .shadow(color: .blue.opacity(0.3), radius: 2)
     }
     @ViewBuilder
     private func countdown(_ deadline: Date, started: Date?) -> some View {
@@ -304,16 +309,19 @@ struct ProofWidget: Widget {
                 .monospacedDigit()
         }
     }
+    private func stat(_ value: String, _ unit: String) -> some View {
+        VStack(spacing: 0) { Text(value).font(.headline).monospacedDigit(); Text(unit).font(.caption2) }
+    }
     private func adjustment(_ symbol: String, _ description: String) -> some View {
         Text(symbol).font(.headline)
-            .frame(width: 44, height: 44)
-            .background(Color.primary.opacity(0.08), in: RoundedRectangle(cornerRadius: 10))
+            .frame(minWidth: 24, maxWidth: .infinity, minHeight: 44)
+            .background(Color(red: 0.15, green: 0.20, blue: 0.28), in: RoundedRectangle(cornerRadius: 10))
             .contentShape(Rectangle()).accessibilityLabel(description)
     }
-    private func actionLabel(_ title: String) -> some View {
+    private func actionLabel(_ title: String, primary: Bool = false) -> some View {
         Text(title).font(.subheadline.weight(.semibold))
             .frame(maxWidth: .infinity, minHeight: 44)
-            .background(Color.primary.opacity(0.08), in: RoundedRectangle(cornerRadius: 10))
+            .background(primary ? Color(red: 0.14, green: 0.36, blue: 0.80) : Color(red: 0.15, green: 0.20, blue: 0.28), in: RoundedRectangle(cornerRadius: 10))
             .contentShape(Rectangle())
     }
 }

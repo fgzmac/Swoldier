@@ -1,5 +1,6 @@
+import {Text,midnight} from './Midnight';
 import { useLayoutEffect, useRef, useState } from 'react';
-import { Alert, Button, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, Button, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { numberField } from './routineModel';
 import type { ProofModule, Snapshot, WorkoutSet } from './workoutModel';
 export default function SetEditor({native,snapshot,set,close,saved,registerLeave}:{native:ProofModule;snapshot:Snapshot;set:WorkoutSet;close():void;saved(value:Snapshot):void;registerLeave?(guard:(action:()=>void)=>void):void}){
@@ -25,10 +26,10 @@ export default function SetEditor({native,snapshot,set,close,saved,registerLeave
  return <ScrollView automaticallyAdjustKeyboardInsets keyboardShouldPersistTaps="handled" contentContainerStyle={styles.page}>
  <Text style={styles.heading}>Edit Set</Text><Text>{snapshot.exercises.find(e=>e.exerciseID===set.exerciseID)?.name} · Set {set.number}</Text>
  <Text>Only this workout’s entered values change. Routine targets and rest stay unchanged.</Text>
- <View style={styles.card}>{([['Pounds',pounds,P,'decimal-pad'],['Reps',reps,R,'number-pad'],['RIR (optional)',rir,I,'number-pad']] as const).map(([label,value,change,keyboardType])=><View key={label}><Text>{label}</Text>{label==='Reps'&&error==='Enter reps'&&!reps.trim()&&<Text>Enter reps</Text>}<TextInput ref={label==='Reps'?repInput:undefined} accessibilityLabel={label} style={[styles.input,label==='Reps'&&error==='Enter reps'&&!reps.trim()&&{borderColor:'#a21f30',borderWidth:2}]} value={value} onChangeText={v=>{change(v);if(label==='Reps'&&v.trim()&&error==='Enter reps')E('')}} keyboardType={keyboardType} editable={!busy}/></View>)}</View>
+ <View style={styles.card}>{([['Pounds',pounds,P,'decimal-pad'],['Reps',reps,R,'number-pad'],['RIR (optional)',rir,I,'number-pad']] as const).map(([label,value,change,keyboardType])=><View key={label}><Text>{label}</Text>{label==='Reps'&&error==='Enter reps'&&!reps.trim()&&<Text>Enter reps</Text>}<TextInput ref={label==='Reps'?repInput:undefined} accessibilityLabel={label} style={[styles.input,label==='Reps'&&error==='Enter reps'&&!reps.trim()&&{borderColor:'#FFB4AD',borderWidth:2}]} value={value} onChangeText={v=>{change(v);if(label==='Reps'&&v.trim()&&error==='Enter reps')E('')}} keyboardType={keyboardType} editable={!busy}/></View>)}</View>
  {!!error&&<Text accessibilityRole="alert">{error}</Text>}
  <Button title="Save changes" disabled={busy} onPress={()=>set.completed?Alert.alert('Correct this recorded set?','This deliberately updates its actual values. The routine and other sets stay unchanged.',[{text:'Cancel',style:'cancel'},{text:'Save correction',onPress:()=>void save()}]):void save()}/>
  <Button title="Cancel / reopen fresh values" disabled={busy} onPress={()=>Alert.alert('Leave editor?','Unsaved edits on this screen will be discarded.',[{text:'Stay',style:'cancel'},{text:'Leave',onPress:close}])}/>
  </ScrollView>;
 }
-const styles=StyleSheet.create({page:{padding:20,gap:18},heading:{fontSize:25,fontWeight:'700'},card:{padding:18,gap:16,backgroundColor:'#fff',borderWidth:2,borderColor:'#627569',borderRadius:16},input:{borderWidth:1,borderColor:'#9caac0',borderRadius:8,minHeight:48,padding:12,color:'#18251d'}});
+const styles=StyleSheet.create({page:{padding:20,gap:18},heading:{fontSize:25,fontWeight:'700'},card:{padding:18,gap:16,backgroundColor:'#273246',borderWidth:2,borderColor:'#3A4961',borderRadius:16},input:{borderWidth:1,borderColor:'#9caac0',borderRadius:8,minHeight:48,padding:12,color:'#F1F4FA'}});

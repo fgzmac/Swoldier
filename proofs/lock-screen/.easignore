@@ -30,3 +30,4 @@ plugins/*
 !SetEditor.tsx
 !WeekPlanner.tsx
 !Organizer.tsx
+!Midnight.tsx

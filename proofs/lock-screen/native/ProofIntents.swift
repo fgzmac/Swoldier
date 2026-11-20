@@ -512,3 +512,34 @@ struct ProofBack: LiveActivityIntent {
         return .result()
     }
 }
+
+struct ProofRIRVisibility: LiveActivityIntent {
+    static let title: LocalizedStringResource = "Show RIR"
+    static var supportedModes: IntentModes { .background }
+    static var authenticationPolicy: IntentAuthenticationPolicy { .requiresLocalDeviceAuthentication }
+
+    @Parameter(title: "Session") var sessionID: String
+    @Parameter(title: "Action version", default: "legacy") var actionToken: String
+    @Parameter(title: "Set") var setID: String
+    @Parameter(title: "Rest", default: "none") var restID: String
+
+    @Parameter(title: "Show RIR") var visible: Bool
+
+    init() {}
+    init(sessionID: String, setID: String, restID: String, actionToken: String, visible: Bool) {
+        self.visible = visible
+        self.sessionID = sessionID
+        self.setID = setID
+        self.restID = restID
+        self.actionToken = actionToken
+    }
+
+    func perform() async throws -> some IntentResult {
+        #if PROOF_WIDGET_EXTENSION
+        try rejectExtensionExecution()
+        #else
+        try await ProofCoordinator.shared.setRIRVisibility(visible, sessionID: sessionID, setID: setID, restID: restID, token: actionToken)
+        #endif
+        return .result()
+    }
+}

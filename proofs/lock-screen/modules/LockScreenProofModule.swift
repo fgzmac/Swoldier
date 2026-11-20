@@ -58,6 +58,9 @@ public final class LockScreenProofModule: Module {
         AsyncFunction("start") { () async throws -> [String: Any] in
             try await ProofCoordinator.shared.start().dictionary
         }
+        AsyncFunction("resumeWorkout") { (sessionID: String) async throws -> [String: Any] in
+            try await ProofCoordinator.shared.resume(sessionID: sessionID).dictionary
+        }
         AsyncFunction("read") { () async throws -> [String: Any]? in
             try await ProofCoordinator.shared.read()?.dictionary
         }

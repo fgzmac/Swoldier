@@ -18,16 +18,16 @@ test('exact-editor validation keeps blanks, zeros and decimals distinct and reje
 
 // Executes the production editor's transpiled JS with a minimal hook/element harness.
 // This checks buffer/target/leave-guard logic, not React Native rendering or Swift.
-function editorHarness(component='SetEditor'){
+function editorHarness(component='SetEditor',exportName='default'){
  const fs=require('node:fs'),ts=require('typescript'),vm=require('node:vm'),{createRequire}=require('node:module'),path=require('node:path');
  const filename=path.resolve(__dirname,'../'+component+'.tsx'),localRequire=createRequire(filename),slots=[],alerts=[],effects=[];let cursor=0;
  const effect=(fn,deps)=>{const n=cursor++,old=slots[n];if(!old||deps.some((v,i)=>v!==old[i]))effects.push(fn);slots[n]=deps;};
  const hooks={useEffect:effect,useRef(value){const n=cursor++;return slots[n]??(slots[n]={current:value});},useState(value){const n=cursor++;if(!(n in slots))slots[n]=value;return[slots[n],next=>{slots[n]=typeof next==='function'?next(slots[n]):next;}];},useLayoutEffect:effect};
- const element=(type,props,key)=>({type,props:props??{},key});const rn={Alert:{alert(...args){alerts.push(args);}},StyleSheet:{create:value=>value}};
+ const element=(type,props,key)=>({type,props:props??{},key});const rn={AppState:{addEventListener:()=>({remove(){}})},Alert:{alert(...args){alerts.push(args);}},StyleSheet:{create:value=>value}};
  for(const name of ['Button','Pressable','ScrollView','Switch','Text','TextInput','View'])rn[name]=name;
  const compiled=ts.transpileModule(fs.readFileSync(filename,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.ReactJSX,target:ts.ScriptTarget.ES2022}}).outputText;
- const module={exports:{}};vm.runInNewContext(compiled,{module,exports:module.exports,require:name=>name==='./Organizer'?{Action:'Button',Groups:'Groups'}:name==='react'?hooks:name==='react-native'?rn:name==='react/jsx-runtime'?{jsx:element,jsxs:element}:localRequire(name==='./routineModel'?'./routineModel.ts':name),console});
- return {alerts,render(props){cursor=0;const tree=module.exports.default(props);effects.splice(0).forEach(fn=>fn());return tree;}};
+ const module={exports:{}};vm.runInNewContext(compiled,{module,exports:module.exports,require:name=>name==='./Midnight'?{Text:'Text',midnight:{text:'#F1F4FA'}}:name==='./Organizer'?{Action:'Button',Groups:'Groups'}:name==='react'?hooks:name==='react-native'?rn:name==='react/jsx-runtime'?{jsx:element,jsxs:element}:localRequire(['./routineModel','./workoutModel'].includes(name)?name+'.ts':name),console});
+ return {alerts,render(props){cursor=0;const tree=module.exports[exportName](props);effects.splice(0).forEach(fn=>fn());return tree;}};
 }
 function descendants(tree){if(!tree||typeof tree!=='object')return[];return[tree,...[tree.props?.children].flat(Infinity).flatMap(descendants)];}
 function editorProps(setID='a'){
@@ -72,7 +72,7 @@ test('routine leave guard protects unsaved values and refuses navigation during 
  const h=editorHarness('RoutineEditor');let guard,moved=0,release;
  const p={native:{routineLibrary:async()=>JSON.stringify({routines:[],exercises:[]}),saveRoutine:json=>new Promise(resolve=>{release=()=>resolve(JSON.stringify({...JSON.parse(json),id:'routine',revision:1}));})},close(){},registerLeave:g=>{guard=g;}};
  let tree=h.render(p);await flush();tree=h.render(p);
- const create=descendants(tree).find(n=>n.type==='Pressable'&&descendants(n).some(x=>x.props?.children==='＋ Create routine'));create.props.onPress();tree=h.render(p);
+ const create=descendants(tree).find(n=>n.type==='Pressable'&&descendants(n).some(x=>x.props?.children==='＋ New routine'));create.props.onPress();tree=h.render(p);
  descendants(tree).find(n=>n.type==='TextInput'&&n.props.accessibilityLabel==='Routine name').props.onChangeText('Fictional unsaved');tree=h.render(p);
  guard(()=>moved++);assert.equal(moved,0);assert.match(h.alerts.at(-1)[0],/Discard unsaved routine edits/);
  const save=descendants(tree).find(n=>n.type==='Pressable'&&descendants(n).some(x=>x.props?.children==='Save routine'));save.props.onPress();
@@ -92,4 +92,76 @@ test('exercise controls hide the seconds and target inputs while retaining dirty
  btn('▸ Set targets · Optional').props.onPress();findLabel(render(),name+' set 1 pounds').props.onChangeText('42.50');btn('▾ Set targets · Optional').props.onPress();assert.equal(findLabel(render(),name+' set 1 pounds'),undefined);
  btn('Move').props.onPress();btn('Move to Top').props.onPress();btn('▸ Set targets · Optional').props.onPress();
  assert.equal(findLabel(render(),name+' set 1 pounds').props.value,'42.50');assert.equal(findLabel(render(),rest).props.value,'090');assert.equal(plan.exercises[1].sets[0].pounds,0);
+});
+
+
+test('goal counts use half-open local periods, skip unfinished and count a session once',()=>{
+ const {periodCompletions}=require('../workoutModel.ts');
+ const completed=(id,date)=>({sessionID:id,workoutFinished:true,finishedAt:+new Date(date)/1000});
+ const last=completed('last','2026-12-31T23:59:59');
+ const workouts=[last,last,completed('first','2027-01-01T00:00:00'),completed('sunday','2027-01-03T23:59:59'),
+   completed('monday','2027-01-04T00:00:00'),{...last,sessionID:'active',workoutFinished:false}];
+ assert.equal(periodCompletions(workouts,'Weekly','2027-01-03'),3);
+ assert.equal(periodCompletions(workouts,'Weekly','2027-01-04'),1);
+ assert.equal(periodCompletions(workouts,'Monthly','2026-12-31'),1);
+ assert.equal(periodCompletions(workouts,'Yearly','2027-01-01'),3);
+});
+
+function organizerFixture(value){
+ let version=1;
+ return {value,async organizer(){return JSON.stringify([[version,JSON.stringify(this.value)]]);},
+   async saveOrganizer(key,revision,json){assert.equal(revision,version++);this.value=JSON.parse(json);}};
+}
+function actions(tree){return descendants(tree).filter(n=>typeof n.props.title==='string');}
+test('workout target editing preserves other periods and legacy accountability entries',async()=>{
+ const api=organizerFixture({goals:[],checks:[],scans:[{date:'2025-01-01'}]});
+ const h=editorHarness('Organizer','Tracker'),props={api,day:'2026-11-20',workouts:[]};
+ const render=()=>h.render(props),press=title=>actions(render()).find(n=>n.props.title===title).props.onPress();
+ render();await flush();
+ for(const [period,value] of [['Weekly','3'],['Monthly','12'],['Yearly','140']]){
+   press(period);press('Set goal');
+   descendants(render()).find(n=>n.props.accessibilityLabel===period+' workout target').props.onChangeText(value);
+   press('Save goal');await flush();
+ }
+ assert.deepEqual(api.value.targets,{Weekly:3,Monthly:12,Yearly:140});
+ press('Monthly');press('Edit target');press('Remove goal');await flush();
+ assert.deepEqual(api.value.targets,{Weekly:3,Yearly:140});assert.deepEqual(api.value.scans,[{date:'2025-01-01'}]);
+});
+
+test('standalone routine rows survive category collapse, membership moves and removal',async()=>{
+ const api=organizerFixture([{id:'group',name:'Strength',members:['a']}]);
+ const h=editorHarness('Organizer','Groups'),props={api,plans:['b','a'].map(id=>({id})),render:p=>({type:'routine',props:{id:p.id}})};
+ const render=()=>h.render(props),rows=()=>descendants(render()).filter(n=>n.type==='routine').map(n=>n.props.id);
+ const press=match=>actions(render()).find(n=>n.props.title.includes(match)).props.onPress();
+ render();await flush();assert.deepEqual(rows(),['b']);press('Strength');assert.deepEqual(rows(),['a','b']);
+ press('Organize routines');press('Move routine');press('To Main list');await flush();assert.deepEqual(rows(),['b','a']);
+ press('Move routine');press('To Strength');await flush();assert.deepEqual(rows(),['b','a']);
+ press('Strength ·');assert.deepEqual(rows(),['a']);press('Remove group');await flush();assert.deepEqual(rows(),['b','a']);
+});
+
+test('Today and Calendar toggle the same date entry and preserve its ID and goal',async()=>{
+ const day=localDay(new Date()),entry={id:'entry',kind:'water',name:'Cup',slot:'Morning',oz:8,children:[{id:'cup',label:'Cup',checked:false}]};
+ let agenda={goal:40,items:[entry]},version=1;
+ const native={calendarDays:async()=>JSON.stringify([[day,version,JSON.stringify(agenda)]]),
+   routineLibrary:async()=>JSON.stringify({routines:[],exercises:[]}),
+   saveCalendarDay:async(d,rev,json)=>{assert.equal(d,day);assert.equal(rev,version++);agenda=JSON.parse(json);}};
+ for(const today of [day,undefined]){
+   const h=editorHarness('WeekPlanner'),props={today,native,workouts:[]};
+   h.render(props);await flush();
+   const row=descendants(h.render(props)).find(n=>n.props.accessibilityRole==='checkbox');
+   assert.equal(row.props.accessibilityState.checked,today===undefined);
+   row.props.onPress();await flush();
+   assert.equal(agenda.items[0].id,'entry');assert.equal(agenda.goal,40);
+ }
+ assert.equal(agenda.items[0].children[0].checked,false);
+});
+
+test('routine Resume uses the active session for that routine without issuing Start',async()=>{
+ const h=editorHarness('RoutineEditor'),plan={id:'routine',revision:2,name:'Fictional',exercises:[]};
+ const resumes=[],props={native:{routineLibrary:async()=>JSON.stringify({routines:[plan],exercises:[]})},
+   onResume:id=>resumes.push(id),workouts:[{sessionID:'other',routineID:'other'},{sessionID:'old',routineID:'routine',workoutFinished:true},{sessionID:'active',routineID:'routine',workoutFinished:false}]};
+ h.render(props);await flush();
+ const group=descendants(h.render(props)).find(n=>n.type==='Groups');
+ actions(group.props.render(plan)).find(n=>n.props.title==='Resume workout').props.onPress();
+ assert.deepEqual(resumes,['active']);
 });

@@ -1,5 +1,13 @@
 # Workout App — project plan
 
+## 2026-11-20 — Midnight app and Live Activity
+
+Today presents the active set, a direct Resume action, independent local weekly, monthly and yearly workout-count targets, and the shared daily agenda. Weekly targets count Monday through Sunday. The accountability journal and completed history remain accessible. Routines appear individually or inside named categories. The Calendar month marks dates with entries, with one add menu and dated occurrence options.
+
+Resume republishes the current stored session after checking its identity. The Lock Screen card gives the exercise name its own width, separates set progress, and places optional RIR beside pounds and reps. Show RIR defaults off and is saved as a display preference. The workout database retains its existing representation for blank, zero and recorded RIR.
+
+The local regression results and pending phone checks are in the [handoff](HANDOFF.md). Framework selection remains open.
+
 ## 2026-11-19 — Corrected A–J preview compiled and signed
 
 [Install build 3e11df7b](https://expo.dev/accounts/fgzmacaraeg/projects/swoldier-lock-screen-proof/builds/3e11df7b-346a-4408-b099-08a78fb3cf2d). Before submitting, compared the new 23-file EAS archive and live source with the failed build's manifest. Only ProofWidget.swift differed, exactly matching the recorded relocation of @ViewBuilder to countdown. Xcode archived successfully and Fastlane exported the signed IPA. Expo Doctor reported the existing Expo patch-version warning (57.0.32 versus expected ~57.0.33). One medium iOS preview consumed $2 included credits. The balance went from $39 to $37 with $0 overage.

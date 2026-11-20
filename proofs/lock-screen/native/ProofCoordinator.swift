@@ -33,6 +33,17 @@ actor ProofCoordinator {
         return snapshot
     }
 
+    func resume(sessionID: String) async throws -> ProofSnapshot {
+        await acquire()
+        defer { release() }
+        guard let snapshot = try ProofStore().read(), snapshot.sessionID == sessionID,
+              !snapshot.workoutFinished else {
+            throw ProofError.input("This workout is no longer active. Check Today.")
+        }
+        try await show(snapshot)
+        return snapshot
+    }
+
     func newStartRequest() -> String { UUID().uuidString }
 
     func startRoutine(id: String, revision: Int, requestID: String, resolution: String? = nil, expectedSession: String? = nil, expectedToken: String? = nil) async throws -> ProofSnapshot {
@@ -74,6 +85,20 @@ actor ProofCoordinator {
             }
         }
         return snapshot
+    }
+
+    // LiveActivityIntent runs in the host, which also constructs every new publication.
+    private let rirPreference = "swoldier.widget.showRIR"
+    func setRIRVisibility(_ visible: Bool, sessionID: String, setID: String, restID: String, token: String) async throws {
+        await acquire()
+        defer { release() }
+        guard let snapshot = try ProofStore().read(), !snapshot.workoutFinished,
+              snapshot.sessionID == sessionID, snapshot.setID == setID,
+              snapshot.restID == restID, snapshot.actionToken == token else { return }
+        UserDefaults.standard.set(visible, forKey: rirPreference)
+        for activity in activities(sessionID) {
+            await activity.update(publication(content(snapshot, showOptions: true)))
+        }
     }
 
     func apply(sessionID: String, setID: String, restID: String, actionToken: String = "legacy", action: ProofAction) async {
@@ -137,7 +162,7 @@ actor ProofCoordinator {
             exerciseID: snapshot.currentExercise.exerciseID, exerciseName: snapshot.currentExercise.name,
             exerciseNumber: snapshot.currentExercise.ordinal, exerciseCount: snapshot.exercises.count,
             setCount: snapshot.currentSets.count, canChooseNext: snapshot.canChooseNext,
-            hasNextExercise: snapshot.hasNextExercise, nextExerciseName: snapshot.nextExerciseName, actionToken: snapshot.actionToken, undoSkipToken: snapshot.undoSkipToken, restSetSkipped: snapshot.sets.first(where: { $0.setID == snapshot.restSetID })?.skippedAt != nil, showOptions: showOptions, workoutFinished: snapshot.workoutFinished
+            hasNextExercise: snapshot.hasNextExercise, nextExerciseName: snapshot.nextExerciseName, actionToken: snapshot.actionToken, undoSkipToken: snapshot.undoSkipToken, restSetSkipped: snapshot.sets.first(where: { $0.setID == snapshot.restSetID })?.skippedAt != nil, showRIR: UserDefaults.standard.bool(forKey: rirPreference), showOptions: showOptions, workoutFinished: snapshot.workoutFinished
         ))
     }
 

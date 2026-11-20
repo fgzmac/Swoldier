@@ -55,6 +55,7 @@ struct ProofActivity: ActivityAttributes {
         var actionToken: String? = nil
         var undoSkipToken: String? = nil
         var restSetSkipped: Bool? = nil
+        var showRIR: Bool? = nil
         var showOptions: Bool? = nil
         var workoutFinished: Bool? = nil
         // Temporary D1 metadata; optional so existing activity content still decodes.
