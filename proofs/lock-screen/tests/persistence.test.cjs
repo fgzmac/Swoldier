@@ -44,10 +44,10 @@ function transaction(db, fn, immediate = true) {
   catch (e) { db.exec('ROLLBACK'); throw e; }
 }
 function migrate(db) {
-  if (db.prepare('PRAGMA user_version').get().user_version >= 7) return;
+  if (db.prepare('PRAGMA user_version').get().user_version >= 8) return;
   transaction(db, () => {
     const version = db.prepare('PRAGMA user_version').get().user_version;
-    if (version >= 7) return;
+    if (version >= 8) return;
     if (version < 2) {
       const cols = new Set(db.prepare('PRAGMA table_info(proof_set)').all().map(r => r.name));
       for (const m of sql.migrations) if (!cols.has(m.column)) db.exec(m.statement);
@@ -57,8 +57,9 @@ function migrate(db) {
     if (version < 4) for (const text of sql.migrationsV4) db.exec(text);
     if (version < 5) for (const text of sql.migrationsV5) db.exec(text);
     if (version < 6) for (const text of sql.migrationsV6) db.exec(text);
-    for (const text of sql.migrationsV7) db.exec(text);
-    db.exec('PRAGMA user_version = 7');
+    if (version < 7) for (const text of sql.migrationsV7) db.exec(text);
+    for (const text of sql.migrationsV8) db.exec(text);
+    db.exec('PRAGMA user_version = 8');
   });
 }
 function open(path) {
@@ -76,13 +77,13 @@ function readInternal(db, now = 1000) {
   const allSets = all(db, sql.readSets, params);
   const sets = allSets.filter(s => s.exercise_id === session.active_exercise_id);
   const exercises = all(db, sql.readExercises, params);
-  const current = sets.find(s => !s.completed) ?? sets.at(-1);
+  const current = sets.find(s => !s.completed && s.skipped_at==null) ?? sets.at(-1);
   const rest = all(db, sql.readRest, params)[0] ?? null;
   // Positional projection deliberately follows Swift's separate snapshot mapping.
   const values = rest ? Object.values(rest) : [];
-  return { sessionID: session.session_id, setID: current.set_id, restID: session.active_rest_id,
+  return { actionToken:session.action_token, sessionID: session.session_id, setID: current.set_id, restID: session.active_rest_id,
     sets, allSets, exercises, exerciseID:session.active_exercise_id, finishedAt:session.finished_at,
-    recordCount: allSets.filter(s => s.completed).length, plannedSetsRecorded: sets.every(s => s.completed),
+    recordCount: allSets.filter(s => s.completed).length, plannedSetsRecorded: sets.every(s => s.completed || s.skipped_at!=null),
     deadline: values[0] ?? null, skippedAt: values[1] ?? null,
     restState: values[2] ?? 'not_started', remaining: values[3] ?? 0,
     continuedAt: values[4] ?? null, restSetID: values[5] ?? null, undoneAt: values[6] ?? null, awaitingContinue: rest !== null && values[4] == null };
@@ -97,8 +98,14 @@ function start(db, sessionID = randomUUID()) {
 }
 function act(db, ids, action, now = 1000, delta = 0) {
   return transaction(db, () => {
-    const p = { ...ids, now, delta, newRestID: randomUUID(), newSetID: randomUUID() };
-    if (action === 'complete') {
+    const before=readInternal(db,now);
+    if(!before || (ids.actionToken??"legacy")!==before.actionToken) return before;
+    const p = { ...ids, actionToken:ids.actionToken??"legacy", newToken:randomUUID(), skipToken:ids.actionToken??"legacy", now, delta, newRestID: randomUUID(), newSetID: randomUUID() };
+    if(action==='skipSet'||action==='finishEarly') {
+      if(before.setID===ids.setID && before.restID===ids.restID && run(db,sql[action==='skipSet'?'skipSet':'skipRemaining'],p)>0) assert.equal(run(db,sql.rotateActionToken,p),1);
+    } else if(action==='undoSkip'){
+      if(run(db,sql.undoSkip,p)>0)assert.equal(run(db,sql.rotateActionToken,p),1);
+    } else if (action === 'complete') {
       run(db, sql.countCompleteRequest, p);
       if (run(db, sql.complete, p) === 1) {
         assert.equal(run(db, sql.createRest, p), 1); assert.equal(run(db, sql.advanceRest, p), 1);
@@ -118,9 +125,9 @@ function reset(db) { transaction(db, () => {
   if(current)assert.equal(all(db,sql.readWorkout,{sessionID:current.sessionID})[0].routine_id,null,'routine reset forbidden');
   sql.reset.forEach(q => db.exec(q));
 }); }
-function ids(s) { return { sessionID: s.sessionID, setID: s.setID, restID: s.restID }; }
+function ids(s) { return { actionToken:s.actionToken, sessionID: s.sessionID, setID: s.setID, restID: s.restID }; }
 function undoIDs(s) { return { ...ids(s), setID: s.restSetID }; }
-function current(s) { return s.sets.find(r => !r.completed) ?? s.sets.at(-1); }
+function current(s) { return s.sets.find(r => !r.completed && r.skipped_at==null) ?? s.sets.at(-1); }
 function fixture(t) {
   const dir = mkdtempSync(join(tmpdir(), 'swoldier-three-'));
   const path = join(dir, 'proof.sqlite3'); const db = open(path);
@@ -153,16 +160,23 @@ function routineSeed(overrides={}) {
     {exerciseID:'stable-b',name:'Fictional reps only',trackRest:false,restSeconds:null,sets:[{pounds:null,reps:12}]},
   ],...overrides};
 }
-function startRoutine(db,seed,requestID=randomUUID(),load=()=>structuredClone(seed)) {
+function resolutionToken(s){return JSON.stringify([s.actionToken,s.restID,s.exerciseID,s.continuedAt,s.finishedAt,s.allSets.map(r=>[r.set_id,r.edit_revision,r.completion_attempts])]);}
+function startRoutine(db,seed,requestID=randomUUID(),load=()=>structuredClone(seed),resolution=null) {
   return transaction(db,()=>{
-    const prior=all(db,sql.startRequest,{requestID})[0];const current=readInternal(db);
+    const prior=all(db,sql.startRequest,{requestID})[0];let current=readInternal(db);
     if(prior){
       assert.equal(prior.routine_id,seed.id,'request routine mismatch');assert.equal(prior.routine_revision,seed.revision,'request revision mismatch');
       assert.equal(current?.sessionID,prior.session_id,'earlier request');return current;
     }
-    assert.ok(!current||current.finishedAt!==null,'unfinished workout');
+    if(resolution){assert.ok(current&&current.finishedAt===null,'changed workout');assert.equal(resolution.sessionID,current.sessionID,'changed session');assert.equal(resolution.token,resolutionToken(current),'changed workout');assert.ok(['finish','discard'].includes(resolution.choice));}
     const captured=load();assert.equal(captured.id,seed.id);assert.equal(captured.revision,seed.revision,'stale routine revision');
     assert.ok(captured.exercises.length&&captured.exercises.every(e=>e.sets.length),'empty routine');
+    if(current&&current.finishedAt===null){
+      assert.ok(resolution,'unfinished workout');assert.equal(resolution.sessionID,current.sessionID,'changed session');assert.equal(resolution.token,resolutionToken(current),'changed workout');
+      const params={sessionID:current.sessionID,actionToken:current.actionToken,newToken:randomUUID(),now:resolution.now??5000};
+      if(resolution.choice==='discard'){sql.discardWorkout.forEach(q=>run(db,q,params));current=null;}
+      else {assert.equal(resolution.choice,'finish');run(db,sql.resolveSkip,params);run(db,sql.resolveRest,params);run(db,sql.resolveExercises,params);assert.equal(run(db,sql.resolveWorkout,params),1);current=readInternal(db);}
+    }
     if(current){assert.equal(run(db,sql.archiveWorkout,{sessionID:current.sessionID,archived:JSON.stringify(current)}),1);assert.equal(run(db,sql.clearFinishedPointer),1);}
     const params={sessionID:randomUUID(),requestID,snapshot:JSON.stringify(captured)};
     assert.equal(run(db,sql.startSession,params),1);run(db,sql.registerRoutine,params);run(db,sql.snapshotExercises,params);run(db,sql.snapshotSets,params);
@@ -182,7 +196,7 @@ function finishAll(db,state,now=3000){
 if (!isMainThread) {
   const db = open(workerData.path);
   try {
-    if(workerData.action==='startRoutine')startRoutine(db,workerData.seed,workerData.requestID);
+    if(workerData.action==='startRoutine')startRoutine(db,workerData.seed,workerData.requestID,()=>workerData.seed,workerData.resolution);
     else act(db, workerData.ids, workerData.action ?? 'complete', workerData.now ?? 1000);
     parentPort.postMessage('done');
   }
@@ -414,7 +428,7 @@ if (!isMainThread) {
       let s=read(db,1000);assert.equal(s.deadline,deadline);assert.equal(s.skippedAt,skipped);
       assert.equal(s.continuedAt,skipped);assert.equal(s.awaitingContinue,skipped==null);
       assert.deepEqual(db.prepare('SELECT * FROM proof_sets_v2 ORDER BY ordinal').all(),oldSets);
-      assert.equal(db.prepare('PRAGMA user_version').get().user_version,7);
+      assert.equal(db.prepare('PRAGMA user_version').get().user_version,8);
       migrate(db);assert.deepEqual(read(db,1000),s);
     });
   }
@@ -439,7 +453,7 @@ if (!isMainThread) {
     const target=undoIDs(saved),before=read(db,when);
     const restored=act(db,target,'undo',when);
     assert.equal(restored.recordCount,0);assert.equal(restored.setID,initial.setID);
-    assert.deepEqual(restored.sets[0],{...before.sets[0],completed:0});
+    assert.deepEqual(restored.sets[0],{...before.sets[0],completed:0,edit_revision:before.sets[0].edit_revision+1});
     assert.deepEqual(restored.sets.slice(1),before.sets.slice(1));
     assert.deepEqual([restored.restID,restored.restSetID,restored.deadline,restored.skippedAt,restored.continuedAt,restored.restState,restored.remaining],
       [before.restID,before.restSetID,before.deadline,before.skippedAt,before.continuedAt,before.restState,before.remaining]);
@@ -543,7 +557,7 @@ if (!isMainThread) {
     assert.equal(s.undoneAt,null);assert.equal(s.restSetID,'installed:set:1');assert.equal(s.restID,'installed:set:1:rest');
     assert.deepEqual([s.deadline,s.skippedAt,s.continuedAt],[deadline,skipped,continued]);
     assert.deepEqual(db.prepare('SELECT * FROM proof_sets_v2 ORDER BY ordinal').all(),oldSets);
-    assert.equal(db.prepare('PRAGMA user_version').get().user_version,7);migrate(db);assert.deepEqual(read(db),s);
+    assert.equal(db.prepare('PRAGMA user_version').get().user_version,8);migrate(db);assert.deepEqual(read(db),s);
     const undone=act(db,undoIDs(s),'undo');
     if(continued==null) {
       assert.equal(undone.recordCount,0);assert.equal(undone.deadline,deadline);
@@ -559,7 +573,7 @@ if (!isMainThread) {
     assert.throws(()=>migrate(db),/locked/);reader.exec('ROLLBACK');
     assert.equal(db.prepare('PRAGMA user_version').get().user_version,3);
     assert.equal(db.prepare('PRAGMA table_info(proof_rests_v2)').all().some(c=>c.name==='undone_at'),false);
-    migrate(db);assert.equal(db.prepare('PRAGMA user_version').get().user_version,7);
+    migrate(db);assert.equal(db.prepare('PRAGMA user_version').get().user_version,8);
     assert.equal(db.prepare('PRAGMA table_info(proof_rests_v2)').all().some(c=>c.name==='undone_at'),true);
   });
 
@@ -581,7 +595,7 @@ if (!isMainThread) {
     const undone=act(db,undoIDs(saved),'undo',1002);
     let edited=act(db,ids(undone),'weight',1003,5);
     edited=act(db,ids(edited),'reps',1004,1);
-    assert.deepEqual(edited.sets[0],{...undone.sets[0],pounds:45,reps:9});
+    assert.deepEqual(edited.sets[0],{...undone.sets[0],pounds:45,reps:9,edit_revision:undone.sets[0].edit_revision+2});
     assert.deepEqual(edited.sets.slice(1),saved.sets.slice(1));
     for(const k of ['restID','deadline','continuedAt','skippedAt','undoneAt','recordCount']) assert.equal(edited[k],undone[k]);
     const reopened=open(path);
@@ -923,7 +937,7 @@ if (!isMainThread) {
     db.exec("UPDATE proof_sets_v5 SET pounds=135,reps=10,completed=1,completion_attempts=2 WHERE ordinal=1 AND exercise_id='legacy:exercise:1'; INSERT INTO proof_rests_v2 VALUES('legacy','original-rest','legacy:exercise:1:set:1',1020,NULL,NULL,NULL); UPDATE proof_session_v2 SET active_rest_id='original-rest'; PRAGMA user_version=5");
     if(phase==='acknowledged')db.exec('UPDATE proof_rests_v2 SET continued_at=1021');
     if(phase==='undone')db.exec("UPDATE proof_rests_v2 SET undone_at=1005; UPDATE proof_sets_v5 SET completed=0 WHERE set_id='legacy:exercise:1:set:1'");
-    const before=db.prepare('SELECT * FROM proof_sets_v5 ORDER BY set_id').all();migrate(db);assert.deepEqual(db.prepare('SELECT * FROM proof_sets_v5 ORDER BY set_id').all().map(r=>({...r})),before.map(r=>({...r,rir:null})));
+    const before=db.prepare('SELECT * FROM proof_sets_v5 ORDER BY set_id').all();migrate(db);assert.deepEqual(db.prepare('SELECT * FROM proof_sets_v5 ORDER BY set_id').all().map(r=>({...r})),before.map(r=>({...r,rir:null,skipped_at:null,skip_token:null,edit_revision:0})));
     const after=read(db);assert.equal(after.deadline,1020);assert.equal(after.restID,'original-rest');assert.equal(after.continuedAt,phase==='acknowledged'?1021:null);assert.equal(after.undoneAt,phase==='undone'?1005:null);
     migrate(db);assert.deepEqual(read(db),after);
   });
@@ -936,7 +950,7 @@ if (!isMainThread) {
     try{assert.throws(()=>migrate(db),/deliberate_missing_table/);}finally{sql.migrationsV6.pop();}
     assert.equal(db.prepare('PRAGMA user_version').get().user_version,5);assert.deepEqual(db.prepare('SELECT * FROM proof_sets_v5').all(),before);
     assert.equal(db.prepare('PRAGMA table_info(proof_rests_v2)').all().some(x=>x.name==='track_rest'),false);
-    migrate(db);assert.equal(db.prepare('PRAGMA user_version').get().user_version,7);assert.deepEqual(db.prepare('SELECT * FROM proof_sets_v5').all().map(r=>({...r})),before.map(r=>({...r,rir:null})));
+    migrate(db);assert.equal(db.prepare('PRAGMA user_version').get().user_version,8);assert.deepEqual(db.prepare('SELECT * FROM proof_sets_v5').all().map(r=>({...r})),before.map(r=>({...r,rir:null,skipped_at:null,skip_token:null,edit_revision:0})));
   });
   test('completed installed fixture survives first routine Start with its original records',t=>{
     const {db,initial}=fixture(t);const old=finishAll(db,initial);const records=all(db,sql.readSets,{sessionID:old.sessionID});
@@ -958,6 +972,7 @@ if (isMainThread) {
     const {db,path,initial}=fixture(t);let s=initial;
     assert.equal(current(s).rir,null);
     s=act(db,ids(s),'rir',1000,-1);assert.equal(current(s).rir,null);
+    s=act(db,ids(s),'rir',1000,1);assert.equal(current(s).rir,0);
     s=act(db,ids(s),'rir',1000,1);assert.equal(current(s).rir,1);
     s=act(db,ids(s),'rir',1000,-1);assert.equal(current(s).rir,0);
     s=act(db,ids(s),'rir',1000,-1);assert.equal(current(s).rir,0);
@@ -972,6 +987,7 @@ if (isMainThread) {
   for(const mode of ['off','zero','positive'])test('RIR Complete/Undo/re-completion and Add Set preserve actuals in '+mode+' rest',t=>{
     const seed=routineSeed({exercises:[{exerciseID:'rir',name:'Fictional RIR',trackRest:mode!=='off',restSeconds:mode==='positive'?20:0,sets:[{pounds:42.5,reps:8}]}]});
     const {db,initial}=routineFixture(t,seed);let s=act(db,ids(initial),'rir',1000,1);
+    s=act(db,ids(s),'rir',1000,1);
     s=act(db,ids(s),'complete',1000);const saved=s,old=undoIDs(s),deadline=s.deadline;
     assert.equal(current(s).rir,1);assert.equal(s.recordCount,1);
     s=act(db,old,'undo',1001);assert.equal(current(s).rir,1);
@@ -988,6 +1004,7 @@ if (isMainThread) {
   test('blank RIR permits completion; RIR does not bypass missing reps or alter next defaults',t=>{
     const seed=routineSeed({exercises:[{exerciseID:'blank',name:'Fictional blanks',trackRest:false,restSeconds:null,sets:[{pounds:null,reps:null},{pounds:0,reps:0}]}]});
     const {db,initial}=routineFixture(t,seed);let s=act(db,ids(initial),'rir',1000,1);
+    s=act(db,ids(s),'rir',1000,1);
     s=act(db,ids(s),'complete');assert.equal(s.recordCount,0);assert.equal(s.restState,'not_started');
     s=act(db,ids(s),'clearRIR');s=act(db,ids(s),'reps',1000,1);s=act(db,ids(s),'complete');
     assert.equal(s.recordCount,1);assert.equal(s.allSets[0].rir,null);assert.equal(s.allSets[0].pounds,null);
@@ -997,7 +1014,7 @@ if (isMainThread) {
     const {db,initial}=fixture(t);const original=ids(initial);
     db.exec("CREATE TRIGGER fail_rir BEFORE UPDATE OF rir ON proof_sets_v5 BEGIN SELECT RAISE(ABORT,'forced RIR failure'); END");
     assert.throws(()=>act(db,original,'rir',1000,1),/forced RIR failure/);assert.deepEqual(read(db),initial);
-    db.exec('DROP TRIGGER fail_rir');let s=act(db,original,'rir',1000,1);assert.equal(current(s).rir,1);
+    db.exec('DROP TRIGGER fail_rir');let s=act(db,original,'rir',1000,1);assert.equal(current(s).rir,0);
     s=act(db,ids(s),'complete');s=act(db,ids(s),'continueRest',1001);const before=read(db,1001);
     for(const action of ['rir','clearRIR'])assert.deepEqual(act(db,original,action,1001,1),before);
   });
@@ -1009,7 +1026,7 @@ if (isMainThread) {
       if(phase==='acknowledged')s=act(db,ids(s),'continueRest',1001);
       if(phase==='undone')s=act(db,undoIDs(s),'undo',1001);
     }
-    db.exec('ALTER TABLE proof_sets_v5 DROP COLUMN rir; PRAGMA user_version=6');
+    db.exec("DROP TRIGGER proof_set_edit_revision; DROP TRIGGER proof_no_completed_skip_insert; DROP TRIGGER proof_no_completed_skip_update; ALTER TABLE proof_sets_v5 DROP COLUMN skipped_at; ALTER TABLE proof_sets_v5 DROP COLUMN skip_token; ALTER TABLE proof_sets_v5 DROP COLUMN edit_revision; ALTER TABLE proof_session_v2 DROP COLUMN action_token; ALTER TABLE proof_workouts_v6 DROP COLUMN started_at; ALTER TABLE proof_workouts_v6 DROP COLUMN discarded_at; DROP TABLE proof_edit_requests; ALTER TABLE proof_sets_v5 DROP COLUMN rir; PRAGMA user_version=6");
     const tables=['proof_sets_v5','proof_rests_v2','proof_session_v2','proof_exercises_v5','proof_workouts_v6'];
     const before=Object.fromEntries(tables.map(name=>[name,db.prepare('SELECT * FROM '+name).all().map(r=>({...r}))]));
     sql.migrationsV7.push('SELECT * FROM deliberate_missing_table');
@@ -1017,8 +1034,8 @@ if (isMainThread) {
     assert.equal(db.prepare('PRAGMA user_version').get().user_version,6);
     assert.equal(db.prepare('PRAGMA table_info(proof_sets_v5)').all().some(c=>c.name==='rir'),false);
     migrate(db);migrate(db);
-    for(const table of tables)assert.deepEqual(db.prepare('SELECT * FROM '+table).all().map(r=>({...r})),before[table].map(r=>table==='proof_sets_v5'?{...r,rir:null}:r));
-    assert.equal(db.prepare('PRAGMA user_version').get().user_version,7);
+    for(const table of tables)assert.deepEqual(db.prepare('SELECT * FROM '+table).all().map(r=>({...r})),before[table].map(r=>table==='proof_sets_v5'?{...r,rir:null,skipped_at:null,skip_token:null,edit_revision:0}:table==='proof_session_v2'?{...r,action_token:'legacy'}:table==='proof_workouts_v6'?{...r,started_at:null,discarded_at:null}:r));
+    assert.equal(db.prepare('PRAGMA user_version').get().user_version,8);
   });
 }
 
@@ -1027,5 +1044,172 @@ if (isMainThread) test('failed Complete rolls back record/rest while preserving 
   db.exec("CREATE TRIGGER fail_rir_rest BEFORE INSERT ON proof_rests_v2 BEGIN SELECT RAISE(ABORT,'forced rest failure'); END");
   assert.throws(()=>act(db,ids(s),'complete'),/forced rest failure/);assert.deepEqual(read(db),draft);
   db.exec('DROP TRIGGER fail_rir_rest');s=act(db,ids(s),'complete');
-  assert.equal(s.recordCount,1);assert.equal(s.allSets[0].rir,1);assert.equal(s.deadline,1020);
+  assert.equal(s.recordCount,1);assert.equal(s.allSets[0].rir,0);assert.equal(s.deadline,1020);
 });
+
+if (isMainThread) test('first RIR plus after Clear records zero without changing blanks, plans, counts or rest',t=>{
+  const {db,path,initial}=fixture(t);const before=initial;
+  let s=act(db,ids(initial),'rir',1000,1);assert.equal(current(s).rir,0);
+  s=act(db,ids(s),'rir',1000,1);assert.equal(current(s).rir,1);
+  s=act(db,ids(s),'clearRIR');assert.equal(current(s).rir,null);
+  s=act(db,ids(s),'rir',1000,-1);assert.equal(current(s).rir,null);
+  s=act(db,ids(s),'rir',1000,1);assert.equal(current(s).rir,0);
+  assert.deepEqual(s.allSets.map(({rir,edit_revision,...row})=>row),before.allSets.map(({rir,edit_revision,...row})=>row));
+  assert.equal(s.deadline,before.deadline);assert.equal(s.recordCount,0);
+  const reopened=open(path);try{assert.equal(current(read(reopened)).rir,0);}finally{reopened.close();}
+});
+
+if(isMainThread){
+ test('skip, duplicate and undo skip preserve zero records and reject old generations',t=>{
+  const {db,initial}=fixture(t);const old=ids(initial);let s=act(db,old,'skipSet');
+  assert.equal(s.recordCount,0);assert.equal(s.allSets[0].skipped_at,1000);assert.equal(s.allSets[0].completed,0);assert.equal(s.deadline,null);assert.equal(current(s).ordinal,2);
+  assert.deepEqual(act(db,old,'skipSet'),s);const skipped=ids(s);s=act(db,skipped,'undoSkip');assert.equal(current(s).ordinal,1);assert.equal(current(s).pounds,40);
+  assert.deepEqual(act(db,old,'complete'),s);assert.deepEqual(act(db,skipped,'undoSkip'),s);
+ });
+ test('finish early skips all remaining sets; Undo restores drafts without changing completed history',t=>{
+  const {db,initial}=fixture(t);let s=act(db,ids(initial),'complete');const deadline=s.deadline;
+  s=act(db,ids(s),'continueRest',1001);const original=ids(s);s=act(db,original,'finishEarly',1002);
+  assert.equal(s.recordCount,1);assert.equal(s.allSets.filter(x=>x.skipped_at!=null).length,2);assert.equal(s.plannedSetsRecorded,true);assert.equal(s.deadline,deadline);
+  assert.deepEqual(act(db,original,'finishEarly',1002),s);s=act(db,ids(s),'undoSkip',1002);assert.equal(current(s).ordinal,2);assert.equal(s.allSets[0].completed,1);
+ });
+ test('all skipped supports explicit Next and final Finish without inventing records/rest',t=>{
+  const {db,initial}=fixture(t);let s=act(db,ids(initial),'finishEarly');const old=ids(s);s=act(db,old,'nextExercise');assert.equal(s.exercises.find(e=>e.exercise_id===s.exerciseID).ordinal,2);
+  assert.deepEqual(act(db,old,'nextExercise'),s);s=act(db,ids(s),'finishEarly');s=act(db,ids(s),'finishWorkout');assert.equal(s.finishedAt,1000);assert.equal(s.recordCount,0);assert.equal(s.deadline,null);
+ });
+ test('skip during undone rest preserves the deadline and acknowledgement; Undo skip restores draft',t=>{
+  const {db,initial}=fixture(t);let s=act(db,ids(initial),'complete');s=act(db,undoIDs(s),'undo');const rest=[s.deadline,s.continuedAt,s.restID];s=act(db,ids(s),'skipSet');
+  assert.deepEqual([s.deadline,s.continuedAt,s.restID],rest);s=act(db,ids(s),'undoSkip');assert.equal(current(s).ordinal,1);assert.deepEqual([s.deadline,s.continuedAt,s.restID],rest);
+ });
+ test('v8 defaults keep explicit zero records completed; competing Add and Next cannot change an added draft',t=>{
+  const {db,initial}=fixture(t);let s=act(db,ids(initial),'finishEarly');const old=ids(s);s=act(db,old,'addSet');assert.equal(current(s).ordinal,4);assert.equal(current(s).pounds,null);assert.equal(current(s).reps,null);
+  assert.deepEqual(act(db,old,'nextExercise'),s);assert.deepEqual(act(db,old,'addSet'),s);
+  assert.equal(db.prepare('PRAGMA user_version').get().user_version,8);
+ });
+}
+
+// Exact-edit orchestration mirrors the native transaction, while executing production SQL.
+function editActual(db,s,set,values,requestID=randomUUID(),override={}){
+ const payload=JSON.stringify({sessionID:s.sessionID,setID:set.set_id,actionToken:s.actionToken,revision:set.edit_revision,requestID,...values,...override});
+ const e=JSON.parse(payload);
+ return transaction(db,()=>{
+  const snapshot=readInternal(db);assert.equal(snapshot.sessionID,e.sessionID,'old session');
+  const params={...e,payload};const prior=db.prepare('SELECT payload FROM proof_edit_requests WHERE request_id=?').get(requestID);
+  if(prior){assert.equal(prior.payload,payload,'reused request');return snapshot;}
+  assert.equal(run(db,sql.editSet,params),1,'stale, skipped or missing reps');
+  run(db,'INSERT INTO proof_edit_requests(request_id,session_id,payload) VALUES(:requestID,:sessionID,:payload)',params);return readInternal(db);
+ });
+}
+if(isMainThread){
+test('exact edits persist nullable decimals and RIR; CAS prevents lost updates, exact retry is harmless',t=>{
+ const {db,path,initial:s}=routineFixture(t);const before=current(s),request=randomUUID(),values={pounds:42.5,reps:null,rir:0};
+ let edited=editActual(db,s,before,values,request);assert.equal(current(edited).pounds,42.5);assert.equal(current(edited).reps,null);assert.equal(current(edited).rir,0);
+ assert.deepEqual(edited,editActual(db,s,before,values,request));assert.throws(()=>editActual(db,s,before,{...values,pounds:99}),/stale/);
+ assert.throws(()=>editActual(db,s,before,{...values,pounds:99},request),/reused/);
+ const reopened=open(path);try{assert.deepEqual(read(reopened),edited);}finally{reopened.close();}
+ assert.equal(current(edited).planned_pounds,before.planned_pounds);assert.equal(edited.deadline,s.deadline);assert.equal(edited.recordCount,0);
+});
+test('exact edit rejects stale state after completion, skip, and competing adjustment; completed correction keeps rest/counts',t=>{
+ const {db,initial:s}=fixture(t);let next=act(db,ids(s),'complete');
+ assert.throws(()=>editActual(db,s,current(s),{pounds:99,reps:9,rir:2}),/stale/);
+ const saved=next.allSets.find(r=>r.set_id===s.setID);let corrected=editActual(db,next,saved,{pounds:null,reps:9,rir:0});
+ assert.equal(corrected.recordCount,1);assert.equal(corrected.deadline,next.deadline);assert.equal(corrected.allSets[0].completion_attempts,1);
+ assert.throws(()=>editActual(db,corrected,corrected.allSets[0],{pounds:0,reps:null,rir:null}),/missing reps/);
+ next=act(db,ids(corrected),'continueRest');const old=current(next);next=act(db,ids(next),'reps',1001,1);
+ assert.throws(()=>editActual(db,next,old,{pounds:0,reps:10,rir:null}),/stale/);
+ const preSkip=next;next=act(db,ids(next),'skipSet');assert.throws(()=>editActual(db,preSkip,current(preSkip),{pounds:0,reps:10,rir:null}),/stale/);
+});
+test('exact-edit ledger failure rolls actuals and revision back, leaving a retry possible',t=>{
+ const {db,initial:s}=fixture(t);db.exec("CREATE TRIGGER fail_edit BEFORE INSERT ON proof_edit_requests BEGIN SELECT RAISE(ABORT,'injected failure'); END");
+ const request=randomUUID(),v={pounds:55.25,reps:9,rir:null};assert.throws(()=>editActual(db,s,current(s),v,request),/injected/);assert.deepEqual(read(db),s);
+ db.exec('DROP TRIGGER fail_edit');assert.equal(current(editActual(db,s,current(s),v,request)).pounds,55.25);
+});
+test('finish-and-start preserves actuals, marks unperformed sets skipped, and retries find original new session',t=>{
+ const {db,seed,initial}=routineFixture(t);const old=act(db,ids(initial),'complete');const request=randomUUID(),resolution={choice:'finish',sessionID:old.sessionID,token:resolutionToken(old)};
+ const fresh=startRoutine(db,seed,request,()=>seed,resolution);assert.notEqual(fresh.sessionID,old.sessionID);assert.equal(fresh.recordCount,0);
+ const archived=JSON.parse(db.prepare('SELECT archived_state FROM proof_workouts_v6 WHERE session_id=?').get(old.sessionID).archived_state);
+ assert.equal(archived.recordCount,1);assert.ok(archived.finishedAt);assert.equal(archived.allSets[1].skipped_at,5000);assert.equal(archived.allSets[0].pounds,42.25);
+ assert.equal(startRoutine(db,seed,request,()=>{throw Error('should not reload');},resolution).sessionID,fresh.sessionID);
+ assert.throws(()=>startRoutine(db,seed,randomUUID(),()=>seed,resolution),/changed session/);
+ assert.equal(act(db,ids(old),'undo',5001).sessionID,fresh.sessionID);assert.equal(read(db).recordCount,0);
+});
+test('discard-and-start deletes only selected unfinished session, retains older history and request tombstone',t=>{
+ const {db,seed,initial}=routineFixture(t);const first=finishAll(db,initial);let active=startRoutine(db,seed);active=act(db,ids(active),'complete');
+ const prior=db.prepare('SELECT archived_state FROM proof_workouts_v6 WHERE session_id=?').get(first.sessionID).archived_state;
+ const request=randomUUID(),r={choice:'discard',sessionID:active.sessionID,token:resolutionToken(active)};const next=startRoutine(db,seed,request,()=>seed,r);
+ assert.equal(db.prepare('SELECT count(*) n FROM proof_sets_v5 WHERE session_id=?').get(active.sessionID).n,0);
+ const tomb=db.prepare('SELECT discarded_at,source_snapshot FROM proof_workouts_v6 WHERE session_id=?').get(active.sessionID);assert.equal(tomb.discarded_at,5000);assert.equal(tomb.source_snapshot,null);
+ assert.equal(db.prepare('SELECT archived_state FROM proof_workouts_v6 WHERE session_id=?').get(first.sessionID).archived_state,prior);
+ assert.equal(startRoutine(db,seed,request,()=>seed,r).sessionID,next.sessionID);
+});
+test('finish/discard decisions reject intervening edits; new-start failure rolls resolution back',t=>{
+ for(const choice of ['finish','discard']){
+ const {db,seed,initial}=routineFixture(t);const r={choice,sessionID:initial.sessionID,token:resolutionToken(initial)};
+ let changed=act(db,ids(initial),'reps',1000,1);assert.throws(()=>startRoutine(db,seed,randomUUID(),()=>seed,r),/changed workout/);assert.deepEqual(read(db),changed);
+ r.token=resolutionToken(changed);db.exec("CREATE TRIGGER fail_start BEFORE INSERT ON proof_session_v2 BEGIN SELECT RAISE(ABORT,'injected start failure'); END");
+ assert.throws(()=>startRoutine(db,seed,randomUUID(),()=>seed,r),/injected/);assert.deepEqual(read(db),changed);
+ db.exec('DROP TRIGGER fail_start');assert.notEqual(startRoutine(db,seed,randomUUID(),()=>seed,r).sessionID,changed.sessionID);
+ }
+});
+test('v8 additive upgrade preserves zero completed records and active/continued/undone rests; idempotent rerun',t=>{
+ for(const mode of ['active','continued','undone']){
+ const {db,initial}=fixture(t);db.prepare('UPDATE proof_sets_v5 SET pounds=0,reps=0 WHERE set_id=?').run(initial.setID);let s=act(db,ids(initial),'complete');
+ if(mode==='continued')s=act(db,ids(s),'continueRest');if(mode==='undone')s=act(db,undoIDs(s),'undo');
+ db.exec('DROP TRIGGER proof_set_edit_revision;DROP TRIGGER proof_no_completed_skip_insert;DROP TRIGGER proof_no_completed_skip_update;DROP TABLE proof_edit_requests;ALTER TABLE proof_sets_v5 DROP COLUMN skipped_at;ALTER TABLE proof_sets_v5 DROP COLUMN skip_token;ALTER TABLE proof_sets_v5 DROP COLUMN edit_revision;ALTER TABLE proof_session_v2 DROP COLUMN action_token;ALTER TABLE proof_workouts_v6 DROP COLUMN started_at;ALTER TABLE proof_workouts_v6 DROP COLUMN discarded_at;PRAGMA user_version=7');
+ const tables=['proof_sets_v5','proof_session_v2','proof_rests_v2','proof_workouts_v6'];const before=tables.map(table=>db.prepare('SELECT * FROM '+table).all());migrate(db);migrate(db);
+ tables.forEach((table,i)=>{const after=db.prepare('SELECT * FROM '+table).all();before[i].forEach((row,n)=>Object.keys(row).forEach(k=>assert.equal(after[n][k],row[k],table+'.'+k)));});
+ const after=read(db);assert.equal(after.allSets[0].pounds,0);assert.equal(after.allSets[0].reps,0);assert.equal(after.allSets[0].skipped_at,null);assert.equal(after.recordCount,s.recordCount);assert.equal(after.deadline,s.deadline);assert.equal(after.continuedAt,s.continuedAt);assert.equal(after.actionToken,'legacy');
+ }
+});
+
+}
+
+if(isMainThread){
+test('failed batch skip rolls all rows and token back; exact retry can succeed',t=>{
+ const {db,initial:s}=fixture(t);db.exec("CREATE TRIGGER fail_skip BEFORE UPDATE OF skipped_at ON proof_sets_v5 WHEN NEW.ordinal=2 AND NEW.skipped_at IS NOT NULL BEGIN SELECT RAISE(ABORT,'injected skip failure'); END");
+ assert.throws(()=>act(db,ids(s),'finishEarly'),/injected/);assert.deepEqual(read(db),s);
+ db.exec('DROP TRIGGER fail_skip');const done=act(db,ids(s),'finishEarly');assert.equal(done.sets.filter(r=>r.skipped_at!=null).length,3);assert.equal(done.recordCount,0);
+});
+test('v8 migration failure rolls back added columns and version without changing installed actuals',t=>{
+ const {db,initial}=fixture(t);let s=act(db,ids(initial),'complete');
+ db.exec('DROP TRIGGER proof_set_edit_revision;DROP TRIGGER proof_no_completed_skip_insert;DROP TRIGGER proof_no_completed_skip_update;DROP TABLE proof_edit_requests;ALTER TABLE proof_sets_v5 DROP COLUMN skipped_at;ALTER TABLE proof_sets_v5 DROP COLUMN skip_token;ALTER TABLE proof_sets_v5 DROP COLUMN edit_revision;ALTER TABLE proof_session_v2 DROP COLUMN action_token;ALTER TABLE proof_workouts_v6 DROP COLUMN started_at;ALTER TABLE proof_workouts_v6 DROP COLUMN discarded_at;PRAGMA user_version=7');
+ const before=db.prepare('SELECT * FROM proof_sets_v5').all();db.exec('CREATE TABLE proof_edit_requests(collision TEXT)');
+ assert.throws(()=>migrate(db),/already exists/);assert.equal(db.prepare('PRAGMA user_version').get().user_version,7);assert.deepEqual(db.prepare('SELECT * FROM proof_sets_v5').all(),before);
+ db.exec('DROP TABLE proof_edit_requests');migrate(db);assert.equal(read(db).recordCount,s.recordCount);assert.equal(read(db).deadline,s.deadline);
+});
+}
+
+if(isMainThread) test('old Finish/Discard confirmation cannot start a new session after the reviewed workout finishes',t=>{
+ for(const choice of ['finish','discard']){
+  const {db,seed,initial}=routineFixture(t);const resolution={choice,sessionID:initial.sessionID,token:resolutionToken(initial)};
+  const finished=finishAll(db,initial);const before=db.prepare('SELECT * FROM proof_workouts_v6').all();
+  assert.throws(()=>startRoutine(db,seed,randomUUID(),()=>seed,resolution),/changed workout/);
+  assert.deepEqual(read(db),finished);assert.deepEqual(db.prepare('SELECT * FROM proof_workouts_v6').all(),before);
+ }
+});
+
+if(isMainThread){
+ const workerRun=data=>new Promise((resolve,reject)=>{const w=new Worker(__filename,{workerData:data});w.once('error',reject);w.once('exit',code=>code?reject(Error('worker failed')):resolve());});
+ test('competing Skip and Complete preserve exactly one outcome; duplicate Undo skip restores once',async t=>{
+  const {db,path,initial}=fixture(t);
+  await Promise.all(['skipSet','complete'].map(action=>workerRun({path,ids:ids(initial),action})));
+  let s=read(db);assert.equal(Number(s.allSets[0].completed)+Number(s.allSets[0].skipped_at!=null),1);
+  assert.equal(s.recordCount,s.allSets[0].completed);if(!s.allSets[0].completed)assert.equal(s.deadline,null);
+  if(s.awaitingContinue)s=act(db,ids(s),'continueRest');s=act(db,ids(s),'skipSet');const skipped=ids(s);
+  await Promise.all([1,2].map(()=>workerRun({path,ids:skipped,action:'undoSkip'})));
+  const restored=read(db);assert.notEqual(restored.actionToken,skipped.actionToken);assert.deepEqual(act(db,skipped,'undoSkip'),restored);
+ });
+ test('competing Finish and Discard confirmations create only one replacement workout',async t=>{
+  const {db,path,initial,seed}=routineFixture(t);
+  const results=await Promise.allSettled(['finish','discard'].map(choice=>workerRun({path,action:'startRoutine',seed,requestID:randomUUID(),resolution:{choice,sessionID:initial.sessionID,token:resolutionToken(initial)}})));
+  assert.equal(results.filter(r=>r.status==='fulfilled').length,1);assert.equal(results.filter(r=>r.status==='rejected').length,1);
+  assert.notEqual(read(db).sessionID,initial.sessionID);assert.equal(db.prepare('SELECT count(*) n FROM proof_workouts_v6').get().n,2);
+ });
+ test('v8 upgrade retains archived history and independent active-session data byte for byte',t=>{
+  const {db,seed,initial}=routineFixture(t);finishAll(db,initial);let active=startRoutine(db,seed);active=act(db,ids(active),'complete');active=act(db,undoIDs(active),'undo');
+  db.exec('DROP TRIGGER proof_set_edit_revision;DROP TRIGGER proof_no_completed_skip_insert;DROP TRIGGER proof_no_completed_skip_update;DROP TABLE proof_edit_requests;ALTER TABLE proof_sets_v5 DROP COLUMN skipped_at;ALTER TABLE proof_sets_v5 DROP COLUMN skip_token;ALTER TABLE proof_sets_v5 DROP COLUMN edit_revision;ALTER TABLE proof_session_v2 DROP COLUMN action_token;ALTER TABLE proof_workouts_v6 DROP COLUMN started_at;ALTER TABLE proof_workouts_v6 DROP COLUMN discarded_at;PRAGMA user_version=7');
+  const before=db.prepare('SELECT session_id,source_snapshot,archived_state FROM proof_workouts_v6 ORDER BY session_id').all();const actuals=db.prepare('SELECT * FROM proof_sets_v5').all();migrate(db);migrate(db);
+  assert.deepEqual(db.prepare('SELECT session_id,source_snapshot,archived_state FROM proof_workouts_v6 ORDER BY session_id').all(),before);
+  const after=db.prepare('SELECT * FROM proof_sets_v5').all();actuals.forEach((r,i)=>Object.keys(r).forEach(k=>assert.equal(after[i][k],r[k])));
+  assert.equal(read(db).sessionID,active.sessionID);assert.equal(read(db).deadline,active.deadline);assert.equal(read(db).undoneAt,active.undoneAt);
+ });
+}

@@ -3,6 +3,18 @@ public import ExpoModulesCore
 public final class LockScreenProofModule: Module {
     public func definition() -> ModuleDefinition {
         Name("LockScreenProof")
+        AsyncFunction("organizer") { (section: String) async throws -> String in
+            try await RoutineService.shared.organizer(section)
+        }
+        AsyncFunction("saveOrganizer") { (section: String, revision: Int, document: String) async throws in
+            try await RoutineService.shared.saveOrganizer(section, revision: revision, document: document)
+        }
+        AsyncFunction("calendarDays") { () async throws -> String in
+            try await RoutineService.shared.calendar()
+        }
+        AsyncFunction("saveCalendarDay") { (day: String, revision: Int, document: String) async throws in
+            try await RoutineService.shared.saveDay(day, revision: revision, document: document)
+        }
         AsyncFunction("routineLibrary") { () async throws -> String in
             try await RoutineService.shared.library()
         }
@@ -11,6 +23,15 @@ public final class LockScreenProofModule: Module {
         }
         AsyncFunction("saveRoutine") { (json: String) async throws -> String in
             try await RoutineService.shared.save(json)
+        }
+        AsyncFunction("deleteRoutine") { (id: String, revision: Int) async throws in
+            try await RoutineService.shared.delete(id, revision: revision)
+        }
+        AsyncFunction("routineSchedule") { () async throws -> String in
+            try await RoutineService.shared.schedule()
+        }
+        AsyncFunction("assignRoutineDay") { (day: String, id: String?) async throws in
+            try await RoutineService.shared.assign(day, id: id)
         }
         AsyncFunction("newRoutineStartRequest") { () async -> String in
             await ProofCoordinator.shared.newStartRequest()
@@ -21,8 +42,18 @@ public final class LockScreenProofModule: Module {
             } catch ProofError.unfinishedWorkout {
                 // Expected refusal, not an Expo UnexpectedException. Keep a stable diagnostic code.
                 // All other errors still reject with their original diagnostics.
-                return ["startRejection": "workout_unfinished"]
+                let active = try await ProofCoordinator.shared.read()
+                return ["startRejection": "workout_unfinished", "activeSession": active?.sessionID ?? "", "resolutionToken": active?.resolutionToken ?? ""]
             }
+        }
+        AsyncFunction("resolveAndStartRoutine") { (id: String, revision: Int, requestID: String, resolution: String, sessionID: String, token: String) async throws -> [String: Any] in
+            try await ProofCoordinator.shared.startRoutine(id: id, revision: revision, requestID: requestID, resolution: resolution, expectedSession: sessionID, expectedToken: token).dictionary
+        }
+        AsyncFunction("editWorkoutSet") { (json: String) async throws -> [String: Any] in
+            try await ProofCoordinator.shared.editSet(json).dictionary
+        }
+        AsyncFunction("workoutHistory") { () async throws -> [[String: Any]] in
+            try await ProofCoordinator.shared.history()
         }
         AsyncFunction("start") { () async throws -> [String: Any] in
             try await ProofCoordinator.shared.start().dictionary

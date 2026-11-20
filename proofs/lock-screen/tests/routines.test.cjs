@@ -187,10 +187,76 @@ test('unknown exercise and duplicate routine name leave saved plans intact',t=>{
 });
 test('routine operations leave a populated installed workout database byte-for-byte unchanged',t=>{
   const {db,dir}=fixture(t);const path=join(dir,'LockScreenProof.sqlite3');const workout=new DatabaseSync(path);
-  workout.exec(workoutSQL.schema);[...workoutSQL.schemaV2,...workoutSQL.migrationsV3,...workoutSQL.migrationsV4,...workoutSQL.migrationsV5,...workoutSQL.migrationsV6,...workoutSQL.migrationsV7].forEach(q=>workout.exec(q));
+  workout.exec(workoutSQL.schema);[...workoutSQL.schemaV2,...workoutSQL.migrationsV3,...workoutSQL.migrationsV4,...workoutSQL.migrationsV5,...workoutSQL.migrationsV6,...workoutSQL.migrationsV7,...workoutSQL.migrationsV8].forEach(q=>workout.exec(q));
   const p={sessionID:'fixture',setID:'fixture:exercise:1:set:1',restID:'none',newRestID:'saved-rest',now:1000};
   for(const name of ['startSession','startExercises','startSets','registerFixture','countCompleteRequest','complete','createRest','advanceRest'])run(workout,workoutSQL[name],p);
   workout.close();const hash=()=>createHash('sha256').update(readFileSync(path)).digest('hex');const before=hash();
   const e=exercise(db,'Saved name');let plan=save(db,model.toPlan(draft('Plan',e.id)));plan=save(db,{...plan,exercises:[]});list(db);
-  assert.equal(hash(),before);assert.equal(plan.exercises.length,0);assert.equal(db.prepare(sql.exercises).all().length,1);
+  run(db,sql.assignDay,{day:'2026-11-16',id:plan.id});deletePlan(db,plan.id,plan.revision);assert.equal(hash(),before);assert.equal(plan.exercises.length,0);assert.equal(db.prepare(sql.exercises).all().length,1);
+});
+// Deletion/scheduling use production SQL in JS transactions; not Swift execution.
+function deletePlan(db,id,revision){return tx(db,()=>{if(!db.prepare('SELECT id FROM routine_plans WHERE id=?').get(id))return;assert.equal(run(db,sql.deleteRoutine,{id,revision}),1,'revision conflict');run(db,sql.clearSchedule,{id});});}
+test('delete routine preserves reusable exercise identity and independent plans; stale delete rolls back',t=>{
+ const {db}=fixture(t),e=exercise(db,'Fictional shared press');let a=save(db,model.toPlan(draft('A',e.id))),b=save(db,model.toPlan(draft('B',e.id)));
+ run(db,sql.assignDay,{day:'2026-11-16',id:a.id});a=save(db,{...a,name:'Updated A'});
+ assert.throws(()=>deletePlan(db,a.id,1),/revision conflict/);assert.equal(list(db).length,2);assert.equal(db.prepare(sql.schedule).all().length,1);
+ deletePlan(db,a.id,a.revision);deletePlan(db,a.id,a.revision);assert.deepEqual(list(db),[b]);assert.ok(db.prepare(sql.exerciseExists).get({id:e.id}));assert.equal(db.prepare(sql.schedule).all().length,0);
+});
+test('week assignments persist, reject unknown/deleted routines, and clear only selected date',t=>{
+ const {db,path}=fixture(t),e=exercise(db,'Fictional weekly exercise');const a=save(db,model.toPlan(draft('Push',e.id))),b=save(db,model.toPlan(draft('Pull',e.id)));
+ assert.equal(run(db,sql.assignDay,{day:'2026-11-16',id:a.id}),1);run(db,sql.assignDay,{day:'2026-11-18',id:b.id});run(db,sql.assignDay,{day:'2026-11-16',id:b.id});
+ assert.equal(run(db,sql.assignDay,{day:'2026-11-20',id:'missing'}),0);
+ const reopened=open(path);try{assert.deepEqual(reopened.prepare(sql.schedule).all().map(r=>[r.day,r.routine_id]),[['2026-11-16',b.id],['2026-11-18',b.id]]);}finally{reopened.close();}
+ run(db,sql.clearDay,{day:'2026-11-16'});assert.equal(db.prepare(sql.schedule).all().length,1);assert.equal(list(db).length,2);
+});
+
+test('delete rolls back routine removal when schedule cleanup fails; retry preserves other dates',t=>{
+ const {db}=fixture(t),e=exercise(db,'Fictional deletion');const a=save(db,model.toPlan(draft('A',e.id))),b=save(db,model.toPlan(draft('B',e.id)));
+ run(db,sql.assignDay,{day:'2026-11-16',id:a.id});run(db,sql.assignDay,{day:'2026-11-17',id:b.id});
+ db.exec("CREATE TRIGGER fail_calendar_cleanup BEFORE DELETE ON routine_schedule BEGIN SELECT RAISE(ABORT,'injected cleanup failure'); END");
+ assert.throws(()=>deletePlan(db,a.id,a.revision),/injected/);assert.equal(list(db).length,2);assert.equal(db.prepare(sql.schedule).all().length,2);
+ db.exec('DROP TRIGGER fail_calendar_cleanup');deletePlan(db,a.id,a.revision);assert.deepEqual(list(db),[b]);assert.equal(db.prepare(sql.schedule).all()[0].routine_id,b.id);
+ assert.equal(run(db,sql.assignDay,{day:'2026-11-18',id:a.id}),0);
+});
+test('calendar migration preserves date, routine and stable occurrence through retries and stale writes',()=>{
+ const db=new DatabaseSync(':memory:');sql.schema.slice(0,3).forEach(q=>db.exec(q));
+ db.prepare('INSERT INTO routine_plans VALUES (?,?,?,?)').run('r',3,'Fictional','{}');
+ db.prepare(sql.assignDay).run({day:'2026-11-18',id:'r'});sql.schema.forEach(q=>db.exec(q));
+ const read=()=>db.prepare('SELECT * FROM calendar_days').get(),before=read();sql.schema.forEach(q=>db.exec(q));assert.deepEqual(read(),before);
+ const item=JSON.parse(before.document).items[0];assert.equal(item.routineID,'r');assert.equal(item.slot,'Any time');assert.match(item.id,/^[0-9a-f-]{36}$/);
+ const save=db.prepare(sql.calendarSave),change={day:before.day,rev:1,doc:JSON.stringify({goal:null,items:[]})};
+ assert.equal(save.run(change).changes,1);assert.equal(save.run(change).changes,0);sql.schema.forEach(q=>db.exec(q));assert.deepEqual(JSON.parse(read().document).items,[]);
+ assert.equal(db.prepare('SELECT revision FROM routine_plans').get().revision,3);db.close();
+});
+test('daily water uses checked quantities; checklist, slot and workout identities stay distinct',()=>{
+ const {calendarProgress}=require('../workoutModel.ts');
+ const items=[32,34,34].map((oz,n)=>({kind:'water',id:String(n),oz,slot:n?'Afternoon':'Morning',children:[{checked:false}]}));
+ const day={goal:null,items};const progress=()=>calendarProgress(day,[]);
+ assert.equal(progress().goal,100);for(const [i,total] of [32,66,100].entries()){items[i].children[0].checked=true;assert.equal(progress().total,total);}
+ assert.equal(progress().done,true);items[0].children[0].checked=false;assert.equal(progress().done,false);day.goal=60;assert.equal(progress().total,68);assert.equal(progress().done,true);assert.equal(items[0].children[0].checked,false);
+ const group={kind:'supplements',children:[{checked:true},{checked:false}]};items.push(group);assert.equal(progress().done,false);group.children[1].checked=true;assert.equal(progress().done,true);
+ const a={kind:'routine',routineID:'r',id:'a'},b={...a,id:'b'};const p=calendarProgress({goal:null,items:[a,b]},[{startRequestID:'a',workoutFinished:true}]);assert.equal(p.complete(a),true);assert.equal(p.complete(b),false);assert.equal(p.done,false);assert.equal(calendarProgress({goal:null,items:[]},[]).done,false);
+});
+test('organizer migration and stale saves preserve routines, dates, check-in history and group independence',()=>{
+ const db=new DatabaseSync(':memory:');sql.schema.slice(0,-1).forEach(q=>db.exec(q));
+ db.exec("INSERT INTO routine_plans VALUES('r',1,'Fictional','{}'); INSERT INTO calendar_days VALUES('2026-11-19',2,'{}')");
+ sql.schema.forEach(q=>db.exec(q));const write=(section,rev,data)=>db.prepare(sql.organizerSave).run({section,rev,doc:JSON.stringify(data)}).changes;
+ const history={goals:[{id:'goal',archived:false}],checks:[{goal:'goal',date:'2026-11-18',value:'0'}],scans:[{source:'Example',date:'2026-11-18',rmr:''}]};
+ assert.equal(write('accountability',0,history),1);assert.equal(write('groups',0,[{id:'g',members:['r']}]),1);
+ assert.equal(write('accountability',1,{...history,goals:[{id:'goal',archived:true}]}),1);assert.equal(write('accountability',1,{}),0);
+ assert.equal(write('groups',1,[]),1);sql.schema.forEach(q=>db.exec(q));
+ assert.deepEqual(JSON.parse(db.prepare("SELECT document FROM organizer_sections WHERE section='accountability'").get().document).checks,history.checks);
+ assert.equal(db.prepare('SELECT id FROM routine_plans').get().id,'r');assert.equal(db.prepare('SELECT revision FROM calendar_days').get().revision,2);db.close();
+});
+test('exercise moves carry dirty rest and set values to boundaries without changing the original plan',()=>{
+ const a=model.newEntry('A'),b=model.newEntry('B'),c=model.newEntry('C');
+ a.restSeconds='0';c.restSeconds='30';b.trackRest=false;b.restSeconds='090';b.sets[1]={pounds:'42.50',reps:'0'};const plan={...model.newPlan(),name:'Fictional',exercises:[a,b,c]};
+ const top=model.moveEntry(plan,1,-1),bottom=model.moveEntry(top,0,2);
+ assert.deepEqual(bottom.exercises,[a,c,b]);assert.equal(bottom.exercises[2],b);assert.deepEqual(plan.exercises,[a,b,c]);
+ assert.equal(model.moveEntry(bottom,2,1),bottom);assert.equal(model.moveEntry(top,0,-1),top);
+ const reopened=model.editPlan(model.toPlan(bottom));assert.equal(reopened.exercises[2].restSeconds,'090');assert.equal(reopened.exercises[2].sets[1].pounds,'42.5');assert.equal(reopened.exercises[2].sets[1].reps,'0');
+});
+test('quote uses the local calendar key across reopening and month boundaries',()=>{
+ const {quoteForDay,dailyQuotes,localDay}=require('../workoutModel.ts');const a=new Date(2026,10,30,23,59),b=new Date(2026,11,1,0,0);
+ assert.equal(quoteForDay(localDay(a)),quoteForDay(localDay(new Date(2026,10,30,2))));assert.notEqual(quoteForDay(localDay(a)),quoteForDay(localDay(b)));assert.equal(dailyQuotes.length,10);
 });

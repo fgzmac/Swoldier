@@ -1,7 +1,11 @@
 {
   "schema": [
     "CREATE TABLE IF NOT EXISTS routine_exercises (id TEXT PRIMARY KEY, name TEXT NOT NULL UNIQUE COLLATE NOCASE)",
-    "CREATE TABLE IF NOT EXISTS routine_plans (id TEXT PRIMARY KEY, revision INTEGER NOT NULL CHECK(revision > 0), name TEXT NOT NULL UNIQUE COLLATE NOCASE, document TEXT NOT NULL)"
+    "CREATE TABLE IF NOT EXISTS routine_plans (id TEXT PRIMARY KEY, revision INTEGER NOT NULL CHECK(revision > 0), name TEXT NOT NULL UNIQUE COLLATE NOCASE, document TEXT NOT NULL)",
+    "CREATE TABLE IF NOT EXISTS routine_schedule (day TEXT PRIMARY KEY, routine_id TEXT NOT NULL)",
+    "CREATE TABLE IF NOT EXISTS calendar_days(day TEXT PRIMARY KEY, revision INTEGER NOT NULL, document TEXT NOT NULL CHECK(json_valid(document)))",
+    "INSERT OR IGNORE INTO calendar_days(day,revision,document) SELECT s.day,1,json_object('goal',null,'items',json_array(json_object('kind','routine','id',lower(hex(randomblob(4))||'-'||hex(randomblob(2))||'-4'||substr(hex(randomblob(2)),2)||'-8'||substr(hex(randomblob(2)),2)||'-'||hex(randomblob(6))),'name',p.name,'routineID',p.id,'slot','Any time','children',json_array()))) FROM routine_schedule s JOIN routine_plans p ON p.id=s.routine_id WHERE NOT EXISTS (SELECT 1 FROM calendar_days c WHERE c.day=s.day)",
+    "CREATE TABLE IF NOT EXISTS organizer_sections (section TEXT PRIMARY KEY CHECK(section IN ('groups','accountability')),revision INTEGER NOT NULL,document TEXT NOT NULL CHECK(json_valid(document)))"
   ],
   "exercises": "SELECT id,name FROM routine_exercises ORDER BY name COLLATE NOCASE,id",
   "routines": "SELECT document FROM routine_plans ORDER BY name COLLATE NOCASE,id",
@@ -9,5 +13,12 @@
   "exerciseExists": "SELECT id FROM routine_exercises WHERE id=:id",
   "insertExercise": "INSERT INTO routine_exercises (id,name) VALUES (:id,:name) ON CONFLICT(name) DO NOTHING",
   "insertRoutine": "INSERT INTO routine_plans (id,revision,name,document) VALUES (:id,1,:name,:document)",
-  "updateRoutine": "UPDATE routine_plans SET revision=revision+1,name=:name,document=:document WHERE id=:id AND revision=CAST(:revision AS INTEGER)"
+  "updateRoutine": "UPDATE routine_plans SET revision=revision+1,name=:name,document=:document WHERE id=:id AND revision=CAST(:revision AS INTEGER)",
+  "deleteRoutine": "DELETE FROM routine_plans WHERE id=:id AND revision=CAST(:revision AS INTEGER)",
+  "clearSchedule": "DELETE FROM routine_schedule WHERE routine_id=:id",
+  "schedule": "SELECT day,routine_id FROM routine_schedule ORDER BY day",
+  "assignDay": "INSERT INTO routine_schedule(day,routine_id) SELECT :day,:id WHERE EXISTS (SELECT 1 FROM routine_plans WHERE id=:id) ON CONFLICT(day) DO UPDATE SET routine_id=excluded.routine_id",
+  "clearDay": "DELETE FROM routine_schedule WHERE day=:day",
+  "calendarSave": "INSERT INTO calendar_days(day,revision,document) SELECT :day,1,:doc WHERE CAST(:rev AS INTEGER)=0 OR EXISTS(SELECT 1 FROM calendar_days WHERE day=:day AND revision=CAST(:rev AS INTEGER)) ON CONFLICT(day) DO UPDATE SET revision=revision+1,document=excluded.document WHERE revision=CAST(:rev AS INTEGER)",
+  "organizerSave": "INSERT INTO organizer_sections(section,revision,document) SELECT :section,1,:doc WHERE CAST(:rev AS INTEGER)=0 OR EXISTS(SELECT 1 FROM organizer_sections WHERE section=:section AND revision=CAST(:rev AS INTEGER)) ON CONFLICT(section) DO UPDATE SET revision=revision+1,document=excluded.document WHERE revision=CAST(:rev AS INTEGER)"
 }

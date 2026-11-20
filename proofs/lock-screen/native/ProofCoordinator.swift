@@ -35,10 +35,10 @@ actor ProofCoordinator {
 
     func newStartRequest() -> String { UUID().uuidString }
 
-    func startRoutine(id: String, revision: Int, requestID: String) async throws -> ProofSnapshot {
+    func startRoutine(id: String, revision: Int, requestID: String, resolution: String? = nil, expectedSession: String? = nil, expectedToken: String? = nil) async throws -> ProofSnapshot {
         await acquire()
         defer { release() }
-        let snapshot = try ProofStore().startRoutine(id: id, revision: revision, requestID: requestID)
+        let snapshot = try ProofStore().startRoutine(id: id, revision: revision, requestID: requestID, resolution: resolution, expectedSession: expectedSession, expectedToken: expectedToken)
         try await show(snapshot)
         return snapshot
     }
@@ -76,27 +76,36 @@ actor ProofCoordinator {
         return snapshot
     }
 
-    func apply(sessionID: String, setID: String, restID: String, action: ProofAction) async {
+    func apply(sessionID: String, setID: String, restID: String, actionToken: String = "legacy", action: ProofAction) async {
         await acquire()
         defer { release() }
         do {
             let result = try ProofStore().apply(sessionID: sessionID, setID: setID,
-                                               restID: restID, action: action)
+                                               restID: restID, actionToken: actionToken, action: action)
             guard let snapshot = result.snapshot, snapshot.sessionID == sessionID else { return }
             for activity in activities(sessionID) {
-                await activity.update(publication(content(snapshot, notice: result.notice)))
+                await activity.update(publication(content(snapshot, notice: result.notice, showOptions: action == .options && result.notice == nil)))
             }
         } catch {
             for activity in activities(sessionID) {
                 var lastDisplayed = activity.content.state
                 lastDisplayed.saveFailed = true
                 lastDisplayed.failedAction = ProofFailedAction(
-                    sessionID: sessionID, setID: setID, restID: restID, action: action)
+                    sessionID: sessionID, setID: setID, restID: restID, action: action, actionToken: actionToken)
                 // Keep the exact failed request; the view must not present old state as success.
                 await activity.update(publication(content(lastDisplayed)))
             }
         }
     }
+
+    func editSet(_ json: String) async throws -> ProofSnapshot {
+        await acquire(); defer { release() }
+        let snapshot = try ProofStore().editSet(json)
+        try await show(snapshot)
+        return snapshot
+    }
+
+    func history() throws -> [[String: Any]] { try ProofStore().history() }
 
     func reset() async throws {
         await acquire()
@@ -108,7 +117,7 @@ actor ProofCoordinator {
         }
     }
 
-    private func content(_ snapshot: ProofSnapshot, notice: String? = nil) -> ActivityContent<ProofActivity.ContentState> {
+    private func content(_ snapshot: ProofSnapshot, notice: String? = nil, showOptions: Bool = false) -> ActivityContent<ProofActivity.ContentState> {
         content(ProofActivity.ContentState(
             pounds: snapshot.displaySet.pounds, reps: snapshot.displaySet.reps, rir: snapshot.displaySet.rir, completed: snapshot.completed,
             restDeadline: snapshot.restDeadline.map { Date(timeIntervalSince1970: $0) },
@@ -128,7 +137,7 @@ actor ProofCoordinator {
             exerciseID: snapshot.currentExercise.exerciseID, exerciseName: snapshot.currentExercise.name,
             exerciseNumber: snapshot.currentExercise.ordinal, exerciseCount: snapshot.exercises.count,
             setCount: snapshot.currentSets.count, canChooseNext: snapshot.canChooseNext,
-            hasNextExercise: snapshot.hasNextExercise, workoutFinished: snapshot.workoutFinished
+            hasNextExercise: snapshot.hasNextExercise, nextExerciseName: snapshot.nextExerciseName, actionToken: snapshot.actionToken, undoSkipToken: snapshot.undoSkipToken, restSetSkipped: snapshot.sets.first(where: { $0.setID == snapshot.restSetID })?.skippedAt != nil, showOptions: showOptions, workoutFinished: snapshot.workoutFinished
         ))
     }
 

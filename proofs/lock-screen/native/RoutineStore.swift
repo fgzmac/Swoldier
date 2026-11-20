@@ -43,9 +43,10 @@ struct RoutineLibrary: Codable, Sendable {
     let routines: [RoutinePlan]
 }
 struct RoutineSQL: Decodable {
+    let calendarSave, organizerSave: String
     let schema: [String]
     let exercises, routines, exerciseByName, exerciseExists: String
-    let insertExercise, insertRoutine, updateRoutine: String
+    let insertExercise, insertRoutine, updateRoutine, deleteRoutine, clearSchedule, schedule, assignDay, clearDay: String
 }
 enum RoutineError: LocalizedError {
     case invalid(String), storage, conflict
@@ -61,9 +62,20 @@ enum RoutineError: LocalizedError {
 // Foreground-only routine API. Never opens ProofStore or publishes a Live Activity.
 actor RoutineService {
     static let shared = RoutineService()
+    func organizer(_ section: String) throws -> String { try RoutineStore().organizer(section) }
+    func saveOrganizer(_ section: String, revision: Int, document: String) throws {
+        try RoutineStore().saveOrganizer(section, revision: revision, document: document)
+    }
+    func calendar() throws -> String { try RoutineStore().calendar() }
+    func saveDay(_ day: String, revision: Int, document: String) throws {
+        try RoutineStore().saveDay(day, revision: revision, document: document)
+    }
     func library() throws -> String { try RoutineStore().library() }
     func createExercise(_ name: String) throws -> String { try RoutineStore().createExercise(name) }
     func save(_ json: String) throws -> String { try RoutineStore().save(json) }
+    func delete(_ id: String, revision: Int) throws { try RoutineStore().delete(id, revision: revision) }
+    func schedule() throws -> String { try RoutineStore().schedule() }
+    func assign(_ day: String, id: String?) throws { try RoutineStore().assign(day, id: id) }
 }
 
 final class RoutineStore {
@@ -99,6 +111,51 @@ final class RoutineStore {
                 try JSONDecoder().decode(RoutinePlan.self, from: Data($0[0].utf8))
             }
             return try encode(RoutineLibrary(exercises: exercises, routines: routines))
+        }
+    }
+
+    func organizer(_ section: String) throws -> String {
+        try encode(rows("SELECT revision,document FROM organizer_sections WHERE section=:section", ["section": section]))
+    }
+    func saveOrganizer(_ section: String, revision: Int, document: String) throws {
+        try transaction {
+            guard try run(sql.organizerSave, ["section":section, "rev":String(revision), "doc":document]) == 1 else {
+                throw RoutineError.conflict
+            }
+        }
+    }
+    func calendar() throws -> String {
+        try encode(rows("SELECT day,revision,document FROM calendar_days ORDER BY day"))
+    }
+    func saveDay(_ day: String, revision: Int, document: String) throws {
+        try transaction {
+            guard try run(sql.calendarSave, ["day": day, "rev": String(revision), "doc": document]) == 1 else {
+                throw RoutineError.invalid("Calendar changed. Review this date and try again.")
+            }
+        }
+    }
+    func delete(_ id: String, revision: Int) throws {
+        try transaction {
+            let params = ["id": id, "revision": String(revision)]
+            if try rows("SELECT id FROM routine_plans WHERE id=:id", params).isEmpty { return }
+            guard try run(sql.deleteRoutine, params) == 1 else { throw RoutineError.conflict }
+            try run(sql.clearSchedule, params)
+        }
+    }
+    func schedule() throws -> String {
+        try transaction(immediate: false) {
+            let result = try rows(sql.schedule).map { ["day": $0[0], "routineID": $0[1]] }
+            return try encode(result)
+        }
+    }
+    func assign(_ day: String, id: String?) throws {
+        let formatter = DateFormatter(); formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.timeZone = TimeZone(secondsFromGMT: 0); formatter.dateFormat = "yyyy-MM-dd"; formatter.isLenient = false
+        guard let date = formatter.date(from: day), formatter.string(from: date) == day else { throw RoutineError.invalid("Choose a valid calendar date.") }
+        try transaction {
+            if let id {
+                guard try run(sql.assignDay, ["day": day, "id": id]) == 1 else { throw RoutineError.conflict }
+            } else { try run(sql.clearDay, ["day": day]) }
         }
     }
 

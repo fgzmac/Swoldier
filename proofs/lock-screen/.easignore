@@ -25,3 +25,8 @@ plugins/*
 !routineModel.ts
 !native/RoutineStore.swift
 !native/RoutineSQL.json
+
+!workoutModel.ts
+!SetEditor.tsx
+!WeekPlanner.tsx
+!Organizer.tsx

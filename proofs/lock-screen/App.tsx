@@ -1,227 +1,84 @@
+import {Tracker,Action} from "./Organizer";
+import {localDay,quoteForDay} from "./workoutModel";
 import RoutineEditor from './RoutineEditor';
-import type { RoutineModule } from './RoutineEditor';
-import { requireOptionalNativeModule } from 'expo';
-import { useEffect, useRef, useState } from 'react';
-import { Alert, AppState, Button, Platform, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
+import SetEditor from './SetEditor';
+import WeekPlanner from './WeekPlanner';
+import {setLink,setForLink} from './workoutModel';
+import type {ProofModule,Snapshot,WorkoutSet} from './workoutModel';
+import {requireOptionalNativeModule} from 'expo';
+import {useEffect,useRef,useState} from 'react';
+import {Alert,AppState,Button,Linking,Platform,Pressable,SafeAreaView,ScrollView,StyleSheet,Text,View} from 'react-native';
+const proof=Platform.OS==='ios'?requireOptionalNativeModule<ProofModule>('LockScreenProof'):null;
+export default function App(){
+ const [tab,T]=useState<'workout'|'routines'|'week'>('workout'),[saved,S]=useState<Snapshot|null>(null),[history,H]=useState<Snapshot[]>([]),[selected,Q]=useState<Snapshot|null>(null);
+ const [edit,D]=useState<{key:number;snapshot:Snapshot;set:WorkoutSet}|null>(null),[message,M]=useState(''),[busy,B]=useState(false),[debug,G]=useState(false),[targets,P]=useState(false);
+ const routineLeave=useRef<(action:()=>void)=>void>(action=>action());
+ const editorLeave=useRef<(action:()=>void)=>void>(action=>action());
+ const navigate=useRef<(action:()=>void)=>void>(action=>action());
+ const editorKey=useRef(0),linkRequest=useRef(0);
+ navigate.current=action=>{if(edit)editorLeave.current(action);else if(tab==='routines')routineLeave.current(action);else action();};
+ const lock=useRef(false);const revision=useRef(0);
+ async function refresh(){if(!proof||lock.current)return;const token=++revision.current;try{const value=await proof.read();if(token===revision.current)S(value);}catch{M('Could not load the workout. Try again.');}}
+ async function refreshHistory(){if(!proof)return;try{H(await proof.workoutHistory());}catch{M('Could not load earlier workouts. Current data has not been removed.');}}
+ async function link(url:string){
+  const target=setLink(url);if(!target||!proof)return;const request=++linkRequest.current;
+  async function inspect(){
+   return setForLink(await proof!.read(),target!);
+  }
+  try{
+   await inspect();if(request!==linkRequest.current)return;
+   navigate.current(()=>{void (async()=>{
+    try{const selected=await inspect();if(request!==linkRequest.current)return;
+     revision.current++;S(selected.snapshot);D({key:++editorKey.current,...selected});T('workout');Q(null);M('');
+    }catch(error){M(error instanceof Error?error.message:'Could not open that set.');}
+   })();});
+  }catch(error){if(request===linkRequest.current)M(error instanceof Error?error.message:'Could not open that set.');}
+ }
 
-type Snapshot = {
-  sessionID: string;
-  routineID: string | null;
-  routineName: string | null;
-  routineRevision: number | null;
-  setID: string;
-  restID: string;
-  setNumber: number;
-  plannedSetsRecorded: boolean;
-  sets: {
-    setID: string; number: number; plannedPounds: number | null; plannedReps: number | null; exerciseID: string; isAdded: boolean;
-    pounds: number | null; reps: number | null; rir: number | null; completed: boolean; completionAttempts: number;
-  }[];
-  exerciseID: string;
-  exerciseName: string;
-  exerciseNumber: number;
-  exerciseCount: number;
-  setCount: number;
-  exercises: { exerciseID: string; name: string; number: number; finishedAt: number | null }[];
-  canChooseNext: boolean;
-  hasNextExercise: boolean;
-  workoutFinished: boolean;
-  finishedAt: number | null;
-  pounds: number | null;
-  reps: number | null;
-  rir: number | null;
-  completed: boolean;
-  completionAttempts: number;
-  recordCount: number;
-  restDeadline: number | null;
-  restSkippedAt: number | null;
-  restContinuedAt: number | null;
-  restSetID: string | null;
-  restUndoneAt: number | null;
-  awaitingContinue: boolean;
-  restState: 'not_started' | 'running' | 'expired' | 'skipped' | 'disabled';
-  restRemainingSeconds: number;
-};
+ useEffect(()=>{void refresh();void refreshHistory();void Linking.getInitialURL().then(url=>{if(url)void link(url);});const listener=Linking.addEventListener('url',e=>void link(e.url));const state=AppState.addEventListener('change',s=>{if(s==='active'){void refresh();void refreshHistory();}});return()=>{revision.current++;listener.remove();state.remove();};},[]);
+ useEffect(()=>{if(saved?.restState!=='running')return;const timer=setInterval(()=>{if(AppState.currentState==='active')void refresh();},1000);return()=>clearInterval(timer);},[saved?.restState,saved?.restDeadline]);
+ async function fixture(reset=false){if(!proof||lock.current)return;lock.current=true;B(true);try{if(reset){await proof.reset();S(null);}else S(await proof.start());}catch(e){M(String(e));}finally{lock.current=false;B(false);}}
+ const [today,setToday]=useState(localDay(new Date())),[past,showPast]=useState(false);
+ useEffect(()=>{let alarm:ReturnType<typeof setTimeout>;function sync(){clearTimeout(alarm);const now=new Date();setToday(localDay(now));const next=new Date(now);next.setHours(24,0,0,0);alarm=setTimeout(sync,next.getTime()-now.getTime());}sync();const sub=AppState.addEventListener('change',s=>{if(s==='active')sync()});return()=>{clearTimeout(alarm);sub.remove()};},[]);
+ const [expanded,setExpanded]=useState<Record<string,boolean>>({});
+ function workoutCard(shown:Snapshot, archived:boolean){
+ const open=!!expanded[shown.sessionID];
+ return <View key={shown.sessionID} style={styles.card}><Pressable accessibilityRole="button" accessibilityState={{expanded:open}} onPress={()=>setExpanded(x=>({...x,[shown.sessionID]:!open}))}>
+ <Text style={styles.title}>{open?'▾':'▸'} {shown.routineName??'Fictional workout'}</Text>
+ <Text>{shown.workoutFinished?'Completed':'In progress'} · {shown.recordCount} recorded · {shown.sets.filter(s=>s.skippedAt!=null).length} skipped</Text>
+ {(shown.finishedAt??shown.startedAt)!=null&&<Text>{new Date((shown.finishedAt??shown.startedAt)!*1000).toLocaleDateString()}</Text>}</Pressable>
+ {open&&<> {shown.exercises.map(exercise=><View key={exercise.exerciseID} style={[styles.card,exercise.exerciseID===shown.exerciseID&&!shown.workoutFinished&&styles.activeCard]}>
+ <Text style={styles.title}>{exercise.name}</Text><Text style={styles.muted}>{exercise.finishedAt!=null?'Finished':exercise.exerciseID===shown.exerciseID?'Current exercise':'Upcoming'}</Text>
+ {shown.sets.filter(s=>s.exerciseID===exercise.exerciseID).map(set=><View key={set.setID} style={styles.setRow}>
+ <Text style={styles.setTitle}>Set {set.number} · {set.skippedAt!=null?'Skipped':set.completed?'Recorded':'Draft'}{set.isAdded?' · Added today':''}</Text>
+ {set.skippedAt==null&&<Text style={styles.actual}>{set.pounds??'—'} lb × {set.reps??'—'} · RIR {set.rir??'—'}</Text>}
+ {targets&&<Text style={styles.muted}>{set.isAdded?'No routine target':`Target: ${set.plannedPounds??'—'} lb × ${set.plannedReps??'—'}`}</Text>}
+ {!archived&&set.skippedAt==null&&<Action title="Edit Set" onPress={()=>{if(saved){linkRequest.current++;D({key:++editorKey.current,snapshot:saved,set});}}}/>}
+ </View>)}
+ </View>)}<Button title={targets?'Hide routine targets':'Show routine targets'} onPress={()=>P(!targets)}/>
+</>}</View>;
+ }
+ const shown=saved;
+ if(edit&&proof)return <SafeAreaView style={styles.screen}><SetEditor key={edit.key} native={proof} registerLeave={guard=>{editorLeave.current=guard;}} snapshot={edit.snapshot} set={edit.set} close={()=>{linkRequest.current++;D(null);void refresh();}} saved={value=>{linkRequest.current++;revision.current++;S(value);D(null);M('Set updated.');}}/>{!!message&&<Text style={styles.message} accessibilityRole="alert">{message}</Text>}</SafeAreaView>;
+ return <SafeAreaView style={styles.screen}>
 
-type ProofModule = RoutineModule & {
-  start(): Promise<Snapshot>;
-  read(): Promise<Snapshot | null>;
-  reset(): Promise<void>;
-  readPublicationDiagnostics(): Promise<PublicationDiagnostic[]>;
-};
-
-type PublicationDiagnostic = {
-  publicationID: string | null;
-  publicationTime: number | null;
-  publishedStaleDate: number | null;
-  savedRestDeadline: number | null;
-  setNumber: number | null;
-  saveFailed: boolean;
-};
-
-function diagnosticTime(seconds: number | null) {
-  return seconds == null ? 'none / unavailable' :
-    new Date(seconds * 1000).toISOString() + ' (' + seconds.toFixed(3) + ' s)';
+ {tab==='routines'?<RoutineEditor native={proof} workouts={[...history,...(saved?[saved]:[])]} registerLeave={guard=>{routineLeave.current=guard;}} close={()=>{linkRequest.current++;T('workout');void refresh();void refreshHistory();}}/>:tab==='week'&&proof?<WeekPlanner onStart={()=>{T('workout');void refresh();void refreshHistory();}} native={proof} workouts={[...history,...(saved?[saved]:[])]}/>:<ScrollView contentContainerStyle={styles.page}>
+ <Text style={styles.title}>{quoteForDay(today)}</Text>
+ {proof&&<Tracker api={proof}/>}
+ {shown&&!shown.workoutFinished&&<Text style={styles.heading}>Unfinished Workout</Text>}
+ {!proof&&<Text>A native iPhone preview is required to save workouts.</Text>}
+ {!shown?<View style={styles.card}><Text style={styles.title}>Ready when you are</Text><Text>Create a routine with exercises, set counts and rest, then start it here.</Text><Button title="Choose or create a routine" onPress={()=>T('routines')}/></View>:!shown.workoutFinished&&workoutCard(shown,false)}
+ {shown&&!shown.workoutFinished&&<Pressable accessibilityRole="button" style={({pressed})=>({padding:14,backgroundColor:pressed?'#aed3ee':'#deefff',borderRadius:10})} disabled={busy} onPress={()=>void fixture()}><Text style={{color:'#123e64',fontWeight:'700'}}>Resume workout</Text></Pressable>}
+ {proof&&<WeekPlanner key={today} today={today} native={proof} workouts={[...history,...(saved?[saved]:[])]} onStart={()=>{void refresh();void refreshHistory();}}/>}
+ <Action title={(past?'▾':'▸')+' Completed Workouts · '+(history.length+(shown?.workoutFinished?1:0))} onPress={()=>showPast(!past)}/>{past&&<>{shown?.workoutFinished&&workoutCard(shown,false)}{history.map(w=>workoutCard(w,true))}</>}
+ <Button title={debug?'Hide proof diagnostics':'Proof diagnostics'} onPress={()=>G(!debug)}/>
+ {debug&&<View style={styles.card}><Text>Diagnostics — not workout instructions</Text>{saved&&<><Text>Complete requests: {saved.completionAttempts}</Text><Text>Rest: {saved.restState}; {saved.awaitingContinue?'awaiting Continue':'dismissed'}</Text><Text>Deadline: {saved.restDeadline??'none'}; acknowledged: {saved.restContinuedAt??'none'}</Text><Text>Saved routine revision: {saved.routineRevision??'fixture'}</Text></>}
+ <Button title="Show / resume fictional fixture" disabled={busy} onPress={()=>void fixture()}/>
+ <Button title="Reset fictional fixture only" disabled={busy} onPress={()=>Alert.alert('Reset fictional fixture?','Only the current fictional fixture is cleared. Saved-routine workouts cannot be reset here.',[{text:'Cancel',style:'cancel'},{text:'Reset fixture',style:'destructive',onPress:()=>void fixture(true)}])}/>
+ <Text>RIR means reps in reserve. Blank is unrecorded; zero is meaningful.</Text></View>}
+ </ScrollView>}
+ <View style={styles.nav}>{(['workout','routines','week'] as const).map(key=><View key={key} style={[styles.navItem,tab===key&&styles.navSelected]}><Pressable accessibilityRole="tab" accessibilityState={{selected:tab===key}} style={styles.navButton} onPress={()=>{const go=()=>{linkRequest.current++;T(key);Q(null);void refresh();void refreshHistory();};if(tab==='routines'&&key!=='routines')routineLeave.current(go);else go();}}><Text style={styles.navText}>{key==='week'?'Calendar':key==='routines'?'Routines':'Today'}</Text></Pressable></View>)}</View>
+ {!!message&&<Text style={styles.message} accessibilityRole="alert" onPress={()=>M('')}>{message}</Text>}
+ </SafeAreaView>;
 }
-
-const proof = Platform.OS === 'ios' ? requireOptionalNativeModule<ProofModule>('LockScreenProof') : null;
-
-export default function App() {
-  const [editingRoutines, setEditingRoutines] = useState(false);
-  const [saved, setSaved] = useState<Snapshot | null>(null);
-  const [busy, setBusy] = useState(false);
-  const [message, setMessage] = useState('');
-  const [diagnostics, setDiagnostics] = useState<PublicationDiagnostic[] | null>(null);
-  const [diagnosticMessage, setDiagnosticMessage] = useState('');
-  const [readingDiagnostics, setReadingDiagnostics] = useState(false);
-  const operation = useRef(false);
-  const revision = useRef(0);
-
-  async function refresh() {
-    if (!proof || operation.current) return;
-    const request = ++revision.current;
-    try {
-      const result = await proof.read();
-      if (revision.current === request) setSaved(result);
-    } catch {
-      if (revision.current === request) setMessage('Could not read proof data.');
-    }
-  }
-
-  useEffect(() => {
-    void refresh();
-    const listener = AppState.addEventListener('change', state => {
-      if (state === 'active') void refresh();
-    });
-    return () => {
-      revision.current++;
-      listener.remove();
-    };
-  }, []);
-
-  // Foreground readout only. Native deadlines and the Live Activity never rely on this polling.
-  useEffect(() => {
-    if (saved?.restState !== 'running') return;
-    const timer = setInterval(() => {
-      if (AppState.currentState === 'active') void refresh();
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [saved?.restState, saved?.restDeadline]);
-
-  async function act(action: 'start' | 'reset') {
-    if (!proof || operation.current) return;
-    operation.current = true;
-    revision.current++;
-    setBusy(true);
-    setMessage('');
-    try {
-      if (action === 'start') {
-        setSaved(await proof.start());
-      } else {
-        await proof.reset();
-        setSaved(null);
-      }
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Could not update the proof.');
-    } finally {
-      operation.current = false;
-      setBusy(false);
-      void refresh();
-    }
-  }
-
-  async function inspectPublication() {
-    if (!proof || readingDiagnostics) return;
-    setReadingDiagnostics(true);
-    setDiagnosticMessage('');
-    try {
-      setDiagnostics(await proof.readPublicationDiagnostics());
-    } catch {
-      setDiagnostics(null);
-      setDiagnosticMessage('Could not read D1 metadata. This requires the D1 native build.');
-    } finally {
-      setReadingDiagnostics(false);
-    }
-  }
-
-  if (editingRoutines) return <SafeAreaView style={styles.screen}><RoutineEditor native={proof} close={() => { setEditingRoutines(false); void refresh(); }} /></SafeAreaView>;
-
-  return (
-    <SafeAreaView style={styles.screen}>
-      <ScrollView contentContainerStyle={styles.content}>
-        <Text accessibilityRole="header" style={styles.title}>Workout proof</Text>
-        <Button title="Routine editor" disabled={busy} onPress={() => setEditingRoutines(true)} />
-        <Text accessibilityRole="header">Routine workout / fictional fixture</Text>
-        {proof ? (
-          <>
-            <Text>{saved
-              ? (saved.workoutFinished ? 'Workout finished' : saved.plannedSetsRecorded ? 'Current exercise sets recorded' :
-                'Current draft ' + saved.setNumber + '/' + saved.setCount + ': ' + (saved.pounds ?? '—') + ' lb × ' + (saved.reps ?? '—') + ' reps')
-              : 'No session started.'}</Text>
-            {saved?.routineName && <Text>Workout snapshot: {saved.routineName} · revision {saved.routineRevision}</Text>}
-            <Text>RIR means reps in reserve: estimated additional reps, optional 0–10. — means unrecorded, not zero. Enter reps before completing a set; blank pounds permits a reps-only record.</Text>
-            {saved && <Text>Current exercise: {saved.exerciseName} ({saved.exerciseNumber}/{saved.exerciseCount})</Text>}
-            {saved?.exercises.map(exercise => <Text key={exercise.exerciseID}>{exercise.name}: {exercise.finishedAt == null ? 'Not finished' : 'Finished'}</Text>)}
-            {saved?.finishedAt != null && <Text>Workout finished at: {saved.finishedAt}</Text>}
-            {saved?.sets.map(set => (
-              <View key={set.setID}>
-                <Text>{saved.exercises.find(e => e.exerciseID === set.exerciseID)?.name} · Set {set.number}: {set.completed ? 'Saved' : 'Draft'} {set.pounds ?? '—'} lb × {set.reps ?? '—'} · RIR {set.rir ?? '—'}</Text>
-                <Text>{set.isAdded ? 'Today-only added set; no routine target' : `Plan: ${set.plannedPounds ?? '—'} lb × ${set.plannedReps ?? '—'}`}</Text>
-              </View>
-            ))}
-            <Text>Saved records: {saved?.recordCount ?? 0}</Text>
-            <Text>Complete requests received: {saved?.completionAttempts ?? 0}</Text>
-            <Text>Rest: {saved?.restState === 'running'
-              ? saved.restRemainingSeconds + ' seconds remaining'
-              : saved?.restState === 'skipped' ? 'Skipped'
-              : saved?.restState === 'disabled' ? 'Tracking off (no countdown or wait)'
-              : saved?.restState === 'expired' ? 'Expired (0 seconds)'
-              : 'Not started'}</Text>
-            {saved && <Text>Rest screen: {saved.awaitingContinue ? 'Awaiting Continue' : 'Dismissed / no rest'}</Text>}
-            {saved?.restContinuedAt != null && <Text>Continued at: {saved.restContinuedAt}</Text>}
-            {saved?.restUndoneAt != null && <Text>Set returned to draft at: {saved.restUndoneAt}</Text>}
-            {saved?.restDeadline != null && <Text>Rest deadline: {saved.restDeadline}</Text>}
-            <Button
-              title={saved ? 'Show Live Activity' : 'Start two-exercise proof'}
-              onPress={() => void act('start')}
-              disabled={busy || saved?.workoutFinished === true}
-            />
-            <Button title="Reset proof data" disabled={busy || !saved || saved.routineID != null} onPress={() => {
-              Alert.alert('Reset fictional data?', 'This removes only the current fictional fixture and ends its Live Activity. Saved-routine workouts, archived workouts and routines are kept.', [
-                { text: 'Cancel', style: 'cancel' },
-                { text: 'Reset', style: 'destructive', onPress: () => void act('reset') },
-              ]);
-            }} />
-          </>
-        ) : <Text>Install the signed iPhone proof to use the Live Activity.</Text>}
-        {!!message && <Text accessibilityRole="alert">{message}</Text>}
-        <View style={styles.diagnostics}>
-          <Text accessibilityRole="header">Publication snapshot (manual, legacy D1 support)</Text>
-          <Text>Historical D1 evidence is recorded in project documents. Continue no longer uses staleness for layout.</Text>
-          <Button title="Read publication diagnostics" onPress={() => void inspectPublication()}
-            disabled={!proof || readingDiagnostics} />
-          {diagnostics?.length === 0 && <Text>No active Live Activity to inspect.</Text>}
-          {diagnostics?.map((item, index) => (
-            <View key={index} style={styles.diagnostics}>
-              <Text selectable>Publication #{item.publicationID ?? 'unknown (older content)'} · Set {item.setNumber ?? '?'}</Text>
-              <Text selectable>Submitted at: {diagnosticTime(item.publicationTime)}</Text>
-              <Text selectable>Published staleDate: {diagnosticTime(item.publishedStaleDate)}</Text>
-              <Text selectable>Saved deadline in this publication: {diagnosticTime(item.savedRestDeadline)}</Text>
-              <Text>Save failure displayed: {item.saveFailed ? 'yes' : 'no'}</Text>
-            </View>
-          ))}
-          {!!diagnosticMessage && <Text accessibilityRole="alert">{diagnosticMessage}</Text>}
-          <Text>UTC timestamps, not display times. This reads current ActivityKit content, not fresh database values. The panel stays unchanged until manually read again.</Text>
-          <Text>The on-screen stale flag depends on rendering; it cannot independently timestamp an internal system event.</Text>
-        </View>
-      </ScrollView>
-    </SafeAreaView>
-  );
-}
-
-const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: '#fff' },
-  content: { padding: 24, gap: 14 },
-  title: { fontSize: 28, fontWeight: '700' },
-  diagnostics: { gap: 8 },
-});
+const styles=StyleSheet.create({navButton:{minHeight:48,alignItems:'center',justifyContent:'center'},navText:{fontWeight:'700',color:'#174f35'},screen:{flex:1,backgroundColor:'#faf8f3'},nav:{flexDirection:'row',gap:8,padding:12,borderBottomWidth:1,borderColor:'#d8d3c9'},navItem:{flex:1,borderRadius:10},navSelected:{backgroundColor:'#e8f0e8'},page:{padding:20,gap:18,paddingBottom:40},heading:{fontSize:28,fontWeight:'700',color:'#18251d'},title:{fontSize:20,fontWeight:'600',color:'#18251d'},muted:{color:'#4c5e76'},card:{backgroundColor:'#fff',borderRadius:16,padding:18,gap:12,borderWidth:2,borderColor:'#627569'},activeCard:{borderColor:'#174f35',borderWidth:2},setRow:{paddingVertical:12,borderTopWidth:1,borderColor:'#e0e6ee',gap:6},setTitle:{fontWeight:'600',color:'#33445c'},actual:{fontSize:18,color:'#18251d'},message:{padding:14,color:'#8b2635'}});

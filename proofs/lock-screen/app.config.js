@@ -4,6 +4,7 @@ const targetName = 'SwoldierProofLiveActivity';
 module.exports = {
   name: 'Swoldier Lock Screen Proof',
   slug: 'swoldier-lock-screen-proof',
+  scheme: 'swoldier-proof',
   version: '1.0.0',
   platforms: ['ios'],
   ios: {

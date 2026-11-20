@@ -1,5 +1,96 @@
 # Swoldier Lock Screen proof
 
+## November 19 upgrade-first phone checklist
+
+1. Capture your Calendar dates, slot assignments, checked supplements, water amounts, routines, active rest and completed workout values before upgrading in place. Reopen and compare before adding test data.
+2. Check the daily quote on reopening. Check and uncheck the same fictional water portion and supplement from Today and Calendar. Verify the same totals and Evening slot. After local midnight or a foreground return, verify the date and access to an unfinished workout from a different date.
+3. Create a metric goal and a habit goal. Save dated observations, edit a target, archive a goal and reopen its history. Enter a fictional manual scan with a date and source, leaving an optional measurement empty. Check that no date completion changes.
+4. Group two routines, change order, rename and remove the group. In one routine, move a long-named exercise from bottom to top and back with unsaved targets. Toggle rest off/on, collapse targets, save and reopen. Confirm blank versus zero, values, original workout records and cancellation.
+5. On the authenticated Lock Screen check a long name, multi-digit set count, larger text, and reachability on draft/rest/Undo. Let rest expire, then End Rest. Compare the stored deadline across reopening. Check error text, Reduce Motion and VoiceOver separately. Record clipping, delay or jumps as observed.
+
+## Calendar upgrade and phone checks
+
+All checks below await device evidence. Capture current routines, any weekly assignments with their dates, workouts, plans, actuals, counts and rest state before installing over the existing app. Compare after reopening before changing data. The earlier weekly assignment persistence trial was paused.
+
+1. Open Calendar. Confirm old assignments retain their local dates under Any time. Add the same fictional routine twice, move one occurrence to Afternoon and reopen. Starting and finishing one must leave the other pending. Check existing finished history after routine deletion.
+2. Add two fictional supplement groups in different slots. Expand, check individual entries, finish a group, reopen and uncheck. Expansion alone should leave progress intact.
+3. Plan 32, 34 and 34 oz across slots. Check them one by one and look for 32, 66 and 100 oz. Expand the completed Water card and uncheck one portion. Try a lower custom goal with an unchecked extra portion. Confirm a pending routine keeps the date pending and an empty date stays neutral.
+4. Expand current and archived workouts in Today. Compare set values. Exercise Edit Set, the blue Resume workout action, End Rest and Undo. Check blank reps feedback and valid zero entries.
+5. On a long routine screen with the keyboard open, trigger the unfinished-workout choices. Expand Discard and cancel. Confirm the panel is reachable and the existing workout survives. Check required routine/calendar fields, optional targets, larger text and VoiceOver. Record screen-sleep and countdown issues separately.
+
+## Final preflight phone checklist — Not run
+
+Use a future usability preview, not earlier RIR-build evidence. No such preview was submitted in this preflight.
+
+1. Before upgrading, capture current/archived workouts, routines, drafts, plans, nullable/decimal/RIR values, counts, rest/deadline/acknowledgement and weekly assignments. Install over the app without deleting/resetting; reopen and compare before fresh fictional trials. Existing 0×0 records must remain records, not become skipped.
+2. **Corrected exact-editor buffer bug:** open set A, type distinctive values, then open a link to B. Declining navigation keeps A and its edits; accepting opens B's own values. Saving must never put A's buffer into B.
+3. **Corrected navigation guard bug:** try links while a routine/exact editor is dirty and during save. Confirm refusal/confirmation protects unsaved edits, in-flight saves and the original retry target. Stale/missing/skipped links must not substitute a different set.
+4. **Corrected resolution bug:** leave a Finish/Discard confirmation pending, finish/change its targeted workout separately if feasible, then confirm. It must reject the stale resolution without starting/replacing a workout. Record if a controlled setup is unavailable; do not infer this from ordinary Start.
+5. Fresh fictional workout: Skip, Undo latest skip batch and Finish exercise early must preserve records/rest and keep skipped distinct from zero. Check Add Set, normal Undo/edit/re-complete, RIR blank-plus-to-0/Clear, named Next and explicit Finish. Check confirmed Finish-and-keep versus Discard-and-start independently.
+6. Delete a routine with confirmation and verify active/history snapshots survive. Test collapsed optional targets, exact-set editing without routine changes, and Today/Routines/This week navigation. Assign/reassign routines to dates; compare scheduled plans with actual completed summaries, including a user-created Push/Pull/Legs split.
+7. Inspect normal/Undo/rest/Options layouts, long names, reachable controls, larger text and accessibility separately. Record screen sleep/countdown jumps separately; neither is claimed fixed. All outcomes remain Not run until evidence arrives.
+
+
+## Usability review corrections — 2026-11-16
+
+The existing usability patch was reviewed against **7a6fbad**, then corrected and rechecked locally. Exact editors now retain their original target/buffer and remount for a newly accepted link. Links use unsaved-edit/save-in-flight guards and revalidate the exact session/set. An outdated Finish/Discard confirmation is rejected even after the reviewed workout has finished; an already-committed Start retry still finds its original session. No SQL/schema, dependencies, rest or action-identity changes in this correction review.
+
+**152 checks Passed:** 122 production-SQL workout wrappers, 22 routine/model and 8 TypeScript/editor-logic tests. Focused pre-review reproductions failed as expected; corrected paths passed. The editor harness executes transpiled source with minimal hooks/elements, not React Native rendering. TypeScript, iOS JavaScript export, ten native copies/membership/resource/URL-scheme checks and a refreshed 22-input local source-package hash check pass. Native compilation/runtime, installed migration, older-content decoding and phone checks remain Not run. Source is ready for build preparation; no cloud build/upload is authorized here. [Full review](../../docs/HANDOFF.md#usability-review-corrected-and-rechecked--2026-11-16).
+
+### Usability review phone additions — Not run
+
+- Open exact Set A, enter unsaved values, then invoke Set B's link. Keep editing must retain A; confirmed navigation must show B's own values, and Save must affect only B. A missing/older-session/skipped-set link must not substitute another target. Retry an injected save failure with the original target/payload.
+- Invoke a set link while routine edits are unsaved or a save is pending. Confirm unsaved edits cannot disappear without a choice and saving is not interrupted by navigation.
+- Leave a Finish/Discard confirmation open, change or finish that workout, then attempt the old choice. It must refuse without starting/replacing a session. Verify genuine repeated Start after an uncertain committed response remains idempotent.
+- Repeat upgrade-first history/rest preservation and Skip/Undo/Next cases from the checklist below. Calendar dates use the device's current timezone when displaying saved timestamps; travel/timezone changes are not validated. Accessibility, long-name fit, lifecycle/concurrency and failure injection remain separate unrun checks.
+
+Earlier dated entries retain their historical results. TS-001, TS-002 and screen sleep remain unresolved; no countdown/keep-awake fix is claimed.
+
+## Ten-note usability implementation — 2026-11-16
+
+**Local source only; native compilation and all new device checks Not run.** Baseline/main remains **7a6fbad35645f21f5a9ba8873ca3cc9214b4e229**, tracking origin/main; no fresh remote query. The ten notes and visual reference are now supplied. This section supersedes the earlier partial/missing-notes status below without rewriting its history. Build 2614e927's RIR evidence does not validate this later code.
+
+### Current behavior and bounded choices
+
+| Area | Implemented locally |
+| --- | --- |
+| Routine library | Separate library/editor screens; routine cards show actual in-progress or last-completed status. Routine options include confirmed deletion. Delete uses the saved revision, preserves reusable exercise identities and every workout snapshot, and removes that routine's calendar assignments. |
+| Simple preparation | Create routine → **Fill in as I train** (Log as you go) with exercises, set counts and explicit rest. **Plan my sets** reveals optional targets; individual exercises can expand/collapse targets. Hiding never clears values. New fields remain blank, distinct from zero. Unsaved navigation is confirmed; unsaved values cannot silently enter Start. |
+| Unfinished workout | Start offers Resume, Finish and keep recorded sets, or confirmed Discard and start selected routine. Finish marks unperformed drafts Skipped and starts the selected saved revision. Discard removes only the confirmed unfinished session's data; other workouts remain. Resolution and new Start share a transaction, original request identity and a confirmation token covering intervening edits/completions/rest acknowledgement. A changed workout requires review again. |
+| Skip / early finish | Draft **Options** on the Lock Screen contains Skip set and Finish exercise early. Skip marks the current draft; early finish marks all remaining drafts in this exercise. Neither records a completed set, increments Complete requests, starts rest nor automatically advances. An existing rest remains unchanged. **Undo skip** reverses the latest skip or early-finish batch while still in this exercise, before advancing; values/plans are retained. This bounded one-level undo does not reopen already-finished exercises. |
+| Next / finish | Resolved exercise offers Add Set, then **Next: [name]**, or **Finish workout** on the last exercise. Most-recent skip can also be undone. Existing rest still needs Continue first. Added sets copy the latest completed actual pounds/reps in that exercise, or remain blank if every set was skipped; RIR starts blank. |
+| Exact values | Tap pounds or Options → Edit set in app. An explicit `swoldier-proof://set` link opens the identified session/set, never a newer substitute. Numeric keyboards accept nullable/decimal pounds, reps and optional RIR. Draft edits and deliberate confirmed corrections to current-workout records do not change routine targets, rest or completion counts. Archived older summaries are read-only in this pass. Revisions reject stale writes; an identical retry finds its original committed edit. Failure keeps unsaved text. Existing provisional limits remain: fixture 200 lb / 30 reps; routine snapshot 2000 lb / 1000 reps, pounds up to two decimals; RIR 0–10. These are not production recommendations. |
+| RIR and card | Blank plus now enters **0**, then 1…10; minus blank and Clear remain blank. Clear RIR sits left of the separate − / RIR / + group. Adjustment targets are 44×44 points in source. A separate Options card avoids adding another permanent row. Normal saved rest retains confirmation/Undo/Continue; undone editing retains Complete Set/End Rest and native deadline gating. |
+| App / week | Today, Routines, This week navigation; warm background, green primary actions, separated cards and readable statuses based on the supplied visual reference. Finished summaries retain recorded/skipped distinctions. Raw timestamps/request counters/fixture controls are under Proof diagnostics. Assign one saved routine per date; create/name your own Push/Pull/Legs split. No templates, community, progression or automatic Start. Calendar assignments are plans, not completed-workout records. Actual workouts are grouped by their recorded local start date; older unknown start dates are not invented. Explicit assignment changes replace that date's assignment; no cloud synchronization. |
+
+### Persistence and compatibility
+
+Additive workout schema v8 adds skipped state, per-set edit revision, action generation, new-session start time, discard marker and exact-edit request ledger. Existing actuals, plans, counts, rest state and history are preserved; **existing 0×0 records are not converted to skips**. New columns start null/zero or the legacy action generation. Migration is transactional and rerunnable. The separate routine database gains only a date-assignment table; routine documents are unchanged.
+
+Skip and Undo skip rotate the action generation so old requests cannot act on a restored or later draft with the same set/rest IDs. Completion/rest identities, execution-time deadline checks and exact failed-action retry IDs remain. Exact editing uses set revision plus session/action generation and a request ledger. It is an explicit correction, not Complete; missing reps still cannot be saved as a completed record. Optional activity fields have legacy fallbacks in source; **native decoding is not verified**. Fixture reset also clears its edit ledger, and cannot reset a saved-routine workout.
+
+**Local checks:** 142 Passed (118 production-workout-SQL wrapper checks, 21 routine/model checks, 3 production-TypeScript model checks); TypeScript and iOS JavaScript export Passed. SQL uses production statements with separate JS transaction/migration orchestration, not Swift or ActivityKit. Ten generated native source/resource copies match current source; host/extension memberships, host-only inline-module discovery and the new URL scheme were inspected. A 22-input local review ZIP and SHA-256 manifest match the explicit isolated allowlist, excluding docs/tests/dependencies/generated files/credentials/private images. This is a local packaging check, not an EAS archive submission or cloud build. Ignored evidence is under `.expo/usability/`.
+
+Native compilation/signing, installed v8 migration, old ActivityKit-content decoding, URL delivery, confirmation dialogs, rendered fit, long names/larger text, VoiceOver, fully locked use and all new physical-device outcomes remain **Not run**. Dense controls and long Next labels still require rendered verification. There is no supported keep-awake claim or code change; [screen-sleep comparison](../../docs/TROUBLESHOOTING_BACKLOG.md#screen-sleep-investigation--2026-11-16) remains separate. TS-001/TS-002 stay open, and the earlier blank → 0 observation remains inconclusive/not reproduced.
+
+### Usability phone checklist — Not run
+
+1. Before any upgrade/reset, capture the current workout, plans, actuals, skipped status/counts, routine settings and rest state. Install a separately authorized future build over it, reopen and compare. Preserve existing 0×0 records as recorded data.
+2. Create fictional Push/Pull/Legs routines with Fill in as I train. Expand optional targets, enter blank/0/decimal values, collapse/save/reopen. Assign three dates and compare scheduled versus actual statuses. Delete one routine with confirmation while its snapshot is active; verify the workout and earlier history survive.
+3. Try Start while unfinished: Resume; separately Finish and keep; separately confirmed Discard and start. Verify other workouts and routines remain, stale confirmation refuses after intervening changes, and repeated Start finds the same new session.
+4. On the authenticated Lock Screen, skip one draft, repeat the old request if possible, Undo skip, then complete it. Finish an exercise early, undo that batch, and try Add/Next choices. Verify skips never become completed zeros, create rest or inflate record/request counts. Test skipping an undone draft with existing rest and verify the same deadline remains.
+5. Tap pounds/Edit set to intentionally open that exact set in the app. Enter blank/zero/decimal actuals, save/reopen, and compare unchanged routine targets/rest. Test stale edit rejection, failed-save retained text, and deliberate recorded-set correction. Do not treat two physical taps as proof of two intent executions.
+6. Check RIR blank → 0 → 1, minus blank, Clear, and normal/Undo-edit controls. Check Next names and final Finish workout. Verify ordinary Off/zero/positive rest, Undo, End Rest, re-completion and exact retries still behave correctly.
+7. Check normal draft, undone rest, saved rest, Options, resolved/Undo-skip and finished layouts with short/long names, larger text and accessibility. Record screen-sleep timing and countdown jumps separately; no fix is claimed.
+
+## Usability pass — partial local changes, 2026-11-16
+
+From published **7a6fbad**, the next-exercise button now names the next exercise from the independent workout snapshot. Older content lacking that optional name falls back to Next Exercise. Execution/retries retain the original IDs. First RIR plus from blank now records **0**, not 1; later plus increments, minus on blank keeps blank, bounds remain 0–10 and Clear restores blank. Clear RIR moves to the action row away from ±, retaining minimum 44-point height. No schema change, record rewrite, rest/gating or action-identity change. Earlier first-plus-to-1 evidence below describes the previous build.
+
+123 SQL-wrapper/model tests and TypeScript Passed. They do not execute Swift/ActivityKit. Named-content source wiring checked; fresh native generation, compilation, migration, rendered fit/accessibility and device behavior **Not run** for this patch. Future phone checks: upgrade without reset and compare existing values; blank minus stays blank, first plus gives 0, next plus 1, Clear/minus/plus/reopen preserves 0; current/next names match snapshot even after routine edits; Clear/Complete/End Rest remain distinct/reachable in Undo; completed actuals and rest deadlines stay unchanged. No pass is inferred from build 2614e927.
+
+Remaining Skip/early-finish/resolution/deletion/Log as you go/editor/presentation work is **not implemented**: the referenced ten notes are absent. [Missing decisions and continuation task](../../docs/HANDOFF.md#usability-pass-started-missing-workout-notes--2026-11-16). No new cloud operations or spend. Both troubleshooting issues remain open; no sleep fix claimed.
+
 ## RIR phone results and current checklist — 2026-11-16
 
 Build **2614e927-835b-4180-a588-d326d043c282** previously passed native compilation/signing. The following device evidence is supplied by the user: screenshot-supported states are recorded from the user's description, not independently re-inspected here; actions are **Passed — user-reported**, not observed automated execution. These results supersede the earlier dated unbuilt/unrun status only within the stated scope. c059edb9 retains its separate historical results.
