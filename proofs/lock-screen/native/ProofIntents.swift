@@ -7,15 +7,17 @@ struct ProofAdjustWeight: LiveActivityIntent {
     static var authenticationPolicy: IntentAuthenticationPolicy { .requiresLocalDeviceAuthentication }
 
     @Parameter(title: "Session") var sessionID: String
+    @Parameter(title: "Action version", default: "legacy") var actionToken: String
     @Parameter(title: "Set") var setID: String
     @Parameter(title: "Rest", default: "none") var restID: String
     @Parameter(title: "Change") var delta: Int
 
     init() {}
-    init(sessionID: String, setID: String, restID: String, delta: Int) {
+    init(sessionID: String, setID: String, restID: String, actionToken: String = "legacy", delta: Int) {
         self.sessionID = sessionID
         self.setID = setID
         self.restID = restID
+        self.actionToken = actionToken
         self.delta = delta
     }
 
@@ -24,7 +26,7 @@ struct ProofAdjustWeight: LiveActivityIntent {
         try rejectExtensionExecution()
         #else
         await ProofCoordinator.shared.apply(sessionID: sessionID, setID: setID,
-                                            restID: restID, action: .weight(delta))
+                                            restID: restID, actionToken: actionToken, action: .weight(delta))
         #endif
         return .result()
     }
@@ -36,15 +38,17 @@ struct ProofAdjustReps: LiveActivityIntent {
     static var authenticationPolicy: IntentAuthenticationPolicy { .requiresLocalDeviceAuthentication }
 
     @Parameter(title: "Session") var sessionID: String
+    @Parameter(title: "Action version", default: "legacy") var actionToken: String
     @Parameter(title: "Set") var setID: String
     @Parameter(title: "Rest", default: "none") var restID: String
     @Parameter(title: "Change") var delta: Int
 
     init() {}
-    init(sessionID: String, setID: String, restID: String, delta: Int) {
+    init(sessionID: String, setID: String, restID: String, actionToken: String = "legacy", delta: Int) {
         self.sessionID = sessionID
         self.setID = setID
         self.restID = restID
+        self.actionToken = actionToken
         self.delta = delta
     }
 
@@ -53,7 +57,7 @@ struct ProofAdjustReps: LiveActivityIntent {
         try rejectExtensionExecution()
         #else
         await ProofCoordinator.shared.apply(sessionID: sessionID, setID: setID,
-                                            restID: restID, action: .reps(delta))
+                                            restID: restID, actionToken: actionToken, action: .reps(delta))
         #endif
         return .result()
     }
@@ -65,15 +69,17 @@ struct ProofAdjustRIR: LiveActivityIntent {
     static var authenticationPolicy: IntentAuthenticationPolicy { .requiresLocalDeviceAuthentication }
 
     @Parameter(title: "Session") var sessionID: String
+    @Parameter(title: "Action version", default: "legacy") var actionToken: String
     @Parameter(title: "Set") var setID: String
     @Parameter(title: "Rest", default: "none") var restID: String
     @Parameter(title: "Change") var delta: Int
 
     init() {}
-    init(sessionID: String, setID: String, restID: String, delta: Int) {
+    init(sessionID: String, setID: String, restID: String, actionToken: String = "legacy", delta: Int) {
         self.sessionID = sessionID
         self.setID = setID
         self.restID = restID
+        self.actionToken = actionToken
         self.delta = delta
     }
 
@@ -82,7 +88,7 @@ struct ProofAdjustRIR: LiveActivityIntent {
         try rejectExtensionExecution()
         #else
         await ProofCoordinator.shared.apply(sessionID: sessionID, setID: setID,
-                                            restID: restID, action: .rir(delta))
+                                            restID: restID, actionToken: actionToken, action: .rir(delta))
         #endif
         return .result()
     }
@@ -94,14 +100,16 @@ struct ProofClearRIR: LiveActivityIntent {
     static var authenticationPolicy: IntentAuthenticationPolicy { .requiresLocalDeviceAuthentication }
 
     @Parameter(title: "Session") var sessionID: String
+    @Parameter(title: "Action version", default: "legacy") var actionToken: String
     @Parameter(title: "Set") var setID: String
     @Parameter(title: "Rest", default: "none") var restID: String
 
     init() {}
-    init(sessionID: String, setID: String, restID: String) {
+    init(sessionID: String, setID: String, restID: String, actionToken: String = "legacy") {
         self.sessionID = sessionID
         self.setID = setID
         self.restID = restID
+        self.actionToken = actionToken
     }
 
     func perform() async throws -> some IntentResult {
@@ -109,7 +117,7 @@ struct ProofClearRIR: LiveActivityIntent {
         try rejectExtensionExecution()
         #else
         await ProofCoordinator.shared.apply(sessionID: sessionID, setID: setID,
-                                            restID: restID, action: .clearRIR)
+                                            restID: restID, actionToken: actionToken, action: .clearRIR)
         #endif
         return .result()
     }
@@ -121,14 +129,16 @@ struct ProofCompleteSet: LiveActivityIntent {
     static var authenticationPolicy: IntentAuthenticationPolicy { .requiresLocalDeviceAuthentication }
 
     @Parameter(title: "Session") var sessionID: String
+    @Parameter(title: "Action version", default: "legacy") var actionToken: String
     @Parameter(title: "Set") var setID: String
     @Parameter(title: "Rest", default: "none") var restID: String
 
     init() {}
-    init(sessionID: String, setID: String, restID: String) {
+    init(sessionID: String, setID: String, restID: String, actionToken: String = "legacy") {
         self.sessionID = sessionID
         self.setID = setID
         self.restID = restID
+        self.actionToken = actionToken
     }
 
     func perform() async throws -> some IntentResult {
@@ -136,7 +146,7 @@ struct ProofCompleteSet: LiveActivityIntent {
         try rejectExtensionExecution()
         #else
         await ProofCoordinator.shared.apply(sessionID: sessionID, setID: setID,
-                                            restID: restID, action: .complete)
+                                            restID: restID, actionToken: actionToken, action: .complete)
         #endif
         return .result()
     }
@@ -148,14 +158,16 @@ struct ProofUndoSet: LiveActivityIntent {
     static var authenticationPolicy: IntentAuthenticationPolicy { .requiresLocalDeviceAuthentication }
 
     @Parameter(title: "Session") var sessionID: String
+    @Parameter(title: "Action version", default: "legacy") var actionToken: String
     @Parameter(title: "Set") var setID: String
     @Parameter(title: "Rest", default: "none") var restID: String
 
     init() {}
-    init(sessionID: String, setID: String, restID: String) {
+    init(sessionID: String, setID: String, restID: String, actionToken: String = "legacy") {
         self.sessionID = sessionID
         self.setID = setID
         self.restID = restID
+        self.actionToken = actionToken
     }
 
     func perform() async throws -> some IntentResult {
@@ -163,7 +175,7 @@ struct ProofUndoSet: LiveActivityIntent {
         try rejectExtensionExecution()
         #else
         await ProofCoordinator.shared.apply(sessionID: sessionID, setID: setID,
-                                            restID: restID, action: .undo)
+                                            restID: restID, actionToken: actionToken, action: .undo)
         #endif
         return .result()
     }
@@ -175,14 +187,16 @@ struct ProofContinueRest: LiveActivityIntent {
     static var authenticationPolicy: IntentAuthenticationPolicy { .requiresLocalDeviceAuthentication }
 
     @Parameter(title: "Session") var sessionID: String
+    @Parameter(title: "Action version", default: "legacy") var actionToken: String
     @Parameter(title: "Set") var setID: String
     @Parameter(title: "Rest", default: "none") var restID: String
 
     init() {}
-    init(sessionID: String, setID: String, restID: String) {
+    init(sessionID: String, setID: String, restID: String, actionToken: String = "legacy") {
         self.sessionID = sessionID
         self.setID = setID
         self.restID = restID
+        self.actionToken = actionToken
     }
 
     func perform() async throws -> some IntentResult {
@@ -190,7 +204,7 @@ struct ProofContinueRest: LiveActivityIntent {
         try rejectExtensionExecution()
         #else
         await ProofCoordinator.shared.apply(sessionID: sessionID, setID: setID,
-                                            restID: restID, action: .continueRest)
+                                            restID: restID, actionToken: actionToken, action: .continueRest)
         #endif
         return .result()
     }
@@ -202,14 +216,16 @@ struct ProofAddSet: LiveActivityIntent {
     static var authenticationPolicy: IntentAuthenticationPolicy { .requiresLocalDeviceAuthentication }
 
     @Parameter(title: "Session") var sessionID: String
+    @Parameter(title: "Action version", default: "legacy") var actionToken: String
     @Parameter(title: "Set") var setID: String
     @Parameter(title: "Rest", default: "none") var restID: String
 
     init() {}
-    init(sessionID: String, setID: String, restID: String) {
+    init(sessionID: String, setID: String, restID: String, actionToken: String = "legacy") {
         self.sessionID = sessionID
         self.setID = setID
         self.restID = restID
+        self.actionToken = actionToken
     }
 
     func perform() async throws -> some IntentResult {
@@ -217,7 +233,7 @@ struct ProofAddSet: LiveActivityIntent {
         try rejectExtensionExecution()
         #else
         await ProofCoordinator.shared.apply(sessionID: sessionID, setID: setID,
-                                            restID: restID, action: .addSet)
+                                            restID: restID, actionToken: actionToken, action: .addSet)
         #endif
         return .result()
     }
@@ -229,14 +245,16 @@ struct ProofNextExercise: LiveActivityIntent {
     static var authenticationPolicy: IntentAuthenticationPolicy { .requiresLocalDeviceAuthentication }
 
     @Parameter(title: "Session") var sessionID: String
+    @Parameter(title: "Action version", default: "legacy") var actionToken: String
     @Parameter(title: "Set") var setID: String
     @Parameter(title: "Rest", default: "none") var restID: String
 
     init() {}
-    init(sessionID: String, setID: String, restID: String) {
+    init(sessionID: String, setID: String, restID: String, actionToken: String = "legacy") {
         self.sessionID = sessionID
         self.setID = setID
         self.restID = restID
+        self.actionToken = actionToken
     }
 
     func perform() async throws -> some IntentResult {
@@ -244,7 +262,7 @@ struct ProofNextExercise: LiveActivityIntent {
         try rejectExtensionExecution()
         #else
         await ProofCoordinator.shared.apply(sessionID: sessionID, setID: setID,
-                                            restID: restID, action: .nextExercise)
+                                            restID: restID, actionToken: actionToken, action: .nextExercise)
         #endif
         return .result()
     }
@@ -256,14 +274,16 @@ struct ProofFinishWorkout: LiveActivityIntent {
     static var authenticationPolicy: IntentAuthenticationPolicy { .requiresLocalDeviceAuthentication }
 
     @Parameter(title: "Session") var sessionID: String
+    @Parameter(title: "Action version", default: "legacy") var actionToken: String
     @Parameter(title: "Set") var setID: String
     @Parameter(title: "Rest", default: "none") var restID: String
 
     init() {}
-    init(sessionID: String, setID: String, restID: String) {
+    init(sessionID: String, setID: String, restID: String, actionToken: String = "legacy") {
         self.sessionID = sessionID
         self.setID = setID
         self.restID = restID
+        self.actionToken = actionToken
     }
 
     func perform() async throws -> some IntentResult {
@@ -271,7 +291,7 @@ struct ProofFinishWorkout: LiveActivityIntent {
         try rejectExtensionExecution()
         #else
         await ProofCoordinator.shared.apply(sessionID: sessionID, setID: setID,
-                                            restID: restID, action: .finishWorkout)
+                                            restID: restID, actionToken: actionToken, action: .finishWorkout)
         #endif
         return .result()
     }
@@ -284,14 +304,16 @@ struct ProofSkipRest: LiveActivityIntent {
     static var authenticationPolicy: IntentAuthenticationPolicy { .requiresLocalDeviceAuthentication }
 
     @Parameter(title: "Session") var sessionID: String
+    @Parameter(title: "Action version", default: "legacy") var actionToken: String
     @Parameter(title: "Set") var setID: String
     @Parameter(title: "Rest", default: "none") var restID: String
 
     init() {}
-    init(sessionID: String, setID: String, restID: String) {
+    init(sessionID: String, setID: String, restID: String, actionToken: String = "legacy") {
         self.sessionID = sessionID
         self.setID = setID
         self.restID = restID
+        self.actionToken = actionToken
     }
 
     func perform() async throws -> some IntentResult {
@@ -299,7 +321,7 @@ struct ProofSkipRest: LiveActivityIntent {
         try rejectExtensionExecution()
         #else
         await ProofCoordinator.shared.apply(sessionID: sessionID, setID: setID,
-                                            restID: restID, action: .skip)
+                                            restID: restID, actionToken: actionToken, action: .skip)
         #endif
         return .result()
     }
@@ -311,14 +333,16 @@ struct ProofIncrementReps: LiveActivityIntent {
     static var authenticationPolicy: IntentAuthenticationPolicy { .requiresLocalDeviceAuthentication }
 
     @Parameter(title: "Session") var sessionID: String
+    @Parameter(title: "Action version", default: "legacy") var actionToken: String
     @Parameter(title: "Set") var setID: String
     @Parameter(title: "Rest", default: "none") var restID: String
 
     init() {}
-    init(sessionID: String, setID: String, restID: String) {
+    init(sessionID: String, setID: String, restID: String, actionToken: String = "legacy") {
         self.sessionID = sessionID
         self.setID = setID
         self.restID = restID
+        self.actionToken = actionToken
     }
 
     func perform() async throws -> some IntentResult {
@@ -326,7 +350,7 @@ struct ProofIncrementReps: LiveActivityIntent {
         try rejectExtensionExecution()
         #else
         await ProofCoordinator.shared.apply(sessionID: sessionID, setID: setID,
-                                            restID: restID, action: .reps(1))
+                                            restID: restID, actionToken: actionToken, action: .reps(1))
         #endif
         return .result()
     }
@@ -339,3 +363,183 @@ private func rejectExtensionExecution() throws {
     ])
 }
 #endif
+
+struct ProofSkipSet: LiveActivityIntent {
+    static let title: LocalizedStringResource = "Skip this set"
+    static var supportedModes: IntentModes { .background }
+    static var authenticationPolicy: IntentAuthenticationPolicy { .requiresLocalDeviceAuthentication }
+
+    @Parameter(title: "Session") var sessionID: String
+    @Parameter(title: "Action version", default: "legacy") var actionToken: String
+    @Parameter(title: "Set") var setID: String
+    @Parameter(title: "Rest", default: "none") var restID: String
+
+    init() {}
+    init(sessionID: String, setID: String, restID: String, actionToken: String = "legacy") {
+        self.sessionID = sessionID
+        self.setID = setID
+        self.restID = restID
+        self.actionToken = actionToken
+    }
+
+    func perform() async throws -> some IntentResult {
+        #if PROOF_WIDGET_EXTENSION
+        try rejectExtensionExecution()
+        #else
+        await ProofCoordinator.shared.apply(sessionID: sessionID, setID: setID,
+                                            restID: restID, actionToken: actionToken, action: .skipSet)
+        #endif
+        return .result()
+    }
+}
+
+
+struct ProofFinishEarly: LiveActivityIntent {
+    static let title: LocalizedStringResource = "Finish exercise early"
+    static var supportedModes: IntentModes { .background }
+    static var authenticationPolicy: IntentAuthenticationPolicy { .requiresLocalDeviceAuthentication }
+
+    @Parameter(title: "Session") var sessionID: String
+    @Parameter(title: "Action version", default: "legacy") var actionToken: String
+    @Parameter(title: "Set") var setID: String
+    @Parameter(title: "Rest", default: "none") var restID: String
+
+    init() {}
+    init(sessionID: String, setID: String, restID: String, actionToken: String = "legacy") {
+        self.sessionID = sessionID
+        self.setID = setID
+        self.restID = restID
+        self.actionToken = actionToken
+    }
+
+    func perform() async throws -> some IntentResult {
+        #if PROOF_WIDGET_EXTENSION
+        try rejectExtensionExecution()
+        #else
+        await ProofCoordinator.shared.apply(sessionID: sessionID, setID: setID,
+                                            restID: restID, actionToken: actionToken, action: .finishEarly)
+        #endif
+        return .result()
+    }
+}
+
+
+struct ProofUndoSkip: LiveActivityIntent {
+    static let title: LocalizedStringResource = "Undo skipped sets"
+    static var supportedModes: IntentModes { .background }
+    static var authenticationPolicy: IntentAuthenticationPolicy { .requiresLocalDeviceAuthentication }
+
+    @Parameter(title: "Session") var sessionID: String
+    @Parameter(title: "Action version", default: "legacy") var actionToken: String
+    @Parameter(title: "Set") var setID: String
+    @Parameter(title: "Rest", default: "none") var restID: String
+
+    init() {}
+    init(sessionID: String, setID: String, restID: String, actionToken: String = "legacy") {
+        self.sessionID = sessionID
+        self.setID = setID
+        self.restID = restID
+        self.actionToken = actionToken
+    }
+
+    func perform() async throws -> some IntentResult {
+        #if PROOF_WIDGET_EXTENSION
+        try rejectExtensionExecution()
+        #else
+        await ProofCoordinator.shared.apply(sessionID: sessionID, setID: setID,
+                                            restID: restID, actionToken: actionToken, action: .undoSkip(actionToken))
+        #endif
+        return .result()
+    }
+}
+
+
+struct ProofOptions: LiveActivityIntent {
+    static let title: LocalizedStringResource = "Set options"
+    static var supportedModes: IntentModes { .background }
+    static var authenticationPolicy: IntentAuthenticationPolicy { .requiresLocalDeviceAuthentication }
+
+    @Parameter(title: "Session") var sessionID: String
+    @Parameter(title: "Action version", default: "legacy") var actionToken: String
+    @Parameter(title: "Set") var setID: String
+    @Parameter(title: "Rest", default: "none") var restID: String
+
+    init() {}
+    init(sessionID: String, setID: String, restID: String, actionToken: String = "legacy") {
+        self.sessionID = sessionID
+        self.setID = setID
+        self.restID = restID
+        self.actionToken = actionToken
+    }
+
+    func perform() async throws -> some IntentResult {
+        #if PROOF_WIDGET_EXTENSION
+        try rejectExtensionExecution()
+        #else
+        await ProofCoordinator.shared.apply(sessionID: sessionID, setID: setID,
+                                            restID: restID, actionToken: actionToken, action: .options)
+        #endif
+        return .result()
+    }
+}
+
+
+struct ProofBack: LiveActivityIntent {
+    static let title: LocalizedStringResource = "Back to set"
+    static var supportedModes: IntentModes { .background }
+    static var authenticationPolicy: IntentAuthenticationPolicy { .requiresLocalDeviceAuthentication }
+
+    @Parameter(title: "Session") var sessionID: String
+    @Parameter(title: "Action version", default: "legacy") var actionToken: String
+    @Parameter(title: "Set") var setID: String
+    @Parameter(title: "Rest", default: "none") var restID: String
+
+    init() {}
+    init(sessionID: String, setID: String, restID: String, actionToken: String = "legacy") {
+        self.sessionID = sessionID
+        self.setID = setID
+        self.restID = restID
+        self.actionToken = actionToken
+    }
+
+    func perform() async throws -> some IntentResult {
+        #if PROOF_WIDGET_EXTENSION
+        try rejectExtensionExecution()
+        #else
+        await ProofCoordinator.shared.apply(sessionID: sessionID, setID: setID,
+                                            restID: restID, actionToken: actionToken, action: .back)
+        #endif
+        return .result()
+    }
+}
+
+struct ProofRIRVisibility: LiveActivityIntent {
+    static let title: LocalizedStringResource = "Show RIR"
+    static var supportedModes: IntentModes { .background }
+    static var authenticationPolicy: IntentAuthenticationPolicy { .requiresLocalDeviceAuthentication }
+
+    @Parameter(title: "Session") var sessionID: String
+    @Parameter(title: "Action version", default: "legacy") var actionToken: String
+    @Parameter(title: "Set") var setID: String
+    @Parameter(title: "Rest", default: "none") var restID: String
+
+    @Parameter(title: "Show RIR") var visible: Bool
+
+    init() {}
+    init(sessionID: String, setID: String, restID: String, actionToken: String, visible: Bool) {
+        self.visible = visible
+        self.sessionID = sessionID
+        self.setID = setID
+        self.restID = restID
+        self.actionToken = actionToken
+    }
+
+    func perform() async throws -> some IntentResult {
+        #if PROOF_WIDGET_EXTENSION
+        try rejectExtensionExecution()
+        #else
+        try await ProofCoordinator.shared.setRIRVisibility(visible, sessionID: sessionID, setID: setID, restID: restID, token: actionToken)
+        #endif
+        return .result()
+    }
+}

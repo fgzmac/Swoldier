@@ -7,6 +7,9 @@ struct ProofSetSnapshot: Sendable {
     let pounds: Double?
     let reps: Int?
     let rir: Int?
+    let skippedAt: TimeInterval?
+    let skipToken: String?
+    let editRevision: Int
     let plannedPounds: Double?
     let plannedReps: Int?
     let exerciseID: String
@@ -19,6 +22,7 @@ struct ProofSetSnapshot: Sendable {
          "plannedReps": plannedReps.map { $0 as Any } ?? NSNull(),
          "exerciseID": exerciseID, "isAdded": isAdded, "pounds": pounds.map { $0 as Any } ?? NSNull(), "reps": reps.map { $0 as Any } ?? NSNull(),
          "rir": rir.map { $0 as Any } ?? NSNull(),
+         "skippedAt": skippedAt.map { $0 as Any } ?? NSNull(), "skipToken": skipToken.map { $0 as Any } ?? NSNull(), "editRevision": editRevision,
          "completed": completed, "completionAttempts": completionAttempts]
     }
 }
@@ -39,7 +43,9 @@ struct ProofExerciseSnapshot: Sendable {
 }
 
 struct ProofSnapshot: Sendable {
-    let sessionID, restID: String
+    let sessionID, restID, actionToken: String
+    let startRequestID: String?
+    let startedAt: TimeInterval?
     let routineID, routineName: String?
     let routineRevision: Int?
     let sets: [ProofSetSnapshot]
@@ -56,13 +62,21 @@ struct ProofSnapshot: Sendable {
     var awaitingContinue: Bool { restSetID != nil && restContinuedAt == nil }
     var setID: String { displaySet.setID }
     var currentSets: [ProofSetSnapshot] { sets.filter { $0.exerciseID == currentExercise.exerciseID } }
-    var completed: Bool { currentSets.allSatisfy { $0.completed } }
+    var completed: Bool { currentSets.allSatisfy { $0.completed || $0.skippedAt != nil } }
     var workoutFinished: Bool { finishedAt != nil }
-    var hasNextExercise: Bool { exercises.contains { $0.ordinal > currentExercise.ordinal } }
-    var canChooseNext: Bool { !workoutFinished && currentExercise.finishedAt == nil && completed && restContinuedAt != nil }
+    var nextExerciseName: String? { exercises.first(where: { $0.ordinal > currentExercise.ordinal })?.name }
+    var hasNextExercise: Bool { nextExerciseName != nil }
+    var canChooseNext: Bool { !workoutFinished && currentExercise.finishedAt == nil && completed && !awaitingContinue }
+    var undoSkipToken: String? { currentSets.first(where: { $0.skipToken == actionToken && $0.skippedAt != nil })?.skipToken }
+    // Confirmation binds to the state shown, including edits, requests and rest acknowledgement.
+    var resolutionToken: String {
+        ([actionToken, restID, currentExercise.exerciseID, String(restContinuedAt ?? -1), String(finishedAt ?? -1)]
+         + sets.map { "\($0.setID):\($0.editRevision):\($0.completionAttempts)" }).joined(separator: "|")
+    }
     var recordCount: Int { sets.filter { $0.completed }.count }
     var dictionary: [String: Any] {
-        ["sessionID": sessionID, "setID": setID, "restID": restID,
+        ["startRequestID": startRequestID.map { $0 as Any } ?? NSNull(), "sessionID": sessionID, "setID": setID, "restID": restID, "actionToken": actionToken,
+         "startedAt": startedAt.map { $0 as Any } ?? NSNull(), "undoSkipToken": undoSkipToken.map { $0 as Any } ?? NSNull(),
          "routineID": routineID.map { $0 as Any } ?? NSNull(),
          "routineName": routineName.map { $0 as Any } ?? NSNull(),
          "routineRevision": routineRevision.map { $0 as Any } ?? NSNull(),
@@ -106,10 +120,12 @@ struct ProofMigration: Decodable { let column, statement: String }
 struct ProofSQL: Decodable {
     let schema: String
     let migrations: [ProofMigration]
-    let schemaV2, importLegacy, migrationsV3, migrationsV4, migrationsV5, migrationsV6, migrationsV7, reset: [String]
+    let schemaV2, importLegacy, migrationsV3, migrationsV4, migrationsV5, migrationsV6, migrationsV7, migrationsV8, reset, discardWorkout: [String]
+    let completedWorkoutForDeletion: String
     let registerFixture, startRequest, readWorkout, archiveWorkout, clearFinishedPointer, registerRoutine, snapshotExercises, snapshotSets: String
     let startSession, startExercises, startSets, readSession, readExercises, readSets, readRest: String
     let addSet, finishExercise, advanceExercise, finishLastExercise, finishWorkout: String
+    let skipSet, skipRemaining, undoSkip, rotateActionToken, resolveSkip, resolveRest, resolveExercises, resolveWorkout, editSet: String
     let countCompleteRequest, complete, createRest, advanceRest, weight, reps, rir, clearRIR, continueRest, undo, markUndone: String
 }
 
@@ -151,12 +167,15 @@ final class ProofStore {
         }
     }
 
-    func startRoutine(id: String, revision: Int, requestID: String) throws -> ProofSnapshot {
+    func startRoutine(id: String, revision: Int, requestID: String, resolution: String? = nil, expectedSession: String? = nil, expectedToken: String? = nil) throws -> ProofSnapshot {
         guard UUID(uuidString: requestID) != nil else { throw ProofError.input("Invalid Start request. Reopen the routine.") }
         return try transaction {
             let existing: String? = try withStatement(sql.startRequest, ["requestID": requestID]) { stmt in
                 switch sqlite3_step(stmt) {
                 case SQLITE_ROW:
+                    guard sqlite3_column_type(stmt, 3) == SQLITE_NULL else {
+                        throw ProofError.input("That workout was removed. Start again from Routines. For a scheduled workout, remove the old Calendar entry and add it again.")
+                    }
                     guard try text(stmt, 1) == id, Int(sqlite3_column_int64(stmt, 2)) == revision else {
                         throw ProofError.input("This Start request belongs to another saved revision.")
                     }
@@ -165,17 +184,37 @@ final class ProofStore {
                 default: throw ProofError.storage
                 }
             }
-            let current = try readInternal()
+            var current = try readInternal()
             if let existing {
                 guard let current, current.sessionID == existing else {
                     throw ProofError.input("This request already started an earlier workout. Return to the current workout.")
                 }
                 return current // Retry after a failed ActivityKit publication, even if routine changed.
             }
-            if let current, !current.workoutFinished {
-                throw ProofError.unfinishedWorkout
+            // A resolution is never silently reinterpreted as an ordinary Start.
+            // Validate even if the confirmed workout has since finished/disappeared.
+            if let resolution {
+                guard let active = current, !active.workoutFinished,
+                      active.sessionID == expectedSession, active.resolutionToken == expectedToken,
+                      resolution == "finish" || resolution == "discard" else {
+                    throw ProofError.input("The active workout changed. Review it before choosing again.")
+                }
             }
             let seed = try RoutineStore().workoutSnapshot(id: id, revision: revision)
+            if let active = current, !active.workoutFinished {
+                guard let resolution else { throw ProofError.unfinishedWorkout }
+                let params = ["sessionID": active.sessionID, "actionToken": active.actionToken,
+                              "newToken": UUID().uuidString, "now": String(Date().timeIntervalSince1970)]
+                if resolution == "discard" {
+                    for statement in sql.discardWorkout { try run(statement, params) }
+                    current = nil
+                } else {
+                    try run(sql.resolveSkip, params); try run(sql.resolveRest, params)
+                    try run(sql.resolveExercises, params)
+                    guard try run(sql.resolveWorkout, params) == 1 else { throw ProofError.storage }
+                    current = try readInternal()
+                }
+            }
             if let current {
                 let archived = String(decoding: try JSONSerialization.data(withJSONObject: current.dictionary), as: UTF8.self)
                 guard try run(sql.archiveWorkout, ["sessionID": current.sessionID, "archived": archived]) == 1 else { throw ProofError.storage }
@@ -191,18 +230,34 @@ final class ProofStore {
         }
     }
 
-    func apply(sessionID: String, setID: String, restID: String, action: ProofAction)
+    func apply(sessionID: String, setID: String, restID: String, actionToken: String = "legacy", action: ProofAction)
         throws -> (snapshot: ProofSnapshot?, notice: String?) {
         try transaction {
             // Sample after obtaining the write lock, never from the archived card.
             let now = Date().timeIntervalSince1970
-            var params = ["sessionID": sessionID, "setID": setID, "restID": restID,
-                          "now": String(now), "newRestID": UUID().uuidString, "newSetID": UUID().uuidString]
+            var params = ["sessionID": sessionID, "setID": setID, "restID": restID, "actionToken": actionToken,
+                          "newToken": UUID().uuidString, "now": String(now), "newRestID": UUID().uuidString, "newSetID": UUID().uuidString]
             // A new rest ID identifies each successful completion, including re-completion.
             // The old rest ID remains the action guard; failed transactions publish neither.
             let before = try readInternal(now: now)
+            guard before?.sessionID == sessionID, before?.actionToken == actionToken else {
+                return (before, "Old action ignored; use the current card")
+            }
             var changed = false
             switch action {
+            case .options, .back:
+                guard before?.setID == setID, before?.restID == restID else { return (before, "Old action ignored") }
+                changed = true
+            case .skipSet, .finishEarly:
+                guard before?.setID == setID, before?.restID == restID else { return (before, "Old action ignored") }
+                if case .skipSet = action { changed = try run(sql.skipSet, params) > 0 }
+                else { changed = try run(sql.skipRemaining, params) > 0 }
+                if changed { guard try run(sql.rotateActionToken, params) == 1 else { throw ProofError.storage } }
+            case .undoSkip(let token):
+                params["skipToken"] = token
+                guard token == actionToken else { return (before, "Old skip ignored") }
+                changed = try run(sql.undoSkip, params) > 0
+                if changed { guard try run(sql.rotateActionToken, params) == 1 else { throw ProofError.storage } }
             case .complete:
                 try run(sql.countCompleteRequest, params)
                 // Only this rest's undone draft may bypass acknowledgement at expiry.
@@ -268,6 +323,77 @@ final class ProofStore {
         }
     }
 
+    // Deliberate exact-actual correction. Does not complete, skip, acknowledge or restart rest.
+    func editSet(_ json: String) throws -> ProofSnapshot {
+        struct Edit: Decodable {
+            let sessionID, setID, actionToken, requestID: String
+            let revision: Int
+            let pounds: Double?
+            let reps, rir: Int?
+        }
+        let edit = try JSONDecoder().decode(Edit.self, from: Data(json.utf8))
+        guard UUID(uuidString: edit.requestID) != nil, edit.revision >= 0 else { throw ProofError.input("Invalid edit. Reopen the set.") }
+        if let value = edit.pounds {
+            guard value.isFinite, (0...2000).contains(value), abs(value * 100 - (value * 100).rounded()) < 0.000001 else { throw ProofError.input("Pounds must be blank or 0–2000, with up to two decimals.") }
+        }
+        if let value = edit.reps, !(0...1000).contains(value) { throw ProofError.input("Reps must be blank or a whole number 0–1000.") }
+        if let value = edit.rir, !(0...10).contains(value) { throw ProofError.input("RIR must be blank or a whole number 0–10.") }
+        return try transaction {
+            guard let snapshot = try readInternal(), snapshot.sessionID == edit.sessionID else { throw ProofError.input("That workout is no longer active. No values changed.") }
+            let params = ["sessionID": edit.sessionID, "setID": edit.setID, "actionToken": edit.actionToken,
+                          "revision": String(edit.revision), "requestID": edit.requestID, "payload": json]
+            let previous: String? = try withStatement("SELECT payload FROM proof_edit_requests WHERE request_id=:requestID", params) { stmt in
+                switch sqlite3_step(stmt) { case SQLITE_ROW: return try text(stmt, 0); case SQLITE_DONE: return nil; default: throw ProofError.storage }
+            }
+            if let previous {
+                guard previous == json else { throw ProofError.input("This edit request was already used. Reopen the set.") }
+                return snapshot
+            }
+            guard let set = snapshot.sets.first(where: { $0.setID == edit.setID }), set.skippedAt == nil else { throw ProofError.input("Undo the skip before editing this set.") }
+            let fixture = snapshot.exercises.first(where: { $0.exerciseID == set.exerciseID })?.sourceExerciseID == nil
+            guard (edit.pounds ?? 0) <= (fixture ? 200 : 2000), (edit.reps ?? 0) <= (fixture ? 30 : 1000) else {
+                throw ProofError.input("Value exceeds this workout's provisional entry limit. Your edits remain unsaved.")
+            }
+            if set.completed && edit.reps == nil { throw ProofError.input("A recorded set requires reps. Your edits have not been saved.") }
+            guard try run(sql.editSet, params) == 1 else { throw ProofError.input("This set changed. Reopen it before saving; your edits are still shown.") }
+            try run("INSERT INTO proof_edit_requests(request_id,session_id,payload) VALUES(:requestID,:sessionID,:payload)", params)
+            guard let result = try readInternal() else { throw ProofError.storage }
+            return result
+        }
+    }
+
+    func deleteCompletedWorkout(sessionID: String) throws {
+        try transaction {
+            let params = ["sessionID": sessionID, "now": String(Date().timeIntervalSince1970)]
+            try withStatement(sql.completedWorkoutForDeletion, params) { stmt in
+                switch sqlite3_step(stmt) {
+                case SQLITE_ROW: break
+                case SQLITE_DONE: throw ProofError.input("This completed workout is no longer available.")
+                default: throw ProofError.storage
+                }
+            }
+            // Keep the original Start request reserved so a late retry cannot recreate this workout.
+            for statement in sql.discardWorkout { try run(statement, params) }
+        }
+    }
+
+    func history() throws -> [[String: Any]] {
+        try transaction(immediate: false) {
+            try withStatement("SELECT archived_state FROM proof_workouts_v6 WHERE archived_state IS NOT NULL AND discarded_at IS NULL ORDER BY rowid DESC") { stmt in
+                var rows: [[String: Any]] = []
+                while true {
+                    switch sqlite3_step(stmt) {
+                    case SQLITE_ROW:
+                        let value = try JSONSerialization.jsonObject(with: Data(text(stmt, 0).utf8))
+                        if let snapshot = value as? [String: Any] { rows.append(snapshot) }
+                    case SQLITE_DONE: return rows
+                    default: throw ProofError.storage
+                    }
+                }
+            }
+        }
+    }
+
     func reset() throws {
         try transaction {
             guard try readInternal()?.routineID == nil else {
@@ -283,19 +409,21 @@ final class ProofStore {
     }
 
     private func readInternal(now: TimeInterval = Date().timeIntervalSince1970) throws -> ProofSnapshot? {
-        let identity: (String, String, String, TimeInterval?)? = try withStatement(sql.readSession) { stmt in
+        let identity: (String, String, String, TimeInterval?, String)? = try withStatement(sql.readSession) { stmt in
             switch sqlite3_step(stmt) {
             case SQLITE_ROW: return (try text(stmt, 0), try text(stmt, 1), try text(stmt, 2),
-                sqlite3_column_type(stmt, 3) == SQLITE_NULL ? nil : sqlite3_column_double(stmt, 3))
+                sqlite3_column_type(stmt, 3) == SQLITE_NULL ? nil : sqlite3_column_double(stmt, 3), try text(stmt, 4))
             case SQLITE_DONE: return nil
             default: throw ProofError.storage
             }
         }
-        guard let (sessionID, restID, exerciseID, finishedAt) = identity else { return nil }
+        guard let (sessionID, restID, exerciseID, finishedAt, actionToken) = identity else { return nil }
         let params = ["sessionID": sessionID, "restID": restID, "now": String(now)]
-        var routineID: String?, routineName: String?, routineRevision: Int?
+        var startRequestID: String?, routineID: String?, routineName: String?, routineRevision: Int?, startedAt: TimeInterval?
         try withStatement(sql.readWorkout, params) { stmt in
             guard sqlite3_step(stmt) == SQLITE_ROW else { throw ProofError.storage }
+            if sqlite3_column_type(stmt, 4) != SQLITE_NULL { startRequestID = try text(stmt, 4) }
+            startedAt = sqlite3_column_type(stmt, 3) == SQLITE_NULL ? nil : sqlite3_column_double(stmt, 3)
             if sqlite3_column_type(stmt, 0) != SQLITE_NULL {
                 routineID = try text(stmt, 0); routineName = try text(stmt, 1)
                 routineRevision = Int(sqlite3_column_int64(stmt, 2))
@@ -328,6 +456,8 @@ final class ProofStore {
                         pounds: sqlite3_column_type(stmt, 4) == SQLITE_NULL ? nil : sqlite3_column_double(stmt, 4),
                         reps: sqlite3_column_type(stmt, 5) == SQLITE_NULL ? nil : Int(sqlite3_column_int64(stmt, 5)),
                         rir: sqlite3_column_type(stmt, 10) == SQLITE_NULL ? nil : Int(sqlite3_column_int64(stmt, 10)),
+                        skippedAt: sqlite3_column_type(stmt, 11) == SQLITE_NULL ? nil : sqlite3_column_double(stmt, 11),
+                        skipToken: sqlite3_column_type(stmt, 12) == SQLITE_NULL ? nil : try text(stmt, 12), editRevision: Int(sqlite3_column_int64(stmt, 13)),
                         plannedPounds: sqlite3_column_type(stmt, 2) == SQLITE_NULL ? nil : sqlite3_column_double(stmt, 2),
                         plannedReps: sqlite3_column_type(stmt, 3) == SQLITE_NULL ? nil : Int(sqlite3_column_int64(stmt, 3)),
                         exerciseID: try text(stmt, 8), isAdded: sqlite3_column_int(stmt, 9) == 1,
@@ -339,7 +469,7 @@ final class ProofStore {
             }
         }
         let currentSets = sets.filter { $0.exerciseID == exerciseID }
-        guard !currentSets.isEmpty, let display = currentSets.first(where: { !$0.completed }) ?? currentSets.last else {
+        guard !currentSets.isEmpty, let display = currentSets.first(where: { !$0.completed && $0.skippedAt == nil }) ?? currentSets.last else {
             throw ProofError.storage
         }
         var started: TimeInterval?, deadline: TimeInterval?, skipped: TimeInterval?, continued: TimeInterval?
@@ -361,7 +491,7 @@ final class ProofStore {
             default: throw ProofError.storage
             }
         }
-        return ProofSnapshot(sessionID: sessionID, restID: restID, routineID: routineID, routineName: routineName, routineRevision: routineRevision, sets: sets, exercises: exercises, currentExercise: currentExercise, finishedAt: finishedAt, displaySet: display,
+        return ProofSnapshot(sessionID: sessionID, restID: restID, actionToken: actionToken, startRequestID: startRequestID, startedAt: startedAt, routineID: routineID, routineName: routineName, routineRevision: routineRevision, sets: sets, exercises: exercises, currentExercise: currentExercise, finishedAt: finishedAt, displaySet: display,
             restDeadline: deadline, restSkippedAt: skipped, restContinuedAt: continued, restStartedAt: started, restSetID: restSetID, restUndoneAt: undone, restState: state, restRemainingSeconds: remaining)
     }
 
@@ -370,14 +500,14 @@ final class ProofStore {
             guard sqlite3_step(stmt) == SQLITE_ROW else { throw ProofError.storage }
             return Int(sqlite3_column_int(stmt, 0))
         }
-        guard version < 7 else { return }
+        guard version < 8 else { return }
         try transaction {
             // Recheck under the write lock to prevent a second legacy import.
             let lockedVersion: Int = try withStatement("PRAGMA user_version") { stmt in
                 guard sqlite3_step(stmt) == SQLITE_ROW else { throw ProofError.storage }
                 return Int(sqlite3_column_int(stmt, 0))
             }
-            guard lockedVersion < 7 else { return }
+            guard lockedVersion < 8 else { return }
             if lockedVersion < 2 {
                 let columns: Set<String> = try withStatement("PRAGMA table_info(proof_set)") { stmt in
                     var result = Set<String>()
@@ -402,8 +532,9 @@ final class ProofStore {
             }
             if lockedVersion < 5 { for statement in sql.migrationsV5 { try execute(statement) } }
             if lockedVersion < 6 { for statement in sql.migrationsV6 { try execute(statement) } }
-            for statement in sql.migrationsV7 { try execute(statement) }
-            try execute("PRAGMA user_version = 7")
+            if lockedVersion < 7 { for statement in sql.migrationsV7 { try execute(statement) } }
+            for statement in sql.migrationsV8 { try execute(statement) }
+            try execute("PRAGMA user_version = 8")
         }
     }
 

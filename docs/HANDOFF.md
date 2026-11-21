@@ -1,5 +1,243 @@
 # Current project handoff
 
+## 2026-11-20 — Gio’s iPhone results for the combined preview
+
+Gio reported the following results on iPhone build `c832451a-1988-46fd-9d35-ff0037610114`.
+
+| Check | User-reported result |
+| --- | --- |
+| Upgrade | Passed |
+| Fictional BodySpec DXA import | Passed |
+| Delete workout | Passed |
+
+The earlier scheduled workout pass belongs to `c0bb769c`. Live BodySpec sign-in and personal scan import remain pending.
+
+## 2026-11-20 — Signed combined preview ready to install
+
+**FINISHED** at 6:16 p.m. Pacific. Build `c832451a-1988-46fd-9d35-ff0037610114` is the internal iPhone preview of the fictional BodySpec importer and Delete workout, version 1.0.0 (1). [Install the combined preview on the registered iPhone](https://expo.dev/accounts/fgzmacaraeg/projects/swoldier-lock-screen-proof/builds/c832451a-1988-46fd-9d35-ff0037610114).
+
+Exactly one build was submitted from the Windows working tree on `feat/midnight-ui` at `70d997f682c4cacebf60228340dbb9c1776831d1`, using the existing `preview` profile and frozen remote credentials. Immediately before submission, all 33 paths and SHA-256 hashes matched in a fresh EAS archive and the working tree, including the seven local app inputs. The exact manifest is in the preparation entry below.
+
+Xcode logged `ARCHIVE SUCCEEDED`, code signing for the app and widget, and the copy of `SwoldierProofLiveActivity.appex` into the app's PlugIns folder. Fastlane confirmed signed IPA export and EAS published the IPA. Included build credit fell from $33 to $31 of the $45 monthly allowance. Overage was $0 before and after.
+
+The pre-install checklist covered the journal, completed workouts and preservation across upgrade. Gio’s results for this build are recorded above.
+
+## 2026-11-20 — Combined DXA and Delete workout preview
+
+**Ready for one internal iOS build.** The Windows candidate is the working tree on `feat/midnight-ui` at `70d997f682c4cacebf60228340dbb9c1776831d1`, with seven changed app inputs. `Organizer.tsx` contains the fictional samples and preview/save flow. `App.tsx` and `workoutModel.ts` connect Delete workout to `modules/LockScreenProofModule.swift`. The bridge calls `native/ProofCoordinator.swift`, which invokes `native/ProofStore.swift` and ends activities for the selected session. The store checks completion using `native/ProofSQL.json` and deletes within a transaction.
+
+**Archive.** From `proofs/lock-screen`, EAS CLI 27.7.2 ran `build:inspect --platform ios --profile preview --stage archive` with `EAS_NO_VCS=1` and `EAS_PROJECT_ROOT` set to that directory. The existing profile specifies internal distribution, a physical iPhone and the sdk-57 image. The 33 archive files matched both the preflight hashes and the tested working tree byte for byte. The nine bundled PNGs matched the artwork at HEAD. Unrelated design samples, reference files, personal scans, credentials, local databases, tests and generated outputs were excluded.
+
+**Windows checks.** All 168 tests passed with zero failures or skips, including the importer and all three Delete workout regressions. TypeScript passed. The iOS export produced one Hermes bundle from 596 modules and nine assets. Expo generated an Xcode project from a separate copy of the archive using the installed SDK template. All ten generated Swift/SQL copies matched. The host contains both stores, the coordinator and both SQL resources. The extension contains ProofActivity, ProofIntents and ProofWidget. Host-only inline module discovery, the iOS 26 deployment target and the `swoldier-proof` URL scheme passed inspection.
+
+**Preparation checkpoint.** This manifest was rechecked immediately before the authorized build. The signed build and Gio’s iPhone results are recorded above.
+
+The local EAS archive-stage output is in `proofs/lock-screen/.expo/preview-dxa-delete-20261120/archive/`. Its sibling `archive.sha256` lists the paths relative to the proof root. SHA-256 of that manifest (UTF-8, LF) is `88742ad7b24a01ba71cded31c908f3c58efe9e312d0c799c14e6d4364ab1fb0a`.
+
+<details>
+<summary>Exact archive inputs and SHA-256 hashes</summary>
+
+```text
+6287c81600bcc61784ee11853e3099e6d8854f9acb6d15a5638c44446e8fa298  App.tsx
+e88e42023935b73988397005cabbe1c85121dec482571099fc4ac3884235da87  Midnight.tsx
+4d5a8a6d90d59646e5bf691fc1eff147a67d2d11505ffc631859da56f9972852  Organizer.tsx
+248459463ac8f7373faa362348a80f74865a873d4d6944835c79906c5a998f5a  RoutineEditor.tsx
+86d74f5cb1bdc7e8d63d319628e9fbde221ffcaad19022e5afa781dae2c6cc3b  SetEditor.tsx
+73ae69a5a98db78457c0af0aeb7f6ae9b247703f073a8c5db0c1346b51a38bd7  WeekPlanner.tsx
+88ddc4408db6276107a31e627d55203d8d91b0f591e1db5d7aeb9d9f28c3e389  app.config.js
+875240626c8e8474fb64497066b770db22d2b2983e5288ce2771ff5f7df89c0c  assets/midnight/bench.png
+1914db5119e171352a06ab1af18fbc66b802dad095d971856b31dd36cce0f3cb  assets/midnight/cal.png
+84d702e233a88738c372200da9dc22342b1b24c1aaf8fcaa84c4c18a3886769b  assets/midnight/calendar-planner.png
+4eefbf9f2a7ed6cec7634190b2f4f0bc0f1cd3fab442b7d23fa395a8e841f2ae  assets/midnight/drop.png
+e28056cd66438b64d12223337ac3ab1584cf7624fa1484196a217278909dc49b  assets/midnight/pill.png
+c5cc39eda64ce9d62cb64a26c9a4f33efd5e3faef60afd194bb9a88c5f055ea3  assets/midnight/right.png
+33da702eeb970b6fb97e4b4e09db35828d400dc5d3bc9a0e557692656b239739  assets/midnight/routines.png
+7e6979ed3ddba32c22cc132334c527f57b5dc624ef466d1168a00ff42716f97c  assets/midnight/today.png
+93ec8d85ec56fd2cd8ad0c96cf5f124121d8413dea346dbe12913a0bb74664a7  assets/midnight/training-journal.png
+5816a0b5044576ca768fe4d6dfac5133278f5d0df418d334110484448b6e5216  eas.json
+3cc816440c81db1b45a7d796c25ee6b45e19cfa2d64f1f934e42b1384c82d90b  index.js
+4c98e9f52dae029d9607410ac31627de713789fdd03f7bac8e094fdaa268e744  modules/LockScreenProofModule.swift
+6dd5840312e3d9849ebfac610084546e88bc81b05304f9140ba94e72e7755051  native/ProofActivity.swift
+af6e3f94ab5a4380e312749a4696ae4aadc5b36f8f5211950dc168204701980d  native/ProofCoordinator.swift
+5c957c4630eceedcde0b48232820f87b39c6348c55c004a0098e6934f3a95ed1  native/ProofIntents.swift
+e2143231afea2e5aadc5ffcd8b2fb5ae46d85d42a7aa515527576689883cb2a8  native/ProofSQL.json
+059ba2ac994425abf528a9dda1ccd029d6f46e4935fb76b23ea63d1053f54061  native/ProofStore.swift
+f449cece63d8c9f955d2688cd67487ef12db710e6199484d8f2e2f360742c702  native/ProofWidget.swift
+f4b2b02955832bc3c19fb502746acc3a099021516e3c7ced1b64f648c2cf3add  native/RoutineSQL.json
+a1d8ac8b7e715795b70998d9a5b4705bfd595a9e1bbbcd5dae11e09cafec9039  native/RoutineStore.swift
+698747d5365843c144422948b0b91d02c81b29a1618f34444228e08572fd6fab  package-lock.json
+bd7967db96f138f190fac5c3e29d797c665ae4ce9fc4027d910320d7b1376065  package.json
+08dc1863144e8c3c1fac291e0260b5dd921621ad5013806193b19eec4facf08a  plugins/withLockScreenProof.js
+a22aeca71b837c9b68b9a42f7f93e7449bc04bfd18335e80c49fb9b2bb1d7b1c  routineModel.ts
+8c4892ccf48b43c120a49a4992740a32a2f3c1a273ba5443849af3e6f8456ea9  tsconfig.json
+b8ae6fd8020eeab25192e500a38e12b2ff7fa306a3b7cbcaced32f0817faa116  workoutModel.ts
+```
+
+</details>
+
+## 2026-11-20 — Fictional BodySpec import verified on Windows
+
+In Today → Accountability, choose **Import fictional BodySpec scan**. Sample 1 previews 2026-11-18, BodySpec (fictional), 23.4% body fat, 120.5 lb lean mass and an estimated RMR of 1512 kcal/day. Sample 2 has the same date, a different result ID and a blank RMR. **Record scan** remains available for manual entry.
+
+On Windows at `feat/midnight-ui` / `70d997f` with local changes, all 168 tests passed, including the DXA regression and all three Delete workout regressions. TypeScript passed. The Tracker test used a substitute native bridge and file-backed SQLite to check cancel without a write, reopen, repeat-import protection, two same-date results and preservation of a matching manual scan. See the [build log](BUILD_LOG.md) for the integration record.
+
+The supplied patch records the owner's subsequent “Workout passed” report for signed preview c0bb769c. After double Complete, Undo, correction, re-completion, Finish and reopen, the owner saw one new workout, two saved sets, the corrected 40 lb × 9 first set, intact targets and the completed occurrence in Today and Calendar. The owner reported the upgrade looked correct. Exact rest-deadline preservation, a full before/after comparison, goal increments and accessibility remain open. The phone card below predates this report.
+
+Next device check, when a signed candidate includes the local features, is to repeat the fictional scan and Delete workout checks on iPhone. Live BodySpec sign-in still requires client and callback confirmation, measurement mapping and consent/token-handling verification before a personal import.
+
+## 2026-11-20 — Delete a completed workout
+
+In a future signed preview, go to Today > Completed Workouts and expand a fictional workout. Cancel deletion once, then confirm the named workout and reopen the app. Check the completed count, goals, routine status, and any scheduled date. Verify a second workout from the same routine and an unfinished workout still have their original sets. Repeat for the most recently finished workout. The currently signed preview c0bb769c predates this feature.
+
+## 2026-11-20 — Lock Screen header and control spacing
+
+Check the revised widget on iPhone with a long exercise name and larger text, including the Undo editing state with RIR and End Rest visible. The local visual preview uses a short exercise name.
+
+## 2026-11-20 — Training Week selected for Calendar
+
+Training Week is now in the local Calendar header. A four-screen visual review is available under design-samples/midnight-screen-previews. Today, Routines and Calendar are browser renders of the current components with fictional state. The Lock Screen card is an illustrative reconstruction with Show RIR enabled. In the next preview, compare the selected artwork, month chips and agenda header on the phone.
+
+## 2026-11-20 — Calendar hero and dated task labels
+
+On a future iPhone preview, check a busy day with four or more entries, long routine names, larger text and a month spanning six weeks. Tap the date to verify that the full agenda opens with the same entries and completion states. Three Calendar hero samples are available locally; the desk planner is currently wired in.
+
+## 2026-11-20 — Routines journal artwork
+
+The selected training journal is wired into the local Routines library header. In the next preview, check the title, count and artwork together at standard and larger text sizes.
+
+## 2026-11-20 — Midnight visual corrections after installation
+
+Midnight preview 66ffdd5f compiled and signed from PR #1 commit a145fd4. The installed Today and Calendar screenshots showed a crowded Agenda header, missing illustrations and text-only tabs. They show an active workout summary. The Calendar screenshot is for a different date than the before-upgrade screenshot, so it does not verify the earlier date’s entries.
+
+The local correction restores the reference artwork, revises Today’s workout and goals, and separates the selected date, add action, month navigation and entry options. Review Today and Calendar side by side with their approved references in a future iPhone preview. Check the narrow-width header, large text, the add form opening directly below the header, and the same saved dated entries from both screens. The correction has no signed build or phone result yet.
+
+## 2026-11-20 — Midnight review and upgrade checklist
+
+The feature branch `feat/midnight-ui` keeps the signed A–J inputs in a prerequisite commit and adds Midnight in a second commit. The previous signed preview was 3e11df7b. Midnight passed 163 local tests, TypeScript, iOS JavaScript export and generated native target/resource checks. Swift compilation, signing, upgrade, accessibility and rendered layouts are pending for Midnight.
+
+After a separately approved preview, check these on the iPhone in order.
+
+1. Before installation, capture the routine list and groups, active session and set, actuals including RIR, rest deadline, and today's agenda checks and water totals. Upgrade in place and reopen before changing anything.
+2. Use Resume from Today and the routine row. If the active session was scheduled, also use Calendar. Confirm the same session, set and rest state every time.
+3. Set different weekly, monthly and yearly targets. Edit and remove one. Check the other two, completed history and prior accountability entries. Move a routine into a category, collapse it, then remove the category and check it returns exactly once.
+4. Change one check or water entry in Today and reopen Calendar on that date. Verify its ID-equivalent entry, totals and selected slot, then edit from Calendar and check Today.
+5. With a long exercise name, a multi-digit set number and larger text, check widget width, reachable buttons and VoiceOver labels. Show RIR in Options, try blank, zero and nonzero values, hide and show it, then complete and Undo during rest. Compare the value and original deadline. Verify the preference persists across sessions.
+
+Both deferred troubleshooting issues remain open. Keep earlier device reports attached to their original builds.
+
+## 2026-11-19 — Corrected A–J preview compiled and signed
+
+[Install build 3e11df7b](https://expo.dev/accounts/fgzmacaraeg/projects/swoldier-lock-screen-proof/builds/3e11df7b-346a-4408-b099-08a78fb3cf2d). Before submitting, compared the new 23-file EAS archive and live source with the failed build's manifest. Only ProofWidget.swift differed, exactly matching the recorded relocation of @ViewBuilder to countdown. Xcode archived successfully and Fastlane exported the signed IPA. Expo Doctor reported the existing Expo patch-version warning (57.0.32 versus expected ~57.0.33). One medium iOS preview consumed $2 included credits. The balance went from $39 to $37 with $0 overage.
+
+Installation and A–J device checks await the [upgrade-in-place phone checklist](../proofs/lock-screen/README.md#november-19-upgrade-first-phone-checklist). Capture current data before upgrading. Earlier build evidence and troubleshooting items retain their recorded scope.
+
+## 2026-11-19 — A–J preview
+
+**Build failed.** The [one A–J build](https://expo.dev/accounts/fgzmacaraeg/projects/swoldier-lock-screen-proof/builds/f645e5c0-65ce-4128-a428-0a08edc97dc6) reached Xcode. ProofWidget.swift:298 failed with “function declares an opaque return type, but has no return statements in its body from which to infer an underlying type.” The new header had taken the existing countdown's @ViewBuilder annotation. Locally restored the annotation to countdown, regenerated and verified the extension source and all ten native copies. This single annotation relocation is the only build-input difference after submission. Its native compile and signing remain pending. No IPA or installation URL was produced. Expo Doctor also flagged locked Expo 57.0.32 versus expected ~57.0.33. All A–J requirements preceded submission. No second build was submitted.
+
+Two post-failure usage queries showed $6 of $45 used, $39 remaining and $0 overage, unchanged from preflight. Recorded credit delta at the last query was $0. A new build would require separate authorization.
+
+Today rotates one starter quote per local date, shows a collapsible Accountability tracker and shares the Calendar agenda, including the existing Night slot displayed as Evening. An unfinished workout remains independently accessible. Completed Workouts opens a counted history list, with the existing per-workout details and edit permissions.
+
+Accountability stores metric or habit goals, dated check-ins and manual dated/source-labeled scan observations in an additive revision-checked organizer table. Estimated RMR is displayed in kcal/day. Blank measurements stay blank. Routine groups use a separate revision in that table. Membership and order reference routine IDs. Group removal returns members to Ungrouped.
+
+The routine editor uses exercise-owned Rest settings and Set settings, Move up/down/top/bottom, conditional rest seconds, optional targets and secondary configuration buttons. Today, Calendar and editor cards use stronger outlines. The Live Activity adds a bold exercise header, labeled set count and a static dark rest panel with a luminous outline. The existing deadline, action identities and End Rest/Undo behavior supply its state.
+
+For prior Calendar preview 5a6419aa only, upgrade preservation, water, supplements and routine scheduling passed by user report. Before-upgrade screenshots document the earlier state. Whole-date completion, undo and empty-date outcomes still await a report.
+
+Local validation covered 157 passing pre-upload tests and an additional passing editor-harness check of hidden seconds, dirty targets and movement with a long exercise name. The migration/CAS, group removal, check-in history, date boundary and calendar progress checks run through SQLite/TypeScript wrappers. TypeScript, iOS JavaScript export, ten generated native copies and target/resource membership passed. No physical layout, installed migration, accessibility or phone result for A–J has been recorded.
+
+Source is local main at 7a6fbad35645f21f5a9ba8873ca3cc9214b4e229 plus working-tree inputs. All 23 isolated archive hashes match reviewed source. The lockfile matches the preceding build. Exact inputs, SHA-256 and batch paths are in the ignored proof manifest `.expo/aj-1119/manifest.json`. All A–J requests were present before submission. Next run the [upgrade-first checklist](../proofs/lock-screen/README.md#november-19-upgrade-first-phone-checklist).
+
+## 2026-11-18 — Calendar preview
+
+[Install Calendar preview 5a6419aa](https://expo.dev/accounts/fgzmacaraeg/projects/swoldier-lock-screen-proof/builds/5a6419aa-4eda-4022-a5e4-af52c29e6f68). EAS FINISHED. Xcode archived the app and extension and Fastlane exported the signed IPA. Exactly one internal preview used $2 included medium-worker credits. Starter balance moved from $41 to $39, with $0 overage. Expo Doctor passed 20/21 and flagged locked Expo 57.0.32 against expected ~57.0.33. Installation and device acceptance remain pending.
+
+The preview uses local main at 7a6fbad35645f21f5a9ba8873ca3cc9214b4e229 with accumulated working-tree changes. The isolated archive contained 22 reviewed inputs, all matching local SHA-256. Sixteen differ from the commit and eleven differ from build b329ba8c. The unchanged lockfile and all input hashes are recorded in the ignored proof directory `.expo/calendar-1118/manifest.json`.
+
+Calendar imports old dated assignments into the routine database inside its schema transaction. Reopening preserves occurrence IDs and revisions. The existing workout database supplies the original Start request identity with each new snapshot. Day writes check their prior revision. Water totals and parent completion are derived from saved children. Supplement details use one free-text entry per child. Today summaries start collapsed. The workout editor, rest dismissal, Resume and conflict panels use the updated wording and interaction. Food with calories and macronutrients remains deferred.
+
+All 154 local tests passed, including migration, stale writes, deleted-entry preservation on reopen, water/checklist reversals, workout history and action guards. During review a Save regression blocked saving a named empty routine. The corrected validation requires an exercise at Start and the original save-in-flight regression passes. TypeScript, iOS JavaScript export, ten generated native file/resource copies, target membership and exact-set URL checks passed. SQL wrappers and editor harnesses cover local logic. Device migration, older content, actual link delivery, keyboard/confirmation scrolling, larger text and VoiceOver await testing. The previous weekly-planner phone trial remains paused. Both deferred troubleshooting issues remain open.
+
+Next, capture existing data before installing over the app and follow the [Calendar upgrade and phone checks](../proofs/lock-screen/README.md#calendar-upgrade-and-phone-checks). Start with local dates and completed workout records before adding fictional calendar items.
+
+## Usability preview compiled and signed — 2026-11-16
+
+**Exactly one authorized build succeeded:** [b329ba8c-d0b2-4354-a734-f02ccb4135d3 — install on iPhone](https://expo.dev/accounts/fgzmacaraeg/projects/swoldier-lock-screen-proof/builds/b329ba8c-d0b2-4354-a734-f02ccb4135d3). EAS FINISHED, Xcode ARCHIVE SUCCEEDED, IPA exported and signed. Existing preview/internal profile, sdk-57 image and frozen signing credentials; no resubmission or retry.
+
+Before submission all 22 current source/archive SHA-256 hashes matched the reviewed final manifest, with unchanged lockfile. Source base remains **7a6fbad35645f21f5a9ba8873ca3cc9214b4e229** plus the reviewed uncommitted usability inputs. All 27 working paths are preserved; no staging/commit/push or fresh remote query. Ignored `.expo/usability-preflight/submitted-inputs.json` records each input/hash and the exact uncommitted input list alongside final build logs and billing responses.
+
+Current official Expo guidance confirms medium default and $2 medium-iOS pricing. Before submission Starter had $43 included credits and $0 overage. Afterward the live report confirms a second medium iOS build: **$4 total credits used, $41 remaining, $0 overage**. This build consumed exactly **$2 included credits**, no additional cash charge. User-reported subscription spend remains $19 of the $50 testing cap. No billing/dependency/credential change.
+
+Warnings: Expo Doctor passed 20/21; locked Expo 57.0.32 differs from expected ~57.0.33. Build continued unchanged. Native logs include generated AppDelegate/iOS 26 and UIRequiresFullScreen deprecations, duplicate C++ library and missing Metal-toolchain search-path warnings, generated JS/Hermes warnings, script-output warnings and signed-extension stripping notice. These did not prevent archive/sign/export; no claim that they are repaired.
+
+Reused unchanged 152 local tests/typecheck/export and native membership review; wrapper tests do not execute Swift. **Native compilation and signing now Passed for this build.** Installation, installed migration/history preservation, older ActivityKit decoding, links/navigation dialogs, runtime concurrency/retries, rendered fit/accessibility and new device outcomes remain **Not run**. Both deferred issues and separate screen-sleep investigation remain open; original blank-to-zero observation remains inconclusive/not reproduced. Prior device evidence retains its original scope.
+
+**Next small task:** capture existing data and install over the current app without deleting/resetting, then follow the [ordered upgrade-first checklist](../proofs/lock-screen/README.md#final-preflight-phone-checklist--not-run): preservation first, three corrected bugs next, then controls/navigation/scheduling/layout. Report observations before marking any trial passed. Historical entries and learning reflections remain untouched.
+
+## Final local usability build preflight — 2026-11-16
+
+**Ready for one separately authorized preview; none submitted.** Local main/HEAD remains **7a6fbad35645f21f5a9ba8873ca3cc9214b4e229**, upstream origin/main, all 27 changed paths unstaged. No fresh remote query. Application inputs are unchanged from the completed correction review.
+
+Actual local EAS `build:inspect --stage archive` succeeded. Exactly **22 required files** and every SHA-256 match current source and the reviewed manifest. The dependency lockfile remains unchanged from HEAD. Ten generated native copies, app/extension source and SQL-resource membership, host-only inline module and `swoldier-proof` exact-set URL scheme were inspected. The archive excludes docs/tests, dependencies, generated projects, credentials, signing/device evidence and unrelated/private files. Final manifest, archive, redacted signing summary, usage response and unexecuted command are preserved in ignored `proofs/lock-screen/.expo/usability-preflight/`.
+
+Read-only EAS checks confirm the existing project, one registered phone and both app/extension AD_HOC profiles active, including that phone; certificate/profile expiry is November 11, 2027. This is EAS-stored metadata, not an independent Apple-portal revocation check. Preview remains internal, physical iOS, sdk-57, local app versions; cached EAS CLI 27.7.2 is reused with frozen credentials. No credentials, dependencies or billing changed.
+
+**Budget:** current Starter usage is $2 of $45 credits, **$43 remaining**, $0 usage overage. A medium iOS preview is expected to consume **$2 credits**, leaving **$41**, with no extra usage charge. The profile does not explicitly pin worker size; estimate uses current medium-worker usage and must be rechecked if worker selection/pricing or intervening account usage changes. User-reported subscription total remains $19 of the $50 cash cap; receipt/tax was not independently inspected. No spending occurred.
+
+Reused unchanged 152 passing tests, TypeScript and JS export; no unrelated suite rerun. SQL wrappers and the TypeScript editor harness do not execute Swift or React Native. Fresh archive/hash/native inspection and documentation/whitespace checks cover this preflight. New native compilation/signing, installed migration, older ActivityKit decoding, link delivery, rendered fit/accessibility and device behavior remain **Not run**. Both deferred issues, screen sleep and the inconclusive/not-reproduced blank-to-zero report remain open.
+
+**Next small task:** separately authorize one preview after rechecking source/credit freshness, then follow the [ordered upgrade-first checks](../proofs/lock-screen/README.md#final-preflight-phone-checklist--not-run). No upload/build, staging, commit or push in this task. Historical entries and reflections remain unchanged.
+
+## Usability review corrected and rechecked — 2026-11-16
+
+**Ready for build preparation; no remaining confirmed source blocker found in this review.** main/HEAD remains **7a6fbad35645f21f5a9ba8873ca3cc9214b4e229** with the same 27 unstaged paths, upstream origin/main. No fresh remote query. Preserved the full incoming patch in ignored local review evidence before corrections. No build/upload, dependency/billing change, spending, staging, commit or push.
+
+**Findings, corrected locally:**
+
+- **P1 — exact-set editor could reuse another set's input buffer.** A second link changed component props without remounting its state; a focused harness against the pre-review source saved A's entered pounds using B's identity. `App.tsx` now gives each accepted opening a fresh key; `SetEditor.tsx` retains its original target/revision for the mounted editor. New links validate the requested session/set before and after navigation confirmation. Stale/missing/skipped targets are rejected rather than substituted.
+- **P2 — links bypassed unsaved-edit navigation guards.** A link could unmount a dirty routine editor or replace exact-entry context without confirmation. Links now use the current editor/routine leave guard, confirm discarded edits, refuse during a save, and ignore superseded pending requests. Guards register in the layout phase; the routine guard also checks the synchronous save lock. Failed exact saves retain values and their original retry payload.
+- **P2 — an old Finish/Discard confirmation could turn into ordinary Start after the workout finished.** The pre-review SQL wrapper reproduced an unexpected new session instead of rejection. Native validation now checks every supplied resolution, including finished/missing current sessions, before mutation. Already-committed Start retries are still handled first and find their original session. No schema, SQL, identifiers, dependencies or signing change was needed for these corrections.
+
+**Re-review/validation:** 152 tests Passed: 122 workout SQL-wrapper, 22 routine/model, 8 production TypeScript/editor-logic checks. Added failed-before/passed-after reproductions, exact-link/leave-buffer tests, competing Skip/Complete and Finish/Discard requests, duplicate Undo skip, archived-plus-active v8 preservation and routine-deletion cleanup rollback. Editor tests transpile production components into a minimal hook/element harness; they do not run React Native UI. SQL tests use separate JS orchestration and do not execute Swift. TypeScript, iOS JS export, ten current native source/resource copies, target/resource/host-only module/URL-scheme inspection, 22-input local package hashes, Markdown links, historical-log preservation and whitespace pass.
+
+**Limits:** Swift compilation/signing, installed migration, older ActivityKit decoding, iOS link delivery/navigation dialogs, actual concurrency/retry injection, rendered layout, VoiceOver/larger text and all new device behavior remain **Not run**. The compact card/Options/long-name layouts still need phone checks. Latest-batch Undo skip is bounded to the current exercise. Calendar reassignment remains last explicit choice; saved timestamps are grouped in the device's current timezone, so timezone changes may regroup dates. There is no cloud/calendar conflict resolution or automatic workout start. Screen sleep, TS-001 automatic reveal and TS-002 countdown jumps remain unresolved; initial blank → 0 remains inconclusive/not reproduced.
+
+**Next small task:** perform local build preflight against the corrected source and current account allowance, without assuming permission to upload or build. A later separately authorized preview should run the [review-specific phone checks](../proofs/lock-screen/README.md#usability-review-phone-additions--not-run) plus the upgrade-first checklist. Previous build evidence and historical entries below retain their original scope. Personal learning reflections are unchanged.
+
+## Ten-note usability pass prepared locally — 2026-11-16
+
+**Current baseline:** main/HEAD **7a6fbad35645f21f5a9ba8873ca3cc9214b4e229**, upstream origin/main; no fresh remote query. Earlier partial work was preserved and extended after the user supplied all ten notes and a routine-library design reference. The earlier missing-notes sections below are historical, not current blockers. No staging/commit/push, dependency upgrade, upload/build or spending.
+
+**Implemented:** explicit skipped-set/early-finish state and latest-batch Undo skip; guarded unfinished-workout Resume/Finish-and-keep/confirmed Discard-and-start; named Next/Finish; confirmed routine deletion; Fill in as I train with collapsed optional targets; exact-set numeric editor linked from the card; RIR blank-plus-to-0 with Clear left and adjustment group right. App now separates Today, Routines and This week, library/editor and completed summaries, uses the reference's cream/green visual direction, and hides diagnostics. One manually assigned saved routine per date supports a user-created split. No templates/community/progression or production-framework decision.
+
+**Safety/choices:** additive v8 migration preserves old data and never reclassifies 0×0. Skip doesn't create records/rest or auto-advance. Undo skip reverses the latest batch only before leaving that exercise. Existing rest must still be acknowledged. Exact edits use original set identity, revision and idempotent request; they preserve targets/rest/counts. Current-workout saved-record corrections require explicit confirmation; older archived summaries remain read-only. Finish/discard plus new Start is atomic; confirmation detects intervening edits/counts/rest changes. Routine deletion never opens the workout store. New session dates support calendar display; unknown historical start dates stay unknown.
+
+**Checks actually passed:** 142 tests (118 workout SQL-wrapper, 21 routine/model, 3 TypeScript model), TypeScript, iOS JavaScript export, ten generated native-file comparisons and host/extension/resource/inline-module/URL-scheme inspection. Separate JS wrappers do not execute Swift. Local 22-file packaging allowlist and hash comparison passed; ignored evidence is in `proofs/lock-screen/.expo/usability/`, excluded from publication. Markdown links/whitespace checked after documentation. New native compilation, installed migration, older activity decoding, deep-link delivery, rendered fit/accessibility and physical-device behavior are **Not run**. Build 2614e927's bounded evidence remains separate.
+
+**Changed paths (27, all unstaged):**
+
+- Root/status: `README.md`, `docs/BUILD_LOG.md`, `docs/HANDOFF.md`, `docs/LOCK_SCREEN_FEASIBILITY.md`, `docs/PROJECT.md`, `docs/TROUBLESHOOTING_BACKLOG.md`.
+- Proof UI/config: `proofs/lock-screen/.easignore`, `App.tsx`, `README.md`, `RoutineEditor.tsx`, new `SetEditor.tsx`, new `WeekPlanner.tsx`, new `workoutModel.ts`, `routineModel.ts`, `app.config.js` (all filenames after the first share the proof directory).
+- Native: `proofs/lock-screen/modules/LockScreenProofModule.swift`; `proofs/lock-screen/native/ProofActivity.swift`, `ProofCoordinator.swift`, `ProofIntents.swift`, `ProofSQL.json`, `ProofStore.swift`, `ProofWidget.swift`, `RoutineSQL.json`, `RoutineStore.swift` (shared native directory).
+- Tests: `proofs/lock-screen/tests/persistence.test.cjs`, `routines.test.cjs`, new `workout.test.cjs` (shared tests directory).
+
+**Next small task:** review this local usability diff, especially skip/undo generation guards, exact-edit revisions, atomic resolution/deletion and the new compact card/Options layout. Then, only if separately authorized, perform one preview build and the [upgrade-first usability checklist](../proofs/lock-screen/README.md#usability-phone-checklist--not-run). No current build authorization is assumed. Deferred TS-001 automatic-reveal delay and TS-002 countdown jumps remain open; screen sleep remains a separate physical comparison with no cause/fix claimed. Original blank → 0 remains inconclusive/not reproduced. Historical entries and user-written reflections are untouched.
+
+## Usability pass started; missing workout notes — 2026-11-16
+
+**Partial implementation, not the completed usability pass.** Starting Git was clean main at published **7a6fbad35645f21f5a9ba8873ca3cc9214b4e229**, tracking origin/main. No fresh remote query; preserved history/reflections. The user's referenced ten real-workout notes were not present in this chat or the searched local project documents. Requested them, especially unfinished-workout choices, Log as you go setup and whether the exact-set editor may open the app/edit completed sets. These decisions materially affect persistence/history and are not invented here.
+
+**Prepared independent changes:** next-exercise action displays the next snapshot exercise's name (older activity fallback remains Next Exercise); action/target IDs are unchanged. First RIR plus from blank now stores explicit 0, subsequent plus increments, minus on blank remains blank and Clear still returns blank. This supersedes the former blank-plus-to-1 requirement only for this unbuilt patch. Clear RIR is separated from ± into the action row; minimum height remains 44 points. Normal saved-rest confirmation/Undo/Continue, existing deadline/acknowledgement/retry guards, snapshots and actuals remain unchanged. No migration or retrospective rewrite of existing 0×0 records.
+
+**Local verification:** 123 tests Passed (104 production-SQL wrapper, 19 routine/model), TypeScript Passed. Revised expected first-entry behavior and added Clear → minus → plus → reopen coverage, with unchanged plans/counts/rest and nullable values. Wrapper orchestration is JavaScript, not Swift/ActivityKit. Named-label/optional-content wiring and action identity checked in source. No native compilation, fresh native generation, installed upgrade, rendered fit or device pass for these changes. Three action controls during Undo and long next-exercise names still need rendered testing; no control shrinking or sleep workaround.
+
+**Not implemented yet:** Skip set, finish exercise early, unfinished-workout resolution, routine deletion, Log as you go, exact-set editor and broader presentation cleanup. Skipped-set state must be distinct from zero records; existing 0×0 records must not be rewritten. The full request remains active pending the missing notes; this partial work does not claim transition/retry/migration coverage for unimplemented actions.
+
+**Screen sleep:** investigated separately using official Apple documentation and source tracing; no cause or keep-awake fix established. [Evidence and bounded comparison](TROUBLESHOOTING_BACKLOG.md#screen-sleep-investigation--2026-11-16). TS-001/TS-002 stay open, original blank → 0 remains inconclusive/not reproduced. Previous build 2614e927's evidence remains historical and does not test this patch.
+
+**Next small task:** obtain the ten notes, settle the three missing interaction/data choices, then resume stage 1 with explicit skipped-state and lifecycle transitions plus stale/retry/upgrade checks. Continue the user's remaining stages locally only. No upload/build, dependency change, staging, commit, push or spending in this task.
+
 ## RIR phone evidence and publication review — 2026-11-16
 
 **No publication blocker found.** Reviewed the accumulated RIR diff against **23e8cf2d3928bd3fc2ade9b8e6586e7e3cc82b25**. Local main/HEAD remains that baseline tracking origin/main; index empty, no fresh remote query. All 19 build-input hashes match both the successful 2614e927 manifest and preserved archive. Application source/tests are unchanged from the reviewed version; no source edit in this task. Publication remains pending separate authorization.

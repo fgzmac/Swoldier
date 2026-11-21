@@ -4,7 +4,8 @@ import Foundation
 enum ProofAction: Codable, Hashable, Sendable {
     case complete, skip, continueRest, undo, addSet, nextExercise, finishWorkout
     case weight(Int), reps(Int), rir(Int)
-    case clearRIR
+    case clearRIR, skipSet, finishEarly, options, back
+    case undoSkip(String)
 }
 
 // Retry the failed request, never infer its target from a newer displayed draft/rest.
@@ -13,6 +14,7 @@ struct ProofFailedAction: Codable, Hashable, Sendable {
     let setID: String
     let restID: String
     let action: ProofAction
+    var actionToken: String? = nil
 }
 
 struct ProofActivity: ActivityAttributes {
@@ -49,6 +51,12 @@ struct ProofActivity: ActivityAttributes {
         var setCount: Int? = nil
         var canChooseNext: Bool? = nil
         var hasNextExercise: Bool? = nil
+        var nextExerciseName: String? = nil
+        var actionToken: String? = nil
+        var undoSkipToken: String? = nil
+        var restSetSkipped: Bool? = nil
+        var showRIR: Bool? = nil
+        var showOptions: Bool? = nil
         var workoutFinished: Bool? = nil
         // Temporary D1 metadata; optional so existing activity content still decodes.
         var diagnosticPublicationID: String? = nil

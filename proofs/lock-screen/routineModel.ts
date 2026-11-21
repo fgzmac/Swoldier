@@ -21,7 +21,8 @@ export function moveEntry(plan: EditPlan, index: number, delta: number): EditPla
   const target = index + delta;
   if (target < 0 || target >= plan.exercises.length) return plan;
   const exercises = [...plan.exercises];
-  [exercises[index], exercises[target]] = [exercises[target], exercises[index]];
+  if(index<0||index>=exercises.length||target===index)return plan;
+  exercises.splice(target,0,exercises.splice(index,1)[0]);
   return { ...plan, exercises };
 }
 export function validName(value: string): string {
@@ -43,7 +44,7 @@ export function routineStartNotice(result: unknown): string | null {
   }
   return null;
 }
-function numberField(value: string, label: string, max: number, decimal = false, required = false): number | null {
+export function numberField(value: string, label: string, max: number, decimal = false, required = false): number | null {
   const text = value.trim();
   if (!text && !required) return null;
   const format = decimal ? /^\d+(\.\d{1,2})?$/ : /^\d+$/;

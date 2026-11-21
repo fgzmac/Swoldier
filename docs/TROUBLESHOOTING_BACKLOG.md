@@ -1,5 +1,25 @@
 # Swoldier troubleshooting backlog
 
+## 2026-11-19 — Integration follow-ups and phone verification
+
+Future requests include authorized Apple Health/Watch activity energy, BodySpec account/report import, Google Health, Android Health Connect, food and macronutrients, and validated on-track forecasting. Each import needs permission, source identity, units, measurement date and duplicate prevention. RMR is a resting estimate. Daily active energy may already include a workout. Expenditure and intake targets need their own data and methodology. Keep new REQUEST items queued for future batches. TS-001, TS-002 and the separate display-sleep investigation remain open.
+
+## Usability implementation boundary — 2026-11-16
+
+The ten supplied notes are now implemented locally, including intentional foreground exact-set editing and separate skipped state. The supplied completed-summary screenshots motivate clearer presentation and a proper skip path; they do not establish the intent behind any particular zero-valued record. No existing 0×0 record is rewritten. Personal screenshots/records are not copied into the repository; tests use fictional data.
+
+The later supplied routine-library image is an interim design reference, replacing the need for the missing example URL. It does not authorize the community/progress features pictured. Screen sleep remains a separate existing-build comparison below; no new phone trial or cause is established. **TS-001 automatic-reveal delay and TS-002 countdown jumps remain open/deferred.** Original blank → 0 remains inconclusive/not reproduced, with no fix claimed. Native/device checks for the usability patch remain Not run.
+
+## Screen sleep investigation — 2026-11-16
+
+Investigated separately from usability edits. Current proof source has no idle-timer/keep-awake control or activity alert configuration; native actions commit state then update an existing Live Activity, with foreground repair comparing saved state. This static trace cannot establish why the user's screen slept or exclude OS/display/authentication behavior. The ten new workout notes were not supplied, so no new timing/device observation is invented.
+
+Apple documents [isIdleTimerDisabled](https://developer.apple.com/documentation/uikit/uiapplication/isidletimerdisabled) as controlling an app's idle timer and advises limiting its use. [Live Activity custom views](https://developer.apple.com/documentation/activitykit/creating-custom-views-for-live-activities) describe system dimming on Always-On displays. These sources do not establish an API guarantee to keep this Lock Screen activity awake; no keep-awake workaround, new timer, alert or polling was added. A layout edit is not a sleep fix.
+
+Proposed comparison, **Not run**: keep phone position/settings constant; compare an untouched authenticated Lock Screen with a trial using one ordinary action. Film externally if available, noting padlock/authentication, time since wake/action, whole-display darkness versus only card changes, and saved state on reopening. Record countdown jumps separately. No low-battery/network/display-setting cause is assumed.
+
+Apple also documents [deep links from a Live Activity](https://developer.apple.com/documentation/widgetkit/linking-to-specific-app-scenes-from-your-widget-or-live-activity) that open a matching app screen. This is a candidate for the requested exact-set editor, not a background/no-app interaction; scope needs confirmation before implementation. TS-001 automatic-reveal delay and TS-002 countdown jumps remain open/deferred. Original blank → 0 remains inconclusive/not reproduced; no fix claimed.
+
 ## RIR and Start-feedback phone update — 2026-11-16
 
 On build 2614e927, friendly unfinished-workout Start rejection without raw exception/file-path text and preservation of the active workout **Passed — user-reported**. This updates the expected-refusal wording result only; unrelated errors, injected failure/retries and broad concurrency remain untested. [Scoped RIR/upgrade evidence and remaining checks](../proofs/lock-screen/README.md#rir-phone-results-and-current-checklist--2026-11-16).

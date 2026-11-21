@@ -1,5 +1,11 @@
 # Lock Screen feasibility and device proof
 
+## Usability source changes — 2026-11-16
+
+The local ten-note pass uses existing background LiveActivityIntents for skip/undo/early finish and current logging actions. **Explicit exception adopted for exact entry:** pounds/Edit set uses a [Link to the exact app scene](https://developer.apple.com/documentation/widgetkit/linking-to-specific-app-scenes-from-your-widget-or-live-activity), intentionally opening the foreground app for numeric editing. Other required card actions retain authenticated-visible-Lock-Screen intent behavior; this source implementation is not a new device pass.
+
+Clear RIR is separated from its adjustment group, 44×44 adjustment targets are specified, and less-frequent actions use a separate Options card. Long names, larger text, normal/Undo/rest/options fit, accessibility, old-content decoding and URL delivery remain **Not run**. No guarantee of screen wake/keep-awake, timely redraw or smooth countdown is added. [Current scope and checklist](../proofs/lock-screen/README.md#ten-note-usability-implementation--2026-11-16); TS-001/TS-002 remain open/deferred. Earlier build evidence below remains scoped to its original source.
+
 ## RIR phone evidence — 2026-11-16
 
 Build 2614e927 has native compilation/signing and [bounded phone results](../proofs/lock-screen/README.md#rir-phone-results-and-current-checklist--2026-11-16): screenshot-supported shown short-name RIR layouts, draft/actual states and retained Undo timer; user-reported RIR adjustments/Clear, completion/Undo/re-completion and rest-mode behavior. The friendly unfinished-Start rejection also passed by report. Screenshot descriptions are supplied by the user, not independently inspected here. This does not establish fully locked operation, accessibility, long-name/larger-text fit, isolated older ActivityKit decoding, broader migration/history preservation or general lifecycle/concurrency guarantees. The dense row remains a risk for untested layouts. Both TS-001 automatic-reveal delay and TS-002 countdown jumps stay open/deferred; no new platform-timing guarantee or fix. Earlier build-scoped evidence below remains historical.

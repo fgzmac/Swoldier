@@ -1,5 +1,19 @@
 # Workout App
 
+## Usability review checkpoint — 2026-11-16
+
+The local 27-path usability patch has been reviewed against published **7a6fbad**. Exact-editor navigation and stale Finish/Discard safeguards were corrected; **152 local tests** and supporting checks pass. [Review findings and remaining limits](docs/HANDOFF.md#usability-review-corrected-and-rechecked--2026-11-16). Ready for build preparation; new native compilation and phone checks remain Not run. No upload/build, staging, commit, push or spending.
+
+## Current local usability checkpoint — 2026-11-16
+
+Published baseline [7a6fbad](https://github.com/fgzmac/Swoldier/commit/7a6fbad35645f21f5a9ba8873ca3cc9214b4e229); local main still matches it. The ten-note usability pass is prepared locally: skipped sets/early finish, unfinished-workout choices, routine deletion, simple setup, exact-set editing, clearer RIR controls, named Next and a separated routine/workout/week interface based on the supplied reference. [Current handoff](docs/HANDOFF.md#ten-note-usability-pass-prepared-locally--2026-11-16) and [future phone checklist](proofs/lock-screen/README.md#usability-phone-checklist--not-run).
+
+142 local tests, TypeScript, JavaScript export and generated-native/packaging checks passed. New Swift compilation and device behavior remain **Not run**. No cloud build/upload or publication. Screen sleep and both deferred troubleshooting issues remain unresolved. Earlier dated checkpoints below retain their historical status.
+
+## Usability work in progress — 2026-11-16
+
+RIR milestone published at [7a6fbad](https://github.com/fgzmac/Swoldier/commit/7a6fbad35645f21f5a9ba8873ca3cc9214b4e229). The next local usability pass is incomplete: named next-exercise actions, first RIR plus from blank to 0 and separated Clear are prepared; 123 wrapper/model tests and TypeScript passed, new native/device checks Not run. Remaining workflow changes need the referenced ten notes. [Current handoff](docs/HANDOFF.md#usability-pass-started-missing-workout-notes--2026-11-16). No build/spending/publication; earlier dated checkpoints below remain historical.
+
 ## Current checkpoint — 2026-11-16
 
 Published baseline remains [23e8cf2](https://github.com/fgzmac/Swoldier/commit/23e8cf2d3928bd3fc2ade9b8e6586e7e3cc82b25). The accumulated optional RIR patch compiled/signed in build 2614e927 and now has bounded screenshot-supported states and **Passed — user-reported** phone checks, including friendly unfinished-Start feedback. [Evidence and remaining checklist](proofs/lock-screen/README.md#rir-phone-results-and-current-checklist--2026-11-16). All 19 inputs match that build; publication review proposes 16 uncommitted paths. [Current handoff](docs/HANDOFF.md#rir-phone-evidence-and-publication-review--2026-11-16). Broader recovery/history/decoding/layout/accessibility and fully locked checks remain unrun. Initial blank → 0 is inconclusive/not reproduced; both troubleshooting issues stay open. No new build, spending or publication in this documentation review. Earlier dated sections below retain their historical scope.

@@ -1,6 +1,106 @@
 # Workout App — project plan
 
+## 2026-11-20 — Fictional DXA import and Delete workout passed on iPhone
+
+Gio reported that Upgrade, fictional BodySpec DXA import and Delete workout each passed on iPhone build `c832451a-1988-46fd-9d35-ff0037610114`.
+
+Today → Accountability supports previewing and saving a fictional BodySpec scan alongside manual entries. The journal identifies an imported scan by provider and result ID, allowing separate scans on the same date. Missing measurements stay blank. Live BodySpec sign-in is pending, including client and callback confirmation, consent and token handling, and mapping a personal scan to the provider’s report.
+
+The owner reported that the scheduled workout loop passed on signed Midnight preview c0bb769c. The [handoff](HANDOFF.md) records the observed workout outcome and remaining device checks.
+
+## 2026-11-20 — Delete a completed workout
+
+A user can permanently delete one completed workout from Today after reviewing its name and completion time when available. This removes its recorded sets from workout history and goal totals. The saved routine and scheduled entries stay available. Fictional sessions are selected manually.
+
+## 2026-11-20 — Lock Screen header and control spacing
+
+The Lock Screen card places the exercise name and set count on one row. Extra spacing separates the header, adjustment controls and workout actions.
+
+## 2026-11-20 — Training Week selected for Calendar
+
+The selected Calendar hero is option 3, Training Week, with the enamel clip, paper schedule and lifting strap.
+
+## 2026-11-20 — Calendar hero and dated task labels
+
+The Calendar month shows dated routine, supplement-group and water labels. Days display up to three entries ordered by time slot, with a count of additional entries. Selecting a date opens its complete agenda. Desk planner is the provisional header artwork pending selection.
+
+## 2026-11-20 — Routines journal artwork
+
+The selected artwork for the Routines library header is the training journal. It sits beside the title and routine count, above New routine.
+
+## 2026-11-20 — Midnight visual corrections after installation
+
+Today and Calendar follow the approved Midnight reference artwork, date typography and action placement. Both surfaces use one responsive agenda heading. The date takes the available space and the add action wraps to a separate line when needed. The local correction is awaiting iPhone visual verification.
+
+## 2026-11-20 — Midnight app and Live Activity
+
+Today presents the active set, a direct Resume action, independent local weekly, monthly and yearly workout-count targets, and the shared daily agenda. Weekly targets count Monday through Sunday. The accountability journal and completed history remain accessible. Routines appear individually or inside named categories. The Calendar month marks dates with entries, with one add menu and dated occurrence options.
+
+Resume republishes the current stored session after checking its identity. The Lock Screen card gives the exercise name its own width, separates set progress, and places optional RIR beside pounds and reps. Show RIR defaults off and is saved as a display preference. The workout database retains its existing representation for blank, zero and recorded RIR.
+
+The local regression results and pending phone checks are in the [handoff](HANDOFF.md). Framework selection remains open.
+
+## 2026-11-19 — Corrected A–J preview compiled and signed
+
+[Install build 3e11df7b](https://expo.dev/accounts/fgzmacaraeg/projects/swoldier-lock-screen-proof/builds/3e11df7b-346a-4408-b099-08a78fb3cf2d). Before submitting, compared the new 23-file EAS archive and live source with the failed build's manifest. Only ProofWidget.swift differed, exactly matching the recorded relocation of @ViewBuilder to countdown. Xcode archived successfully and Fastlane exported the signed IPA. Expo Doctor reported the existing Expo patch-version warning (57.0.32 versus expected ~57.0.33). One medium iOS preview consumed $2 included credits. The balance went from $39 to $37 with $0 overage.
+
+Installation and A–J device checks await the [upgrade-in-place phone checklist](../proofs/lock-screen/README.md#november-19-upgrade-first-phone-checklist). Capture current data before upgrading. Earlier build evidence and troubleshooting items retain their recorded scope.
+
+## 2026-11-19 — Today, Accountability and routine organization
+
+**Build failed.** The [one A–J build](https://expo.dev/accounts/fgzmacaraeg/projects/swoldier-lock-screen-proof/builds/f645e5c0-65ce-4128-a428-0a08edc97dc6) reached Xcode. ProofWidget.swift:298 failed with “function declares an opaque return type, but has no return statements in its body from which to infer an underlying type.” The new header had taken the existing countdown's @ViewBuilder annotation. Locally restored the annotation to countdown, regenerated and verified the extension source and all ten native copies. This single annotation relocation is the only build-input difference after submission. Its native compile and signing remain pending. No IPA or installation URL was produced. Expo Doctor also flagged locked Expo 57.0.32 versus expected ~57.0.33. All A–J requirements preceded submission. No second build was submitted.
+
+Two post-failure usage queries showed $6 of $45 used, $39 remaining and $0 overage, unchanged from preflight. Recorded credit delta at the last query was $0. A new build would require separate authorization.
+
+Today rotates one starter quote per local date, shows a collapsible Accountability tracker and shares the Calendar agenda, including the existing Night slot displayed as Evening. An unfinished workout remains independently accessible. Completed Workouts opens a counted history list, with the existing per-workout details and edit permissions.
+
+Accountability stores metric or habit goals, dated check-ins and manual dated/source-labeled scan observations in an additive revision-checked organizer table. Estimated RMR is displayed in kcal/day. Blank measurements stay blank. Routine groups use a separate revision in that table. Membership and order reference routine IDs. Group removal returns members to Ungrouped.
+
+The routine editor uses exercise-owned Rest settings and Set settings, Move up/down/top/bottom, conditional rest seconds, optional targets and secondary configuration buttons. Today, Calendar and editor cards use stronger outlines. The Live Activity adds a bold exercise header, labeled set count and a static dark rest panel with a luminous outline. The existing deadline, action identities and End Rest/Undo behavior supply its state.
+
+## Calendar and workout presentation — 2026-11-18
+
+[Install Calendar preview 5a6419aa](https://expo.dev/accounts/fgzmacaraeg/projects/swoldier-lock-screen-proof/builds/5a6419aa-4eda-4022-a5e4-af52c29e6f68). EAS FINISHED. Xcode archived the app and extension and Fastlane exported the signed IPA. Exactly one internal preview used $2 included medium-worker credits. Starter balance moved from $41 to $39, with $0 overage. Expo Doctor passed 20/21 and flagged locked Expo 57.0.32 against expected ~57.0.33. Installation and device acceptance remain pending.
+
+Calendar replaces This week. A local date owns scheduled routine occurrences, supplement groups and water portions. Each occurrence has a stable identity and an optional time slot. Starting a scheduled routine uses its occurrence ID as the durable Start request ID. Completed workout snapshots determine its status. Supplement entries support free-text name, amount, unit and notes. Checked quantities determine water progress. An editable goal overrides the sum of planned portions. Reaching it combines the portions into a single expandable card. Empty dates remain neutral.
+
+Today starts with collapsed workout summaries. Edit Set opens the existing exact-set editor. End Rest dismisses the post-set rest. Resume workout uses blue styling. Start conflicts and expanded Discard choices scroll into view. Required fields give inline feedback while optional targets may stay blank. Food remains deferred, including calorie, protein, carbohydrate and fat tracking. Nutrition sources, entry and integrations remain undecided.
+
+The earlier weekly-planner phone persistence check was paused for this change. Prior device evidence retains its original scope. See the [Calendar phone checklist](../proofs/lock-screen/README.md#calendar-upgrade-and-phone-checks).
+
+## Usability native-build checkpoint — 2026-11-16
+
+[Preview b329ba8c succeeded](HANDOFF.md#usability-preview-compiled-and-signed--2026-11-16) with native compilation and signing passed for the reviewed usability patch. Exactly one build used $2 included credits; $41 remain, no overage. Upgrade/runtime/layout/accessibility/device checks remain Not run. Begin the preservation-first phone checklist; no additional feature or production-framework decision.
+
+## Build preparation checkpoint — 2026-11-16
+
+[Final local preflight](HANDOFF.md#final-local-usability-build-preflight--2026-11-16) verifies the 22-input archive against reviewed source, existing EAS signing metadata and current included credits. Ready for a separately authorized preview; none submitted. All new native/runtime/device checks remain Not run. No implementation or production-framework change.
+
+## Usability review checkpoint — 2026-11-16
+
+Reviewed the accumulated 27-path patch against **7a6fbad** and corrected three confirmed issues: exact-set buffer retargeting, link navigation bypassing unsaved-edit guards, and stale Finish/Discard confirmation becoming ordinary Start after completion. Original workout/set identities, rest/skip semantics, migration, routine snapshots and history remain unchanged. [Findings and validation](HANDOFF.md#usability-review-corrected-and-rechecked--2026-11-16).
+
+152 local tests, TypeScript, JS export, generated-native/configuration and documentation checks pass. No remaining confirmed source blocker found; ready for build preparation. This is not native/runtime verification. New native compilation, installed migration, older content, link delivery, layout/accessibility and device trials remain Not run. Both deferred issues, separate sleep investigation, historical phone evidence and reflections are preserved. No upload/build/publication/spending.
+
+## Adopted ten-note usability pass — local implementation, 2026-11-16
+
+Baseline **7a6fbad35645f21f5a9ba8873ca3cc9214b4e229** is verified locally on main; no fresh remote verification. All ten notes and the routine-library screenshot are now supplied. The prior missing-notes/partial checkpoint remains historical below.
+
+Adopted and prepared locally: Skip set/Finish exercise early with separate skipped state and an Undo path; explicit unfinished-workout resolution; routine deletion without workout deletion; Log as you go with optional targets collapsed; exact actual-value editing from a Live Activity link; RIR blank → 0 → 1…10 and separated Clear; named Next/Finish; distinct library, editor, active workout and finished-summary layouts. The supplied design informs warm/green colors, spacing and clear containers; community/progress features pictured are not implemented. Production framework remains open.
+
+A bounded weekly planner assigns saved routines to dates, supporting manually named Push/Pull/Legs splits. It keeps scheduled plans separate from completed workouts and does not auto-start sessions. One routine per date, last explicit reassignment wins; no cloud or recurrence. Actual completion status uses workout snapshots, not the current routine contents. Older unknown start dates remain unassigned.
+
+Data safeguards: additive v8, no retrospective 0×0 conversion; saved plans/actuals/snapshots and rest semantics preserved. Skip marks only unperformed drafts; latest skip/early-finish batch can be undone before exercise advancement. Exact-edit requests intentionally open the app, use revision checks and preserve routine targets; current saved-record corrections are explicit, archived older summaries read-only. Finish-and-keep marks remaining drafts skipped; confirmed discard removes only that active session. Both resolve/start atomically with repeated-request and stale-confirmation protection. [Implementation choices and acceptance checklist](../proofs/lock-screen/README.md#ten-note-usability-implementation--2026-11-16).
+
+Local tests/typecheck/export/native-generation/packaging checks passed; all new Swift compilation, installed upgrade, native runtime/old-content decoding, rendered UI/accessibility and device checks remain **Not run**. Existing build evidence is not extended to this patch. Screen sleep is investigated separately without a fix claim; TS-001/TS-002 remain open. No build/upload/dependency change/publication/spending. Next milestone is a bounded code review, then separately authorized native/device verification, before further features.
+
 Last updated: **2026-11-16**
+
+## Real-workout usability pass — partial local work, 2026-11-16
+
+Published baseline is **7a6fbad35645f21f5a9ba8873ca3cc9214b4e229**, clean at task start. Adopted pass: (1) Skip set, finish exercise early, unfinished-workout resolution, named next actions; (2) routine deletion, Log as you go setup, exact-set editor from the Live Activity; (3) first RIR plus from blank enters 0, separated Clear placement, cleaner presentation. Skips must be distinct from completed zero-valued actuals; never automatically rewrite existing 0×0 records. Preserve snapshots/history, nullable/decimal values, rest and action/retry guards.
+
+Named next action, blank-RIR-plus-to-0 and separated Clear are prepared locally. Other requested features are **not implemented** while the referenced ten notes are missing; unfinished-workout resolution, Log as you go semantics and editor scope need clarification. Source checks, 123 SQL-wrapper/model tests and TypeScript passed; this is not Swift/runtime/rendered/device verification. The full usability task remains incomplete. [Current handoff](HANDOFF.md#usability-pass-started-missing-workout-notes--2026-11-16). Screen sleep remains a separate unresolved investigation; no keep-awake claim, no new build/spending/publication. Historical results and both deferred issues remain intact.
 
 ## RIR bounded phone results and publication review — 2026-11-16
 
@@ -52,7 +152,7 @@ Build an iPhone-first workout tracker that makes it easy to log actual sets, ada
 
 | Area | Status |
 | --- | --- |
-| Current phase | RIR preview 2614e927 compiled/signed with scoped screenshot-supported states and user-reported phone passes. Publication review ready: 16 paths, uncommitted. Broader migration/recovery/decoding/layout/accessibility checks remain unrun; both troubleshooting issues open. |
+| Current phase | RIR milestone published at 7a6fbad. Usability pass partially prepared locally; missing ten workout notes block remaining interaction/data decisions. New native/rendered/device checks Not run; both deferred issues open. |
 | Product notes | Adopted scope and planned checks recorded below. |
 | GitHub repository | [fgzmac/Swoldier](https://github.com/fgzmac/Swoldier), published [23e8cf2](https://github.com/fgzmac/Swoldier/commit/23e8cf2d3928bd3fc2ade9b8e6586e7e3cc82b25), local/remote main verified matching before work on 2026-11-16. |
 | Application code | Two fictional exercises, planned and today-only sets in the [Lock Screen proof](../proofs/lock-screen/README.md#current-three-set-proof--prepared-locally); production app not started. |
