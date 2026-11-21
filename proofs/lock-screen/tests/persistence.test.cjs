@@ -1213,3 +1213,53 @@ if(isMainThread){
   assert.equal(read(db).sessionID,active.sessionID);assert.equal(read(db).deadline,active.deadline);assert.equal(read(db).undoneAt,active.undoneAt);
  });
 }
+
+function deleteCompleted(db, sessionID) {
+  transaction(db, () => {
+    const params = {sessionID, now: 6000};
+    assert.equal(all(db, sql.completedWorkoutForDeletion, params).length, 1, 'not a completed workout');
+    for (const query of sql.discardWorkout) run(db, query, params);
+  });
+}
+
+if (isMainThread) test('deleting a finished fixture removes its sets and current pointer across reopen', t => {
+  const {db, path, initial} = fixture(t);
+  const finished = finishAll(db, initial);
+  deleteCompleted(db, finished.sessionID);
+  const reopened = open(path);
+  try {
+    assert.equal(read(reopened), null);
+    assert.equal(reopened.prepare('SELECT COUNT(*) n FROM proof_sets_v5 WHERE session_id=?').get(finished.sessionID).n, 0);
+    assert.throws(() => deleteCompleted(reopened, finished.sessionID), /not a completed workout/);
+  } finally { reopened.close(); }
+});
+
+if (isMainThread) test('deleting an archive preserves another completion, the active workout and Start retry guard', t => {
+  const {db, initial, seed} = routineFixture(t);
+  const keep = finishAll(db, initial);
+  const requestID = randomUUID();
+  const remove = finishAll(db, startRoutine(db, seed, requestID));
+  const active = startRoutine(db, seed);
+  const archive = db.prepare('SELECT archived_state FROM proof_workouts_v6 WHERE session_id=?');
+  const before = archive.get(keep.sessionID).archived_state;
+  deleteCompleted(db, remove.sessionID);
+  assert.equal(archive.get(remove.sessionID).archived_state, null);
+  assert.equal(archive.get(keep.sessionID).archived_state, before);
+  assert.ok(all(db, sql.startRequest, {requestID})[0].discarded_at);
+  for (const sessionID of [active.sessionID, remove.sessionID, randomUUID()]) {
+    assert.throws(() => deleteCompleted(db, sessionID), /not a completed workout/);
+  }
+  assert.deepEqual(read(db), active);
+});
+
+if (isMainThread) test('failed history deletion rolls back sets, pointer and completion status', t => {
+  const {db, initial} = routineFixture(t);
+  const finished = finishAll(db, initial);
+  const before = read(db);
+  db.exec("CREATE TRIGGER reject_delete BEFORE UPDATE OF discarded_at ON proof_workouts_v6 BEGIN SELECT RAISE(ABORT,'injected failure'); END");
+  assert.throws(() => deleteCompleted(db, finished.sessionID), /injected failure/);
+  assert.deepEqual(read(db), before);
+  db.exec('DROP TRIGGER reject_delete');
+  deleteCompleted(db, finished.sessionID);
+  assert.equal(read(db), null);
+});

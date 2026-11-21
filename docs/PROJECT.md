@@ -1,5 +1,17 @@
 # Workout App — project plan
 
+## 2026-11-20 — Fictional DXA import and Delete workout passed on iPhone
+
+Gio reported that Upgrade, fictional BodySpec DXA import and Delete workout each passed on iPhone build `c832451a-1988-46fd-9d35-ff0037610114`.
+
+Today → Accountability supports previewing and saving a fictional BodySpec scan alongside manual entries. The journal identifies an imported scan by provider and result ID, allowing separate scans on the same date. Missing measurements stay blank. Live BodySpec sign-in is pending, including client and callback confirmation, consent and token handling, and mapping a personal scan to the provider’s report.
+
+The owner reported that the scheduled workout loop passed on signed Midnight preview c0bb769c. The [handoff](HANDOFF.md) records the observed workout outcome and remaining device checks.
+
+## 2026-11-20 — Delete a completed workout
+
+A user can permanently delete one completed workout from Today after reviewing its name and completion time when available. This removes its recorded sets from workout history and goal totals. The saved routine and scheduled entries stay available. Fictional sessions are selected manually.
+
 ## 2026-11-20 — Lock Screen header and control spacing
 
 The Lock Screen card places the exercise name and set count on one row. Extra spacing separates the header, adjustment controls and workout actions.

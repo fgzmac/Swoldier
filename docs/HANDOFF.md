@@ -1,5 +1,94 @@
 # Current project handoff
 
+## 2026-11-20 — Gio’s iPhone results for the combined preview
+
+Gio reported the following results on iPhone build `c832451a-1988-46fd-9d35-ff0037610114`.
+
+| Check | User-reported result |
+| --- | --- |
+| Upgrade | Passed |
+| Fictional BodySpec DXA import | Passed |
+| Delete workout | Passed |
+
+The earlier scheduled workout pass belongs to `c0bb769c`. Live BodySpec sign-in and personal scan import remain pending.
+
+## 2026-11-20 — Signed combined preview ready to install
+
+**FINISHED** at 6:16 p.m. Pacific. Build `c832451a-1988-46fd-9d35-ff0037610114` is the internal iPhone preview of the fictional BodySpec importer and Delete workout, version 1.0.0 (1). [Install the combined preview on the registered iPhone](https://expo.dev/accounts/fgzmacaraeg/projects/swoldier-lock-screen-proof/builds/c832451a-1988-46fd-9d35-ff0037610114).
+
+Exactly one build was submitted from the Windows working tree on `feat/midnight-ui` at `70d997f682c4cacebf60228340dbb9c1776831d1`, using the existing `preview` profile and frozen remote credentials. Immediately before submission, all 33 paths and SHA-256 hashes matched in a fresh EAS archive and the working tree, including the seven local app inputs. The exact manifest is in the preparation entry below.
+
+Xcode logged `ARCHIVE SUCCEEDED`, code signing for the app and widget, and the copy of `SwoldierProofLiveActivity.appex` into the app's PlugIns folder. Fastlane confirmed signed IPA export and EAS published the IPA. Included build credit fell from $33 to $31 of the $45 monthly allowance. Overage was $0 before and after.
+
+The pre-install checklist covered the journal, completed workouts and preservation across upgrade. Gio’s results for this build are recorded above.
+
+## 2026-11-20 — Combined DXA and Delete workout preview
+
+**Ready for one internal iOS build.** The Windows candidate is the working tree on `feat/midnight-ui` at `70d997f682c4cacebf60228340dbb9c1776831d1`, with seven changed app inputs. `Organizer.tsx` contains the fictional samples and preview/save flow. `App.tsx` and `workoutModel.ts` connect Delete workout to `modules/LockScreenProofModule.swift`. The bridge calls `native/ProofCoordinator.swift`, which invokes `native/ProofStore.swift` and ends activities for the selected session. The store checks completion using `native/ProofSQL.json` and deletes within a transaction.
+
+**Archive.** From `proofs/lock-screen`, EAS CLI 27.7.2 ran `build:inspect --platform ios --profile preview --stage archive` with `EAS_NO_VCS=1` and `EAS_PROJECT_ROOT` set to that directory. The existing profile specifies internal distribution, a physical iPhone and the sdk-57 image. The 33 archive files matched both the preflight hashes and the tested working tree byte for byte. The nine bundled PNGs matched the artwork at HEAD. Unrelated design samples, reference files, personal scans, credentials, local databases, tests and generated outputs were excluded.
+
+**Windows checks.** All 168 tests passed with zero failures or skips, including the importer and all three Delete workout regressions. TypeScript passed. The iOS export produced one Hermes bundle from 596 modules and nine assets. Expo generated an Xcode project from a separate copy of the archive using the installed SDK template. All ten generated Swift/SQL copies matched. The host contains both stores, the coordinator and both SQL resources. The extension contains ProofActivity, ProofIntents and ProofWidget. Host-only inline module discovery, the iOS 26 deployment target and the `swoldier-proof` URL scheme passed inspection.
+
+**Preparation checkpoint.** This manifest was rechecked immediately before the authorized build. The signed build and Gio’s iPhone results are recorded above.
+
+The local EAS archive-stage output is in `proofs/lock-screen/.expo/preview-dxa-delete-20261120/archive/`. Its sibling `archive.sha256` lists the paths relative to the proof root. SHA-256 of that manifest (UTF-8, LF) is `88742ad7b24a01ba71cded31c908f3c58efe9e312d0c799c14e6d4364ab1fb0a`.
+
+<details>
+<summary>Exact archive inputs and SHA-256 hashes</summary>
+
+```text
+6287c81600bcc61784ee11853e3099e6d8854f9acb6d15a5638c44446e8fa298  App.tsx
+e88e42023935b73988397005cabbe1c85121dec482571099fc4ac3884235da87  Midnight.tsx
+4d5a8a6d90d59646e5bf691fc1eff147a67d2d11505ffc631859da56f9972852  Organizer.tsx
+248459463ac8f7373faa362348a80f74865a873d4d6944835c79906c5a998f5a  RoutineEditor.tsx
+86d74f5cb1bdc7e8d63d319628e9fbde221ffcaad19022e5afa781dae2c6cc3b  SetEditor.tsx
+73ae69a5a98db78457c0af0aeb7f6ae9b247703f073a8c5db0c1346b51a38bd7  WeekPlanner.tsx
+88ddc4408db6276107a31e627d55203d8d91b0f591e1db5d7aeb9d9f28c3e389  app.config.js
+875240626c8e8474fb64497066b770db22d2b2983e5288ce2771ff5f7df89c0c  assets/midnight/bench.png
+1914db5119e171352a06ab1af18fbc66b802dad095d971856b31dd36cce0f3cb  assets/midnight/cal.png
+84d702e233a88738c372200da9dc22342b1b24c1aaf8fcaa84c4c18a3886769b  assets/midnight/calendar-planner.png
+4eefbf9f2a7ed6cec7634190b2f4f0bc0f1cd3fab442b7d23fa395a8e841f2ae  assets/midnight/drop.png
+e28056cd66438b64d12223337ac3ab1584cf7624fa1484196a217278909dc49b  assets/midnight/pill.png
+c5cc39eda64ce9d62cb64a26c9a4f33efd5e3faef60afd194bb9a88c5f055ea3  assets/midnight/right.png
+33da702eeb970b6fb97e4b4e09db35828d400dc5d3bc9a0e557692656b239739  assets/midnight/routines.png
+7e6979ed3ddba32c22cc132334c527f57b5dc624ef466d1168a00ff42716f97c  assets/midnight/today.png
+93ec8d85ec56fd2cd8ad0c96cf5f124121d8413dea346dbe12913a0bb74664a7  assets/midnight/training-journal.png
+5816a0b5044576ca768fe4d6dfac5133278f5d0df418d334110484448b6e5216  eas.json
+3cc816440c81db1b45a7d796c25ee6b45e19cfa2d64f1f934e42b1384c82d90b  index.js
+4c98e9f52dae029d9607410ac31627de713789fdd03f7bac8e094fdaa268e744  modules/LockScreenProofModule.swift
+6dd5840312e3d9849ebfac610084546e88bc81b05304f9140ba94e72e7755051  native/ProofActivity.swift
+af6e3f94ab5a4380e312749a4696ae4aadc5b36f8f5211950dc168204701980d  native/ProofCoordinator.swift
+5c957c4630eceedcde0b48232820f87b39c6348c55c004a0098e6934f3a95ed1  native/ProofIntents.swift
+e2143231afea2e5aadc5ffcd8b2fb5ae46d85d42a7aa515527576689883cb2a8  native/ProofSQL.json
+059ba2ac994425abf528a9dda1ccd029d6f46e4935fb76b23ea63d1053f54061  native/ProofStore.swift
+f449cece63d8c9f955d2688cd67487ef12db710e6199484d8f2e2f360742c702  native/ProofWidget.swift
+f4b2b02955832bc3c19fb502746acc3a099021516e3c7ced1b64f648c2cf3add  native/RoutineSQL.json
+a1d8ac8b7e715795b70998d9a5b4705bfd595a9e1bbbcd5dae11e09cafec9039  native/RoutineStore.swift
+698747d5365843c144422948b0b91d02c81b29a1618f34444228e08572fd6fab  package-lock.json
+bd7967db96f138f190fac5c3e29d797c665ae4ce9fc4027d910320d7b1376065  package.json
+08dc1863144e8c3c1fac291e0260b5dd921621ad5013806193b19eec4facf08a  plugins/withLockScreenProof.js
+a22aeca71b837c9b68b9a42f7f93e7449bc04bfd18335e80c49fb9b2bb1d7b1c  routineModel.ts
+8c4892ccf48b43c120a49a4992740a32a2f3c1a273ba5443849af3e6f8456ea9  tsconfig.json
+b8ae6fd8020eeab25192e500a38e12b2ff7fa306a3b7cbcaced32f0817faa116  workoutModel.ts
+```
+
+</details>
+
+## 2026-11-20 — Fictional BodySpec import verified on Windows
+
+In Today → Accountability, choose **Import fictional BodySpec scan**. Sample 1 previews 2026-11-18, BodySpec (fictional), 23.4% body fat, 120.5 lb lean mass and an estimated RMR of 1512 kcal/day. Sample 2 has the same date, a different result ID and a blank RMR. **Record scan** remains available for manual entry.
+
+On Windows at `feat/midnight-ui` / `70d997f` with local changes, all 168 tests passed, including the DXA regression and all three Delete workout regressions. TypeScript passed. The Tracker test used a substitute native bridge and file-backed SQLite to check cancel without a write, reopen, repeat-import protection, two same-date results and preservation of a matching manual scan. See the [build log](BUILD_LOG.md) for the integration record.
+
+The supplied patch records the owner's subsequent “Workout passed” report for signed preview c0bb769c. After double Complete, Undo, correction, re-completion, Finish and reopen, the owner saw one new workout, two saved sets, the corrected 40 lb × 9 first set, intact targets and the completed occurrence in Today and Calendar. The owner reported the upgrade looked correct. Exact rest-deadline preservation, a full before/after comparison, goal increments and accessibility remain open. The phone card below predates this report.
+
+Next device check, when a signed candidate includes the local features, is to repeat the fictional scan and Delete workout checks on iPhone. Live BodySpec sign-in still requires client and callback confirmation, measurement mapping and consent/token-handling verification before a personal import.
+
+## 2026-11-20 — Delete a completed workout
+
+In a future signed preview, go to Today > Completed Workouts and expand a fictional workout. Cancel deletion once, then confirm the named workout and reopen the app. Check the completed count, goals, routine status, and any scheduled date. Verify a second workout from the same routine and an unfinished workout still have their original sets. Repeat for the most recently finished workout. The currently signed preview c0bb769c predates this feature.
+
 ## 2026-11-20 — Lock Screen header and control spacing
 
 Check the revised widget on iPhone with a long exercise name and larger text, including the Undo editing state with RIR and End Rest visible. The local visual preview uses a short exercise name.

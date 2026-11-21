@@ -121,6 +121,7 @@ struct ProofSQL: Decodable {
     let schema: String
     let migrations: [ProofMigration]
     let schemaV2, importLegacy, migrationsV3, migrationsV4, migrationsV5, migrationsV6, migrationsV7, migrationsV8, reset, discardWorkout: [String]
+    let completedWorkoutForDeletion: String
     let registerFixture, startRequest, readWorkout, archiveWorkout, clearFinishedPointer, registerRoutine, snapshotExercises, snapshotSets: String
     let startSession, startExercises, startSets, readSession, readExercises, readSets, readRest: String
     let addSet, finishExercise, advanceExercise, finishLastExercise, finishWorkout: String
@@ -172,6 +173,9 @@ final class ProofStore {
             let existing: String? = try withStatement(sql.startRequest, ["requestID": requestID]) { stmt in
                 switch sqlite3_step(stmt) {
                 case SQLITE_ROW:
+                    guard sqlite3_column_type(stmt, 3) == SQLITE_NULL else {
+                        throw ProofError.input("That workout was removed. Start again from Routines. For a scheduled workout, remove the old Calendar entry and add it again.")
+                    }
                     guard try text(stmt, 1) == id, Int(sqlite3_column_int64(stmt, 2)) == revision else {
                         throw ProofError.input("This Start request belongs to another saved revision.")
                     }
@@ -355,6 +359,21 @@ final class ProofStore {
             try run("INSERT INTO proof_edit_requests(request_id,session_id,payload) VALUES(:requestID,:sessionID,:payload)", params)
             guard let result = try readInternal() else { throw ProofError.storage }
             return result
+        }
+    }
+
+    func deleteCompletedWorkout(sessionID: String) throws {
+        try transaction {
+            let params = ["sessionID": sessionID, "now": String(Date().timeIntervalSince1970)]
+            try withStatement(sql.completedWorkoutForDeletion, params) { stmt in
+                switch sqlite3_step(stmt) {
+                case SQLITE_ROW: break
+                case SQLITE_DONE: throw ProofError.input("This completed workout is no longer available.")
+                default: throw ProofError.storage
+                }
+            }
+            // Keep the original Start request reserved so a late retry cannot recreate this workout.
+            for statement in sql.discardWorkout { try run(statement, params) }
         }
     }
 

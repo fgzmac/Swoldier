@@ -130,6 +130,15 @@ actor ProofCoordinator {
         return snapshot
     }
 
+    func deleteCompletedWorkout(sessionID: String) async throws {
+        await acquire()
+        defer { release() }
+        try ProofStore().deleteCompletedWorkout(sessionID: sessionID)
+        for activity in activities(sessionID) {
+            await activity.end(nil, dismissalPolicy: .immediate)
+        }
+    }
+
     func history() throws -> [[String: Any]] { try ProofStore().history() }
 
     func reset() async throws {

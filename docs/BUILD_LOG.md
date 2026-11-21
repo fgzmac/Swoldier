@@ -4,6 +4,50 @@ Record a short entry after each working session. Newest entries go first. Write 
 
 **Planned:** agreed or proposed work. **Implemented:** code exists. **Verified:** a named check ran and passed.
 
+## 2026-11-20 — Combined preview passed on Gio’s iPhone
+
+Gio reported three results for build `c832451a-1988-46fd-9d35-ff0037610114`.
+
+| Check | User-reported result |
+| --- | --- |
+| Upgrade | Passed |
+| Fictional BodySpec DXA import | Passed |
+| Delete workout | Passed |
+
+The earlier scheduled workout pass belongs to `c0bb769c`. Before staging, all 33 Windows app inputs matched the SHA-256 manifest for `c832451a`, including all seven uncommitted app files.
+
+The Windows pre-commit run passed all 168 tests, including the DXA regression and all three Delete workout regressions, with zero failed or skipped. TypeScript and the staged whitespace check also passed.
+
+## 2026-11-20 — Combined BodySpec and Delete workout preview finished
+
+Exactly one internal iOS build was submitted using `preview` and frozen remote signing credentials from the Windows proof root. Immediately beforehand, a fresh EAS archive inspection and the working tree both matched all 33 entries in `archive.sha256`, including the seven uncommitted app inputs over `70d997f`. Manifest SHA-256 was `88742ad7b24a01ba71cded31c908f3c58efe9e312d0c799c14e6d4364ab1fb0a`. Git staging, commits, pushes and merges were untouched.
+
+EAS accepted build `c832451a-1988-46fd-9d35-ff0037610114` and reported FINISHED at 2026-11-21 02:16:33 UTC (November 20, 6:16 p.m. Pacific). Xcode signed the app and widget, embedded the widget in the app and reported `ARCHIVE SUCCEEDED`. Fastlane reported successful signed IPA export. The installation page is available. [Internal iPhone preview](https://expo.dev/accounts/fgzmacaraeg/projects/swoldier-lock-screen-proof/builds/c832451a-1988-46fd-9d35-ff0037610114).
+
+EAS account usage reported $12 of $45 included build credit used before submission and $14 used after completion. The remaining balance fell from $33 to $31, with $0 overage in both readings. The prior 168-test Windows result covers these verified inputs. Device checks on the new build remain pending.
+
+## 2026-11-20 — Prepared the combined internal iOS preview on Windows
+
+The local EAS archive-stage inspection for the existing preview profile produced 33 files. All matched the tested working tree and the preflight hashes. Seven app inputs differ from base 70d997f. Confirmed the fictional import flow and the completed-workout deletion path through the Expo module, coordinator, store and SQL. No app inputs changed during preparation. The [handoff](HANDOFF.md#2026-11-20--combined-dxa-and-delete-workout-preview) records the exact manifest, local archive location and pending device checks.
+
+Fresh Windows results in `proofs/lock-screen` were 168/168 tests passed, zero skipped, and TypeScript passed. The iOS JavaScript export produced one Hermes bundle and nine assets. The generated project passed all ten native copy comparisons and target/resource, inline module and URL scheme checks. Local preparation stopped before submission. Native compilation and signing remain pending.
+
+## 2026-11-20 — Integrated the fictional BodySpec importer on Windows
+
+Integrated the Downloads archive on `feat/midnight-ui` at `70d997f682c4cacebf60228340dbb9c1776831d1`. Its patch matched the loose repository copy by SHA-256. The full `git apply --check` found overlap in BUILD_LOG, HANDOFF and PROJECT. The importer and its regression test passed a scoped apply check and were applied once. Reconciled the documentation by hand, preserving the Windows acceptance and Delete workout entries. The patch's earlier Linux run recorded 165 passing tests and a successful typecheck on its separate tree.
+
+Ran `npm.cmd test` and `npm.cmd run typecheck` in `proofs/lock-screen` on Windows with Node v24.19.0 and npm 11.17.0. **168 passed, 0 failed, 0 skipped.** TypeScript exited 0. All three Delete workout regressions passed, covering deletion across reopen, archive isolation and Start retry protection, and rollback on failure.
+
+The new Tracker regression exercised all five labeled preview fields, cancellation with the original journal revision intact, and save across database close/reopen and component remount. A repeat result disabled Save. A second result ID on the same date saved separately with its RMR blank. The original manual scan with matching date, source and measurements survived both saves. The test used the production organizer save SQL through a substitute bridge. iOS compilation and device acceptance of these local changes remain pending.
+
+The imported handoff also records the owner's successful scheduled two-exercise workout on c0bb769c, including Undo, correction and reopening with two saved sets. See the [handoff](HANDOFF.md) for the scope of that phone report. No new device trial or EAS build ran in this session.
+
+**Learning prompt.** What would happen to Sample 2 if the importer used only the date to detect repeats? As a small experiment in a scratch copy, change Sample 2's result ID to match Sample 1 and rerun the DXA test.
+
+## 2026-11-20 — Delete a completed workout
+
+Added confirmed deletion for a completed workout, including the latest finished session and earlier archived sessions. SQLite checks completion and removes the selected session inside one write transaction. The original Start request stays reserved against replay, and the coordinator dismisses only activities for that session. No schema migration is needed. All 167 local tests passed, including three SQL-wrapper regressions covering deletion across reopen, isolation and rollback. TypeScript and ten generated native source/resource checks passed. Swift compilation and iPhone interaction for this change are pending.
+
 ## 2026-11-20 — Lock Screen header and control spacing
 
 Aligned the exercise name and set count on their first baseline. Added six points of bottom padding to the header and adjustment row. Reviewed the updated illustrative preview. The local generator and target inspection passed all ten source/resource comparisons. Native compilation and iPhone layout checks were not run.

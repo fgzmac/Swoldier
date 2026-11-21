@@ -52,6 +52,9 @@ public final class LockScreenProofModule: Module {
         AsyncFunction("editWorkoutSet") { (json: String) async throws -> [String: Any] in
             try await ProofCoordinator.shared.editSet(json).dictionary
         }
+        AsyncFunction("deleteCompletedWorkout") { (sessionID: String) async throws in
+            try await ProofCoordinator.shared.deleteCompletedWorkout(sessionID: sessionID)
+        }
         AsyncFunction("workoutHistory") { () async throws -> [[String: Any]] in
             try await ProofCoordinator.shared.history()
         }

@@ -83,7 +83,7 @@
     "INSERT INTO proof_workouts_v6(session_id) SELECT session_id FROM proof_session_v2"
   ],
   "registerFixture": "INSERT INTO proof_workouts_v6(session_id,started_at) VALUES(:sessionID,CAST(strftime('%s','now') AS REAL))",
-  "startRequest": "SELECT session_id,routine_id,routine_revision FROM proof_workouts_v6 WHERE request_id=:requestID",
+  "startRequest": "SELECT session_id,routine_id,routine_revision,discarded_at FROM proof_workouts_v6 WHERE request_id=:requestID",
   "readWorkout": "SELECT routine_id,routine_name,routine_revision,started_at,request_id FROM proof_workouts_v6 WHERE session_id=:sessionID",
   "archiveWorkout": "UPDATE proof_workouts_v6 SET archived_state=:archived WHERE session_id=:sessionID",
   "clearFinishedPointer": "DELETE FROM proof_session_v2 WHERE finished_at IS NOT NULL",
@@ -115,6 +115,7 @@
   "resolveRest": "UPDATE proof_rests_v2 SET continued_at=CAST(:now AS REAL),skipped_at=CASE WHEN deadline>CAST(:now AS REAL) THEN COALESCE(skipped_at,CAST(:now AS REAL)) ELSE skipped_at END WHERE session_id=:sessionID AND continued_at IS NULL",
   "resolveExercises": "UPDATE proof_exercises_v5 SET finished_at=COALESCE(finished_at,CAST(:now AS REAL)) WHERE session_id=:sessionID",
   "resolveWorkout": "UPDATE proof_session_v2 SET finished_at=CAST(:now AS REAL),action_token=:newToken WHERE session_id=:sessionID AND action_token=:actionToken AND finished_at IS NULL",
+  "completedWorkoutForDeletion": "SELECT 1 FROM proof_workouts_v6 w LEFT JOIN proof_session_v2 s ON s.session_id=w.session_id WHERE w.session_id=:sessionID AND w.discarded_at IS NULL AND (s.finished_at IS NOT NULL OR (s.session_id IS NULL AND w.archived_state IS NOT NULL))",
   "discardWorkout": [
     "DELETE FROM proof_sets_v5 WHERE session_id=:sessionID",
     "DELETE FROM proof_exercises_v5 WHERE session_id=:sessionID",

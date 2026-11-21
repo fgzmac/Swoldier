@@ -128,6 +128,58 @@ test('workout target editing preserves other periods and legacy accountability e
  assert.deepEqual(api.value.targets,{Weekly:3,Yearly:140});assert.deepEqual(api.value.scans,[{date:'2025-01-01'}]);
 });
 
+test('BodySpec demo preview cancels cleanly and reopens one journal entry per result ID', async t=>{
+ const {DatabaseSync}=require('node:sqlite');
+ const {mkdtempSync,rmSync}=require('node:fs');
+ const {join}=require('node:path');
+ const sql=require('../native/RoutineSQL.json');
+ const dir=mkdtempSync(join(require('node:os').tmpdir(),'scan-test-'));
+ const filename=join(dir,'journal.sqlite');
+ let db=new DatabaseSync(filename);
+ t.after(()=>{db.close();rmSync(dir,{recursive:true,force:true});});
+ sql.schema.forEach(statement=>db.exec(statement));
+ const api={
+   async organizer(key){
+     const row=db.prepare('SELECT revision,document FROM organizer_sections WHERE section=?').get(key);
+     return JSON.stringify(row?[[row.revision,row.document]]:[]);
+   },
+   async saveOrganizer(section,rev,doc){
+     assert.equal(db.prepare(sql.organizerSave).run({section,rev,doc}).changes,1);
+   },
+ };
+ const manual={date:'2026-11-18',source:'BodySpec (fictional)',fat:'23.4',lean:'120.5',rmr:'1512'};
+ const original={scans:[manual],goals:[],checks:[],targets:{Weekly:3}};
+ await api.saveOrganizer('accountability',0,JSON.stringify(original));
+ const read=async()=>{const [[rev,doc]]=JSON.parse(await api.organizer('accountability'));return {rev,journal:JSON.parse(doc)};};
+ const props={api,day:manual.date,workouts:[]};
+ let harness;
+ const render=()=>harness.render(props);
+ const button=title=>actions(render()).find(node=>node.props.title===title).props;
+ const press=async title=>{const action=button(title);assert.ok(!action.disabled,title);action.onPress();await flush();};
+ async function mount(){
+   harness=editorHarness('Organizer','Tracker');render();await flush();
+   await press('▸ Accountability · 0 active goals');
+ }
+ const open='Import fictional BodySpec scan';
+ await mount();await press(open);
+ const preview=descendants(render()).filter(node=>node.type==='View');
+ for(const [label,value] of [['Measurement date (YYYY-MM-DD)',manual.date],['Measurement source',manual.source],
+   ['Body fat (%)',manual.fat],['Lean mass (lb)',manual.lean],['Estimated RMR (kcal/day)',manual.rmr]]){
+   assert.ok(preview.some(row=>row.props.children?.[0]?.props?.children===label && row.props.children[1].props.children===value),label);
+ }
+ await press('Cancel');assert.deepEqual(await read(),{rev:1,journal:original});
+ await press(open);await press('Save scan');
+ db.close();db=new DatabaseSync(filename);await mount();
+ const first={...manual,provider:'bodyspec-demo',resultID:'sample-a'};
+ assert.deepEqual(await read(),{rev:2,journal:{...original,scans:[manual,first]}});
+ await press(open);assert.equal(button('Save scan').disabled,true);
+ await press('Sample 2');
+ assert.ok(descendants(render()).some(row=>row.props.children?.[0]?.props?.children==='Estimated RMR (kcal/day)' && row.props.children[1].props.children===''));
+ await press('Save scan');
+ const second={...first,resultID:'sample-b',fat:'23.1',lean:'121',rmr:''};
+ assert.deepEqual(await read(),{rev:3,journal:{...original,scans:[manual,first,second]}});
+});
+
 test('standalone routine rows survive category collapse, membership moves and removal',async()=>{
  const api=organizerFixture([{id:'group',name:'Strength',members:['a']}]);
  const h=editorHarness('Organizer','Groups'),props={api,plans:['b','a'].map(id=>({id})),render:p=>({type:'routine',props:{id:p.id}})};

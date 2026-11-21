@@ -16,7 +16,16 @@ function useSection<T>(api:OrganizerAPI,key:string,initial:T){
 const blank={title:'',type:'Metric',unit:'',target:'',baseline:'',current:'',due:'',notes:''};
 type Goal=typeof blank & {id:string;archived:boolean};
 type Check={goal:string;date:string;value:string;unit:string};
-type Scan={date:string;source:string;fat:string;rmr:string;lean:string};
+type Scan={date:string;source:string;fat:string;rmr:string;lean:string;provider?:'bodyspec-demo';resultID?:string};
+const demoScans:Scan[]=[
+ {provider:'bodyspec-demo',resultID:'sample-a',source:'BodySpec (fictional)',date:'2026-11-18',fat:'23.4',lean:'120.5',rmr:'1512'},
+ {provider:'bodyspec-demo',resultID:'sample-b',source:'BodySpec (fictional)',date:'2026-11-18',fat:'23.1',lean:'121',rmr:''},
+];
+const scanFields={
+ date:'Measurement date (YYYY-MM-DD)',source:'Measurement source',fat:'Body fat (%)',
+ lean:'Lean mass (lb)',rmr:'Estimated RMR (kcal/day)',
+} as const;
+const scanKeys=['date','source','fat','lean','rmr'] as const;
 type Journal={targets?:Partial<Record<GoalPeriod,number>>;goals:Goal[];checks:Check[];scans:Scan[]};
 const dateOK=(s:string)=>/^\d{4}-\d\d-\d\d$/.test(s)&&localDay(new Date(s+'T12:00:00'))===s;
 const numeric=(s:string)=>/^\d+(\.\d+)?$/.test(s)&&Number.isFinite(Number(s));
@@ -30,12 +39,15 @@ function PeriodButton({title,selected,onPress,disabled}:{title:GoalPeriod;select
 export function Tracker({api,workouts,day}:{api:OrganizerAPI;workouts:Snapshot[];day:string}){
  const {value:j,save,busy,feedback}=useSection<Journal>(api,'accountability',{goals:[],checks:[],scans:[]});
  const [open,O]=useState(false),[form,F]=useState<Goal|null>(null),[check,C]=useState<Check|null>(null),[scan,S]=useState<Scan|null>(null),[error,E]=useState('');
+ const importing=scan?.provider==='bodyspec-demo';
+ const alreadyImported=importing && j.scans.some(saved=>saved.provider===scan.provider && saved.resultID===scan.resultID);
  function clear(){F(null);C(null);S(null);E('');}
  async function submit(){let next:Journal;
  if(form){if(!form.title.trim()||!form.target.trim()||(form.due&&!dateOK(form.due))||(form.type==='Metric'&&(!form.unit.trim()||![form.target,form.baseline,form.current].every(v=>!v||numeric(v))))){E('Enter a title, target or habit criterion, valid metric values and unit, and a valid date if used.');return;}
  next={...j,goals:[...j.goals.filter(g=>g.id!==form.id),form]};}
  else if(check){if(!dateOK(check.date)||!check.value.trim()||(j.goals.find(g=>g.id===check.goal)?.type==='Metric'&&!numeric(check.value))){E('Enter a valid date and observed result.');return;}next={...j,checks:[...j.checks,check]};}
- else if(scan){if(!dateOK(scan.date)||!scan.source.trim()||![scan.fat,scan.rmr,scan.lean].some(Boolean)||![scan.fat,scan.rmr,scan.lean].every(s=>!s||numeric(s))||Number(scan.fat)>100){E('Enter a date, source and at least one valid measurement (body fat 0–100%).');return;}next={...j,scans:[...j.scans,scan]};}else return;
+ else if(scan){if(alreadyImported)return;
+ if(!dateOK(scan.date)||!scan.source.trim()||![scan.fat,scan.rmr,scan.lean].some(Boolean)||![scan.fat,scan.rmr,scan.lean].every(s=>!s||numeric(s))||Number(scan.fat)>100){E('Enter a date, source and at least one valid measurement (body fat 0–100%).');return;}next={...j,scans:[...j.scans,scan]};}else return;
  if(await save(next))clear();}
  const [period,periodTo]=useState<GoalPeriod>('Weekly'),[editing,setEditing]=useState(false),[input,setInput]=useState(''),[targetError,setTargetError]=useState('');
  const {start,end}=goalPeriodRange(period,day);
@@ -60,11 +72,25 @@ export function Tracker({api,workouts,day}:{api:OrganizerAPI;workouts:Snapshot[]
  {j.checks.filter(c=>c.goal===g.id).sort((a,b)=>a.date.localeCompare(b.date)).map((c,n)=><Text key={n}>{c.date} · {c.value} {c.unit}</Text>)}
  {!g.archived&&!form&&!check&&!scan&&<><Action title="Check in" disabled={busy} onPress={()=>C({goal:g.id,date:localDay(new Date()),value:'',unit:g.unit})}/><Action title="Edit goal" disabled={busy} onPress={()=>F({...g})}/><Action title="Archive goal" disabled={busy} onPress={()=>void save({...j,goals:j.goals.map(x=>x.id===g.id?{...x,archived:true}:x)})}/></>}</View>)}
  {j.scans.map((s,n)=><View key={n} style={box}><Text>{s.date} · {s.source}</Text>{!!s.fat&&<Text>Body fat · {s.fat}%</Text>}{!!s.rmr&&<Text>Estimated RMR · {s.rmr} kcal/day</Text>}{!!s.lean&&<Text>Lean mass · {s.lean} lb</Text>}</View>)}
- {!form&&!scan&&!check&&<><Action title="Add goal" disabled={busy} onPress={()=>void api.newRoutineStartRequest().then(id=>F({...blank,id,archived:false})).catch(e=>E(String(e)))}/><Action title="Record scan" disabled={busy} onPress={()=>S({date:localDay(new Date()),source:'',fat:'',rmr:'',lean:''})}/></>}
+ {!form&&!scan&&!check&&<><Action title="Add goal" disabled={busy} onPress={()=>void api.newRoutineStartRequest().then(id=>F({...blank,id,archived:false})).catch(e=>E(String(e)))}/><Action title="Record scan" disabled={busy} onPress={()=>S({date:localDay(new Date()),source:'',fat:'',rmr:'',lean:''})}/>
+ <Action title="Import fictional BodySpec scan" disabled={busy} onPress={()=>S(demoScans[0])}/></>}
  {form&&<>{['Metric','Habit'].map(t=><Action key={t} title={t} disabled={t===form.type} onPress={()=>F({...form,type:t,unit:''})}/>)}{(['title',...(form.type==='Metric'?['unit']:[]),'target','baseline','current','due','notes'] as (keyof typeof blank)[]).map(k=>field(({title:'Goal title',target:form.type==='Habit'?'Habit criterion':'Target value',unit:'Unit',baseline:'Baseline (optional)',current:'Current value (optional)',due:'Target date (YYYY-MM-DD, optional)',notes:'Notes (optional)',type:'Type'})[k],form[k],v=>F({...form,[k]:v})))}</>}
  {check&&<>{field('Check-in date (YYYY-MM-DD)',check.date,date=>C({...check,date}))}{field('Observed result',check.value,value=>C({...check,value}))}</>}
- {scan&&(['date','source','fat','rmr','lean'] as const).map(k=>field(({date:'Measurement date (YYYY-MM-DD)',source:'Measurement source',fat:'Body fat (%)',rmr:'Estimated RMR (kcal/day)',lean:'Lean mass (lb)'})[k],scan[k],v=>S({...scan,[k]:v})))}
- {(form||check||scan)&&<><Action title="Save" disabled={busy} onPress={()=>void submit()}/><Action title="Cancel" disabled={busy} onPress={clear}/></>}
+ {importing&&<View style={box}>
+   <Text style={{fontWeight:'700'}}>Preview fictional BodySpec scan</Text>
+   <View style={{flexDirection:'row',flexWrap:'wrap',gap:8}}>
+     {demoScans.map((sample,i)=><Action key={sample.resultID} title={`Sample ${i+1}`}
+       disabled={busy||sample.resultID===scan.resultID} onPress={()=>S(sample)}/>)}
+   </View>
+   {scanKeys.map(key=><View key={key}><Text style={{color:midnight.muted}}>{scanFields[key]}</Text>
+     <Text>{scan[key]}</Text></View>)}
+   {alreadyImported&&<Text>This scan is already in your journal.</Text>}
+ </View>}
+ {scan&&!importing&&scanKeys.map(key=>field(scanFields[key],scan[key],value=>S({...scan,[key]:value})))}
+ {(form||check||scan)&&<>
+   <Action title={importing?'Save scan':'Save'} disabled={busy||alreadyImported} onPress={()=>void submit()}/>
+   <Action title="Cancel" disabled={busy} onPress={clear}/>
+ </>}
  {!!error&&<Text accessibilityRole="alert">{error}</Text>}</>}</View>
 }
 type Group={id:string;name:string;members:string[]};

@@ -20,7 +20,33 @@ export default function App(){
  navigate.current=action=>{if(edit)editorLeave.current(action);else if(tab==='routines')routineLeave.current(action);else action();};
  const lock=useRef(false);const revision=useRef(0);
  async function refresh(){if(!proof||lock.current)return;const token=++revision.current;try{const value=await proof.read();if(token===revision.current)S(value);}catch{M('Could not load the workout. Try again.');}}
- async function refreshHistory(){if(!proof)return;try{H(await proof.workoutHistory());}catch{M('Could not load earlier workouts. Current data has not been removed.');}}
+ const historyRevision=useRef(0);
+ async function refreshHistory(){
+   if(!proof||lock.current)return;
+   const token=++historyRevision.current;
+   try{const rows=await proof.workoutHistory();if(token===historyRevision.current)H(rows);}
+   catch{if(token===historyRevision.current)M('Could not load earlier workouts. Try again.');}
+ }
+ async function deleteCompleted(sessionID:string){
+   if(!proof||lock.current)return;
+   lock.current=true;B(true);revision.current++;historyRevision.current++;
+   try{
+     await proof.deleteCompletedWorkout(sessionID);
+     H(rows=>rows.filter(row=>row.sessionID!==sessionID));
+     S(row=>row?.sessionID===sessionID?null:row);
+     M('Workout deleted.');
+   }catch{M('Could not delete that completed workout. Check the list and try again.');}
+   finally{lock.current=false;B(false);}
+   await Promise.all([refresh(),refreshHistory()]);
+ }
+ function confirmDelete(workout:Snapshot){
+   const name=workout.routineName??'Fictional workout';
+   const when=workout.finishedAt==null?'':' on '+new Date(workout.finishedAt*1000).toLocaleString();
+   Alert.alert('Delete completed workout?',name+when+' and its recorded sets will be permanently removed from history. Your saved routine is kept.',[
+     {text:'Cancel',style:'cancel'},
+     {text:'Delete workout',style:'destructive',onPress:()=>void deleteCompleted(workout.sessionID)},
+   ]);
+ }
  async function link(url:string){
   const target=setLink(url);if(!target||!proof)return;const request=++linkRequest.current;
   async function inspect(){
@@ -71,6 +97,7 @@ export default function App(){
  {!archived&&set.skippedAt==null&&<Action title="Edit Set" onPress={()=>{if(saved){linkRequest.current++;D({key:++editorKey.current,snapshot:saved,set});}}}/>}
  </View>)}
  </View>)}<Button title={targets?'Hide routine targets':'Show routine targets'} onPress={()=>P(!targets)}/>
+ {shown.workoutFinished&&<Button title="Delete workout" color="#FFB4AD" disabled={busy} onPress={()=>confirmDelete(shown)}/>}
 </>}</View>;
  }
  const shown=saved;
